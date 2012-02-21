@@ -178,7 +178,7 @@ function cas_posts_checklist($post_id = 0, $args = array()) {
 	);
 
 	if($post_id)
-		$args['selected_cats'] = (array)get_post_meta($post_id, 'post_types', true);
+		$args['selected_cats'] = (array)get_post_meta($post_id, '_cas_post_types', true);
 	else
 		$args['selected_cats'] = array();
 

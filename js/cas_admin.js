@@ -2,7 +2,7 @@
  * @package Content Aware Sidebars
  */
 jQuery(document).ready(function($) {
-
+        
         handleAllCheckbox("post_types","posttype");
         handleAllCheckbox("taxonomies","taxonomy");
         handleAllCheckbox("authors","list");
@@ -74,10 +74,14 @@ jQuery(document).ready(function($) {
          */
         function endisableHostSidebars(select) {
                 var name = "select[name='host']";
-                if(select.val() == 2)
+                if(select.val() == 2) {
+                        $(name).hide();
                         $(name).attr("disabled", true);
-                else
+                        
+                } else {
+                        $(name).show();
                         $(name).removeAttr("disabled");
+                }
         }
         
 });
