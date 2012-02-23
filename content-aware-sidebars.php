@@ -6,7 +6,7 @@
 Plugin Name: Content Aware Sidebars
 Plugin URI: http://www.intox.dk/
 Description: Manage and show sidebars according to the content being viewed.
-Version: 0.8
+Version: 0.8.1
 Author: Joachim Jensen
 Author URI: http://www.intox.dk/
 Text Domain: content-aware-sidebars
@@ -374,10 +374,21 @@ class ContentAwareSidebars {
 	 *
 	 */
 	public function remove_sidebar_widgets($post_id) {
+		
+		// Authenticate and only continue on sidebar post type
+		if(!current_user_can('delete_posts') || get_post_type($post_id) != 'sidebar')
+			return;
+		
 		$id = 'ca-sidebar-'.$post_id;		
 		
-		//Remove widgets settings
+		//Get widgets
 		$sidebars_widgets = wp_get_sidebars_widgets();
+		
+		// Check if sidebar exists in database
+		if(!isset($sidebars_widgets[$id]))
+			return;
+		
+		// Remove widgets settings from sidebar
 		foreach($sidebars_widgets[$id] as $widget_id) {
 			$widget_type = preg_replace( '/-[0-9]+$/', '', $widget_id );
 			$widget_settings = get_option('widget_'.$widget_type);
@@ -391,6 +402,8 @@ class ContentAwareSidebars {
 		// Remove sidebar
 		unset($sidebars_widgets[$id]);
 		wp_set_sidebars_widgets($sidebars_widgets);
+		
+		
 	}
 	
 	/**
@@ -558,7 +571,7 @@ class ContentAwareSidebars {
 			$where .= "(post_types.meta_value LIKE '%".serialize($post_type)."%') AND ";
 			$where .= "exposure.meta_value >= '1' AND ";		
 		
-		// Search
+		// Author archive
 		} elseif(is_author()) {
 
 			$joins .= "LEFT JOIN $wpdb->postmeta authors ON authors.post_id = posts.ID AND authors.meta_key = '".self::prefix."authors' ";	
