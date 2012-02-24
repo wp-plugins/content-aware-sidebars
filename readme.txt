@@ -1,10 +1,10 @@
 ﻿=== Plugin Name ===
 Contributors: intoxstudio
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=KPZHE6A72LEN4&lc=US&item_name=WordPress%20Plugin%3a%20Content%20Aware%20Sidebars&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted
-Tags: sidebar, widget, content aware, dynamic, post type, taxonomy, term, archive, singular, seo
+Tags: sidebar, widget, content aware, post type, taxonomy, term, archive, singular, seo
 Requires at least: 3.1
 Tested up to: 3.3.1
-Stable tag: 0.8.1
+Stable tag: 0.8.2
 
 Manage and show sidebars according to the content being viewed.
 
@@ -71,6 +71,10 @@ The function accepts URL-style strings as parameters too, like the standard Word
 5. Viewing Another Page. The Content Aware Sidebar has replaced `Main Sidebar`
 
 == Changelog ==
+
+= 0.8.2 =
+
+* Fixed: new rules caused issues with post types with taxonomies
 
 = 0.8.1 =
 

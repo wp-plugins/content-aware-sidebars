@@ -6,7 +6,7 @@
 Plugin Name: Content Aware Sidebars
 Plugin URI: http://www.intox.dk/
 Description: Manage and show sidebars according to the content being viewed.
-Version: 0.8.1
+Version: 0.8.2
 Author: Joachim Jensen
 Author URI: http://www.intox.dk/
 Text Domain: content-aware-sidebars
@@ -495,26 +495,6 @@ class ContentAwareSidebars {
 		// Single content
 		} elseif(is_singular()) {
 			
-			// Post Type
-			$joins .= "LEFT JOIN $wpdb->postmeta post_types ON post_types.post_id = posts.ID AND post_types.meta_key = '".self::prefix."post_types' ";
-			$where .= "((post_types.meta_value IS NULL OR (post_types.meta_value LIKE '%".serialize(get_post_type())."%' OR post_types.meta_value LIKE '%".serialize((string)get_the_ID())."%'))";
-			$where2 = "AND (post_types.meta_value IS NOT NULL ";
-	
-			//Author
-			$joins .= "LEFT JOIN $wpdb->postmeta authors ON authors.post_id = posts.ID AND authors.meta_key = '".self::prefix."authors' ";			
-			$where .= " AND (authors.meta_value IS NULL OR (authors.meta_value LIKE '%authors%' OR authors.meta_value LIKE '%".serialize((string)$post->post_author)."%'))";
-			$where2 .= "OR authors.meta_value IS NOT NULL ";
-			
-			//Page Template
-			$template = get_post_meta(get_the_ID(),'_wp_page_template',true);
-			if($template && $template != 'default') {
-				$joins .= "LEFT JOIN $wpdb->postmeta page_templates ON page_templates.post_id = posts.ID AND page_templates.meta_key = '".self::prefix."page_templates' ";		
-				$where .= " AND (page_templates.meta_value IS NULL OR (page_templates.meta_value LIKE '%page_templates%' OR page_templates.meta_value LIKE '%".$template."%'))";
-				$where2 .= "OR page_templates.meta_value IS NOT NULL ";
-			}
-			
-			$where2 .= ")";
-			
 			// Check if content has any taxonomies supported
 			$post_taxonomies = get_object_taxonomies(get_post_type());
 			if($post_taxonomies) {
@@ -524,11 +504,13 @@ class ContentAwareSidebars {
 					$terms = array();
 					$taxonomies = array();
 					
+					$where .= "(";
+					
 					//Grab posts terms and make where rules for taxonomies.
 					foreach($post_terms as $term) {
 						$terms[] = $term->slug;
 						if(!isset($taxonomies[$term->taxonomy])) {
-							$where .= " OR post_tax.meta_value LIKE '%".$taxonomies[$term->taxonomy] = $term->taxonomy."%'";
+							$where .= "post_tax.meta_value LIKE '%".$taxonomies[$term->taxonomy] = $term->taxonomy."%' OR ";
 						}
 					}
 					
@@ -537,12 +519,31 @@ class ContentAwareSidebars {
 					$joins .= "LEFT JOIN $wpdb->terms terms ON terms.term_id = taxonomy.term_id ";
 					$joins .= "LEFT JOIN $wpdb->postmeta post_tax ON post_tax.post_id = posts.ID AND post_tax.meta_key = '".self::prefix."taxonomies'";
 					
-					$where .= " OR terms.slug IN('".implode("','",$terms)."')";
+					$where .= "terms.slug IN('".implode("','",$terms)."') ";
+					$where .= ") OR ";
 				}
 			}
 			
+			// Post Type
+			$joins .= "LEFT JOIN $wpdb->postmeta post_types ON post_types.post_id = posts.ID AND post_types.meta_key = '".self::prefix."post_types' ";
+			$where .= "((post_types.meta_value IS NULL OR (post_types.meta_value LIKE '%".serialize(get_post_type())."%' OR post_types.meta_value LIKE '%".serialize((string)get_the_ID())."%'))";
+			$where2 = "AND (post_types.meta_value IS NOT NULL";
+	
+			//Author
+			$joins .= "LEFT JOIN $wpdb->postmeta authors ON authors.post_id = posts.ID AND authors.meta_key = '".self::prefix."authors' ";			
+			$where .= " AND (authors.meta_value IS NULL OR (authors.meta_value LIKE '%authors%' OR authors.meta_value LIKE '%".serialize((string)$post->post_author)."%'))";
+			$where2 .= " OR authors.meta_value IS NOT NULL";
 			
-					
+			//Page Template
+			$template = get_post_meta(get_the_ID(),'_wp_page_template',true);
+			if($template && $template != 'default') {
+				$joins .= "LEFT JOIN $wpdb->postmeta page_templates ON page_templates.post_id = posts.ID AND page_templates.meta_key = '".self::prefix."page_templates' ";		
+				$where .= " AND (page_templates.meta_value IS NULL OR (page_templates.meta_value LIKE '%page_templates%' OR page_templates.meta_value LIKE '%".$template."%'))";
+				$where2 .= " OR page_templates.meta_value IS NOT NULL";
+			}
+			
+			$where2 .= ")";
+	
 			$where .= $where2.") AND ";
 			$where .= "exposure.meta_value <= '1' AND ";
 			
