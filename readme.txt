@@ -3,14 +3,14 @@ Contributors: intoxstudio
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=KPZHE6A72LEN4&lc=US&item_name=WordPress%20Plugin%3a%20Content%20Aware%20Sidebars&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted
 Tags: sidebar, widget, content aware, post type, taxonomy, term, archive, singular, seo
 Requires at least: 3.1
-Tested up to: 3.3
-Stable tag: 0.7
+Tested up to: 3.3.1
+Stable tag: 0.8.2
 
 Manage and show sidebars according to the content being viewed.
 
 == Description ==
 
-Manage an infinite number of sidebars. Make your WordPress site even more dynamic and boost SEO by controlling what content the sidebars should be displayed with. Creating flexible, dynamic sidebars has never been easier, and no code is needed at all as everything is easily done in the administration.
+Manage an infinite number of sidebars. Make your WordPress site even more dynamic and boost SEO by controlling what content the sidebars should be displayed with. Creating flexible, dynamic sidebars has never been easier, and no code is needed at all as everything is easily done in the administration. 
 No extra database tables or table columns will be added.
 
 = Features =
@@ -48,19 +48,18 @@ www.intox.dk
 
 If you have any questions not answered here, feel free to contact jv[at]intox.dk.
 
-= How do I use `display_ca_sidebar()`? =
+= How do I use display_ca_sidebar()? =
 
-This function handles all sidebars that are set to be handled manually. It can be inserted anywhere on your site in any quantity, either as it is, or with the following parameters:
+This function is optional and handles all sidebars that are set to be handled manually. It can be inserted anywhere on your site in any quantity, either as it is, or with the following parameters:
 
-`include` (array|string)
-Insert IDs of sidebars. By using this, the function will only handle the sidebars whose IDs are included. Default is `null`.
+`$args = array(
+'include' => '',
+'before' => '<div id="sidebar" class="widget-area"><ul class="xoxo">',
+'after' => '</ul></div>'
+);`
 
-`before` (string)
-Change the html to be displayed before the sidebar. Default is `<div id="sidebar" class="widget-area"><ul class="xoxo">`.
 
-`after` (string)
-Change the html to be displayed after the sidebar. Default is `</ul></div>`.
-
+If ID's of specific sidebars are passed to `include`, the function will only handle these. The visuals of the content aware sidebars can be modified by passing `before` and `after`.
 The function accepts URL-style strings as parameters too, like the standard WordPress Template Tags.
 
 == Screenshots ==
@@ -73,6 +72,31 @@ The function accepts URL-style strings as parameters too, like the standard Word
 
 == Changelog ==
 
+= 0.8.2 =
+
+* Fixed: new rules caused issues with post types with taxonomies
+
+= 0.8.1 =
+
+* Fixed: several checks for proper widget and sidebar removal
+
+= 0.8 =
+
+* Added: some rules are dependent of each other if present
+* Added: widgets in removed sidebars will be removed too
+* Added: database data update module
+* Added: rewrite rules flushed on plugin deactivation
+* Added: data will be removed when plugin is uninstalled
+* Added: icon-32 is back
+* Added: message if a host is not available in sidebar overview
+* Fixed: prefixed data
+* Fixed: data hidden from custom fields
+* Fixed: manage widgets link removed from trashed sidebars
+* Fixed: view sidebar link removed in wp3.1.x
+* Fixed: all custom taxonomies could not be removed again when assigned to sidebar
+* Fixed: altered options meta box on edit screen
+* Fixed: check if host of sidebar exists before handling it
+
 = 0.7 =
 
 * Added: sidebars will be displayed even if empty (i.e. hidden)
@@ -82,8 +106,8 @@ The function accepts URL-style strings as parameters too, like the standard Word
 * Fixed: minor tweak for full compatibility with wp3.3
 * Fixed: function for meta boxes is called only on editor page
 * Fixed: proper column sorting in administration
-* Fixed: specific post type label not supported in WP3.1.x
-* Fixed: type (array) not supported as post_status in get_posts() in WP3.1.x
+* Fixed: specific post type label not supported in wp3.1.x
+* Fixed: type (array) not supported as post_status in get_posts() in wp3.1.x
 * Fixed: code cleanup
 
 = 0.6.3 =
@@ -143,6 +167,10 @@ The function accepts URL-style strings as parameters too, like the standard Word
 * First stable release
 
 == Upgrade Notice ==
+
+= 0.8 =
+
+* Content Aware Sidebar data in your database will be updated automatically. Remember to backup this data before updating the plugin.
 
 = 0.5 =
 
