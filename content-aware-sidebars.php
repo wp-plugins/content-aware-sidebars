@@ -6,14 +6,14 @@
 Plugin Name: Content Aware Sidebars
 Plugin URI: http://www.intox.dk/
 Description: Manage and show sidebars according to the content being viewed.
-Version: 0.8.2
+Version: 0.8.3
 Author: Joachim Jensen
 Author URI: http://www.intox.dk/
 Text Domain: content-aware-sidebars
 Domain Path: /lang/
 License: GPL2
 
-    Copyright 2011  Joachim Jensen  (email : jv@intox.dk)
+    Copyright 2011-2012  Joachim Jensen  (email : jv@intox.dk)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License, version 2, as 
@@ -59,7 +59,7 @@ class ContentAwareSidebars {
 		add_filter('post_row_actions',				array(&$this,'sidebar_row_actions'),10,2);
 		add_filter('post_updated_messages', 			array(&$this,'sidebar_updated_messages'));
 			
-		add_action('init',					array(&$this,'init_sidebar_type'),50);
+		add_action('init',					array(&$this,'init_sidebar_type'),99);
 		add_action('widgets_init',				array(&$this,'create_sidebars'));
 		add_action('add_meta_boxes_sidebar',			array(&$this,'create_meta_boxes'));
 		add_action('admin_init',				array(&$this,'prepare_admin_scripts_styles'));
@@ -355,6 +355,9 @@ class ContentAwareSidebars {
 	 */
 	public function admin_column_rows($column_name,$post_id) {
 		
+		if(get_post_type($post_id) != 'sidebar')
+			return;
+		
 		// Load metadata
 		if(!$this->metadata) $this->_init_metadata();
 		
@@ -607,6 +610,7 @@ class ContentAwareSidebars {
 		$where .= "posts.post_status ".$post_status."";
 		
 		// Do query and cache it
+		$wpdb->query('SET OPTION SQL_BIG_SELECTS = 1');
 		$this->sidebar_cache = $wpdb->get_results("
 			SELECT
 				posts.ID,
@@ -824,7 +828,7 @@ class ContentAwareSidebars {
 		}
 	
 		echo '<p style="padding:6px 0 4px;">'."\n";
-		echo '<label><input type="checkbox" name="taxonomies[]" value="'.$taxonomy->name.'"'.(in_array($taxonomy->name,$current) ? ' checked="checked"' : '').' /> '.sprintf(__('Show with %s'),$taxonomy->labels->all_items).'</label>'."\n";
+		echo '<label><input type="checkbox" name="taxonomies[]" value="'.$taxonomy->name.'"'.(in_array($taxonomy->name,$current) ? ' checked="checked"' : '').' /> '.sprintf(__('Show with %s','content-aware-sidebars'),$taxonomy->labels->all_items).'</label>'."\n";
 		echo '</p>'."\n";
 	
 	}
@@ -868,7 +872,7 @@ class ContentAwareSidebars {
 		
 		//WP3.1.4 does not support $post_type->labels->all_items
 		echo '<p style="padding:6px 0 4px;">'."\n";
-		echo '<label><input type="checkbox" name="post_types[]" value="'.$post_type->name.'"'.(in_array($post_type->name,$current) ? ' checked="checked"' : '').' /> '.sprintf(__('Show with All %s'),$post_type->label).'</label>'."\n";
+		echo '<label><input type="checkbox" name="post_types[]" value="'.$post_type->name.'"'.(in_array($post_type->name,$current) ? ' checked="checked"' : '').' /> '.sprintf(__('Show with All %s','content-aware-sidebars'),$post_type->label).'</label>'."\n";
 		echo '</p>'."\n";
 
 	}
@@ -893,7 +897,7 @@ class ContentAwareSidebars {
 			</div>
 		</div>
 		<p style="padding:6px 0 4px;">
-			<label><input type="checkbox" name="<?php echo $field; ?>[]" value="<?php echo $field; ?>"<?php echo (in_array($field,$current) ? ' checked="checked"' : ''); ?> /> <?php _e('Show with All '.$this->metadata[$field]['name']); ?></label>
+			<label><input type="checkbox" name="<?php echo $field; ?>[]" value="<?php echo $field; ?>"<?php echo (in_array($field,$current) ? ' checked="checked"' : ''); ?> /> <?php printf(__('Show with All %s','content-aware-sidebars'),$this->metadata[$field]['name']); ?></label>
 		</p>
 <?php	
 	}

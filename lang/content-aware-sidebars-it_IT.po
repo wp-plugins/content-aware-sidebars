@@ -1,0 +1,252 @@
+# Copyright (C) 2012 Content Aware Sidebars
+# This file is distributed under the same license as the Content Aware Sidebars package.
+msgid ""
+msgstr ""
+"Project-Id-Version: Content Aware Sidebars 0.8.3\n"
+"Report-Msgid-Bugs-To: http://wordpress.org/tag/content-aware-sidebars\n"
+"POT-Creation-Date: 2012-03-09 13:35:16+00:00\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"PO-Revision-Date: 2012-04-23 22:09+0100\n"
+"Last-Translator: Joachim Jensen <jv@intox.dk>\n"
+"Language-Team: MyWeb2 <info@myweb2.it>\n"
+"X-Poedit-Language: Italian\n"
+"X-Poedit-Country: ITALY\n"
+
+#: content-aware-sidebars.php:103
+msgid "Post Types"
+msgstr "Tipi di messaggi"
+
+#: content-aware-sidebars.php:111
+msgid "Taxonomies"
+msgstr "Tassonomie"
+
+#: content-aware-sidebars.php:119
+msgid "Authors"
+msgstr "Autori"
+
+#: content-aware-sidebars.php:127
+msgid "Page Templates"
+msgstr "Template Pagine"
+
+#: content-aware-sidebars.php:135
+msgid "Static Pages"
+msgstr "Pagine Statiche"
+
+#: content-aware-sidebars.php:141
+msgid "Front Page"
+msgstr "Pagina Principale"
+
+#: content-aware-sidebars.php:142
+msgid "Search Results"
+msgstr "Risultati di Ricerca"
+
+#: content-aware-sidebars.php:143
+msgid "404 Page"
+msgstr "Pagina 404"
+
+#: content-aware-sidebars.php:147
+#: content-aware-sidebars.php:312
+msgid "Exposure"
+msgstr "Tipologia"
+
+#: content-aware-sidebars.php:153
+msgid "Singular"
+msgstr "Singola"
+
+#: content-aware-sidebars.php:154
+msgid "Singular & Archive"
+msgstr "Singola e Archivio"
+
+#: content-aware-sidebars.php:155
+msgid "Archive"
+msgstr "Archivio"
+
+#: content-aware-sidebars.php:159
+#: content-aware-sidebars.php:313
+msgctxt "option"
+msgid "Handle"
+msgstr "Comportamento e Posizione"
+
+#: content-aware-sidebars.php:161
+msgid "Replace host sidebar, merge with it or add sidebar manually."
+msgstr "Sostituisce host sidebar, si fonde con essa o aggiunge la sidebar manualmente."
+
+#: content-aware-sidebars.php:165
+msgid "Replace"
+msgstr "Sostituisci"
+
+#: content-aware-sidebars.php:166
+msgid "Merge"
+msgstr "Fondi"
+
+#: content-aware-sidebars.php:167
+msgid "Manual"
+msgstr "Manuale"
+
+#: content-aware-sidebars.php:171
+msgid "Host Sidebar"
+msgstr "Sidebar Host"
+
+#: content-aware-sidebars.php:179
+#: content-aware-sidebars.php:314
+msgid "Merge position"
+msgstr "Fondi posizione"
+
+#: content-aware-sidebars.php:181
+msgid "Place sidebar on top or bottom of host when merging."
+msgstr "Posizione sidebar in alto o in basso dell'host durante la fusione."
+
+#: content-aware-sidebars.php:185
+msgid "Top"
+msgstr "Alto"
+
+#: content-aware-sidebars.php:186
+msgid "Bottom"
+msgstr "Basso"
+
+#: content-aware-sidebars.php:216
+msgid "Sidebars"
+msgstr "Sidebars"
+
+#: content-aware-sidebars.php:217
+msgid "Sidebar"
+msgstr "Sidebar"
+
+#: content-aware-sidebars.php:218
+msgctxt "sidebar"
+msgid "Add New"
+msgstr "Aggiungi"
+
+#: content-aware-sidebars.php:219
+msgid "Add New Sidebar"
+msgstr "Aggiungi Nuova Sidebar"
+
+#: content-aware-sidebars.php:220
+msgid "Edit Sidebar"
+msgstr "Modifica Sidebar"
+
+#: content-aware-sidebars.php:221
+msgid "New Sidebar"
+msgstr "Nuova Sidebar"
+
+#: content-aware-sidebars.php:222
+msgid "All Sidebars"
+msgstr "Tutte le Sidebars"
+
+#: content-aware-sidebars.php:223
+msgid "View Sidebar"
+msgstr "Vedi Sidebar"
+
+#: content-aware-sidebars.php:224
+msgid "Search Sidebars"
+msgstr "Cerca Sidebars"
+
+#: content-aware-sidebars.php:225
+msgid "No sidebars found"
+msgstr "Nessuna sidebars trovata"
+
+#: content-aware-sidebars.php:226
+msgid "No sidebars found in Trash"
+msgstr "nessuna sidebar cancellata"
+
+#: content-aware-sidebars.php:247
+msgid "Sidebar updated. <a href=\"%s\">Manage widgets</a>"
+msgstr "Sidebar aggiornata. <a href=\"%s\">Gestione widgets</a>"
+
+#: content-aware-sidebars.php:250
+msgid "Sidebar updated."
+msgstr "Sidebar aggiornata."
+
+#: content-aware-sidebars.php:252
+msgid "Sidebar published. <a href=\"%s\">Manage widgets</a>"
+msgstr "Sidebar publicata. <a href=\"%s\">Gestione widgets</a>"
+
+#: content-aware-sidebars.php:253
+msgid "Sidebar saved."
+msgstr "Sidebar salvata."
+
+#: content-aware-sidebars.php:254
+msgid "Sidebar submitted. <a href=\"%s\">Manage widgets</a>"
+msgstr "Sidebar inviata. <a href=\"%s\">Gestione widgets</a>"
+
+#: content-aware-sidebars.php:255
+msgid "Sidebar scheduled for: <strong>%1$s</strong>. <a href=\"%2$s\">Manage widgets</a>"
+msgstr "Sidebar posticipata per: <strong>%1$s</strong>. <a href=\"%2$s\">Gestione widgets</a>"
+
+#. translators: Publish box date format, see http:php.net/date
+#: content-aware-sidebars.php:257
+msgid "M j, Y @ G:i"
+msgstr "M j, Y @ G:i"
+
+#: content-aware-sidebars.php:258
+msgid "Sidebar draft updated. <a href=\"%s\">Manage widgets</a>"
+msgstr "Bozza sidebar aggiornata. <a href=\"%s\">Gestione widgets</a>"
+
+#: content-aware-sidebars.php:421
+msgid "Manage Widgets"
+msgstr "Gestione Widgets"
+
+#: content-aware-sidebars.php:656
+msgid "Words from the author"
+msgstr "Parole dell'autore"
+
+#: content-aware-sidebars.php:704
+msgid "Options"
+msgstr "Opzioni"
+
+#: content-aware-sidebars.php:781
+msgid "If you love this plugin, please consider donating."
+msgstr "Se ti piae questo plugin, considera di fare una donazione."
+
+#: content-aware-sidebars.php:783
+msgid "Remember to <a class=\"button\" href=\"%1$s\" target=\"_blank\">rate</a> and <a class=\"button\" href=\"%2$s\" target=\"_blank\">share</a> it too!"
+msgstr "Ricorda  di <a class=\"button\" href=\"%1$s\" target=\"_blank\">valutarlo</a> e <a class=\"button\" href=\"%2$s\" target=\"_blank\">condiverlo</a>!"
+
+#: content-aware-sidebars.php:785
+msgid "Check out Content Aware Sidebars for %23WordPress! :)"
+msgstr "Verifica Content Aware Sidebars per %23WordPress! :)"
+
+#: content-aware-sidebars.php:800
+#: content-aware-sidebars.php:852
+msgid "No items."
+msgstr "Nessun oggetto."
+
+#: content-aware-sidebars.php:806
+msgid "Most Used"
+msgstr "Più usati"
+
+#: content-aware-sidebars.php:807
+#: content-aware-sidebars.php:858
+#: content-aware-sidebars.php:883
+msgid "View All"
+msgstr "Vedi tutti"
+
+#: content-aware-sidebars.php:827
+msgid "Show with %s"
+msgstr "Mostra %s"
+
+#: content-aware-sidebars.php:871
+msgid "Show with All %s"
+msgstr "Mostra tutti %s"
+
+#. Plugin Name of the plugin/theme
+msgid "Content Aware Sidebars"
+msgstr "Content Aware Sidebars"
+
+#. #-#-#-#-#  plugin.pot (Content Aware Sidebars 0.8.2)  #-#-#-#-#
+#. Plugin URI of the plugin/theme
+#. #-#-#-#-#  plugin.pot (Content Aware Sidebars 0.8.2)  #-#-#-#-#
+#. Author URI of the plugin/theme
+msgid "http://www.intox.dk/"
+msgstr "http://www.intox.dk/"
+
+#. Description of the plugin/theme
+msgid "Manage and show sidebars according to the content being viewed."
+msgstr "Gestisce e mostra sidebars a seconda del contenuto visualizzato."
+
+#. Author of the plugin/theme
+msgid "Joachim Jensen"
+msgstr "Joachim Jensen"
+
