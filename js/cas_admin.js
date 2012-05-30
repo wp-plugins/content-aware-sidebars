@@ -10,6 +10,8 @@ jQuery(document).ready(function($) {
         
         handleSidebarHandle();
         
+	//$( "#cas_tabs" ).tabs();
+        
         /**
          *
          * Handle "Show with All" checkbox

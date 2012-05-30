@@ -29,17 +29,17 @@ License: GPL2
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 */
-class ContentAwareSidebars {
+final class ContentAwareSidebars {
 	
 	const db_version		= '0.8';
 	const prefix			= '_cas_';
 	
-	protected $metadata		= array();
-	protected $post_types		= array();
-	protected $post_type_objects	= array();
-	protected $taxonomies		= array();
-	protected $taxonomy_objects	= array();
-	protected $sidebar_cache	= array();
+	private $metadata		= array();
+	private $post_types		= array();
+	private $post_type_objects	= array();
+	private $taxonomies		= array();
+	private $taxonomy_objects	= array();
+	private $sidebar_cache		= array();
 
 	/**
 	 *
@@ -48,31 +48,86 @@ class ContentAwareSidebars {
 	 */
 	public function __construct() {
 		
+		register_activation_hook(__FILE__,			array(&$this,'plugin_activation'));
+		register_deactivation_hook(__FILE__,			array(&$this,'plugin_deactivation'));
+		
 		$this->_load_dependencies();
 		
-		add_filter('wp',					array(&$this,'replace_sidebar'));
-		add_filter('request',					array(&$this,'admin_column_orderby'));
+		// WordPress Hooks. Somewhat ordered by execution
+		
+		// On sitewide requests
+		add_action('plugins_loaded',				array(&$this,'deploy_modules'));
+		add_action('init',					array(&$this,'init_sidebar_type'),99);
+		add_action('widgets_init',				array(&$this,'create_sidebars'));
+		
+		// On admin requests
+		add_action('admin_menu',				array(&$this,'clear_admin_menu'));
+		add_action('admin_init',				array(&$this,'prepare_admin_scripts_styles'));
+		add_action('admin_print_scripts-edit.php',		array(&$this,'load_admin_scripts'));
+		add_action('admin_print_scripts-post-new.php',		array(&$this,'load_admin_scripts'));
+		add_action('admin_print_scripts-post.php',		array(&$this,'load_admin_scripts'));
+		
+		// On post type and taxonomy requests
+		add_action('delete_post',				array(&$this,'remove_sidebar_widgets'));
+		add_action('save_post', 				array(&$this,'save_post'));
+		
+		// Order not known yet
+		add_action('add_meta_boxes_sidebar',			array(&$this,'create_meta_boxes'));
+		
 		add_filter('default_hidden_meta_boxes',			array(&$this,'change_default_hidden'),10,2);	
 		add_filter('manage_edit-sidebar_columns',		array(&$this,'admin_column_headers'));
 		add_filter('manage_edit-sidebar_sortable_columns',	array(&$this,'admin_column_sortable_headers'));
 		add_filter('manage_posts_custom_column',		array(&$this,'admin_column_rows'),10,3);
 		add_filter('post_row_actions',				array(&$this,'sidebar_row_actions'),10,2);
 		add_filter('post_updated_messages', 			array(&$this,'sidebar_updated_messages'));
-			
-		add_action('init',					array(&$this,'init_sidebar_type'),99);
-		add_action('widgets_init',				array(&$this,'create_sidebars'));
-		add_action('add_meta_boxes_sidebar',			array(&$this,'create_meta_boxes'));
-		add_action('admin_init',				array(&$this,'prepare_admin_scripts_styles'));
-		add_action('admin_menu',				array(&$this,'clear_admin_menu'));
-		add_action('admin_print_scripts-edit.php',		array(&$this,'load_admin_scripts'));
-		add_action('admin_print_scripts-post-new.php',		array(&$this,'load_admin_scripts'));
-		add_action('admin_print_scripts-post.php',		array(&$this,'load_admin_scripts'));
-		add_action('save_post', 				array(&$this,'save_post'));
-		add_action('delete_post',				array(&$this,'remove_sidebar_widgets'));
-		add_action('wp_loaded',					array(&$this,'db_update'));
 		
-		register_activation_hook(__FILE__,			array(&$this,'plugin_activation'));
-		register_deactivation_hook(__FILE__,			array(&$this,'plugin_deactivation'));
+		
+		// Sitewide hooks that should not be loaded sitewide here
+		if(is_admin()) {
+			add_filter('request',				array(&$this,'admin_column_orderby'));
+			
+			add_action('wp_loaded',				array(&$this,'db_update'));	
+		} else {
+			add_filter('wp',				array(&$this,'replace_sidebar'));
+		}
+		
+	}
+	
+	/**
+	 *
+	 * Deploy modules
+	 *
+	 */
+	public function deploy_modules() {
+		
+		// Standard modules
+		$modules = array(
+			'static',
+			'post_type',
+			'author',
+			'page_template',
+			'taxonomy'
+		);
+		
+		// Modules for supported plugins
+		$plugin_modules = array(
+			'bbpress'		=> function_exists('bbp_get_version'),	// bbPress
+			'qtranslate'		=> defined('QT_SUPPORTED_WP_VERSION'),	// qTranslate
+			'transposh'		=> defined('TRANSPOSH_PLUGIN_VER'),	// Transposh Translation Filter
+			'wpml'			=> defined('ICL_LANGUAGE_CODE')		// WPML Multilingual Blog/CMS
+			
+		);
+		
+		// Add plugin module if plugin is present
+		foreach($plugin_modules as $name => $condition) {
+			if($condition)
+				$modules[] = $name;
+		}
+		
+		// Fire!
+		foreach($modules as $name) {
+			$this->_forge_module($name);
+		}
 		
 	}
 	
@@ -82,8 +137,8 @@ class ContentAwareSidebars {
 	 *
 	 */
 	private function _init_metadata() {
-		global $post, $wp_registered_sidebars, $wpdb;
-
+		global $post, $wp_registered_sidebars;
+		
 		// List of sidebars
 		$sidebar_list = array();
 		foreach($wp_registered_sidebars as $sidebar) {
@@ -91,102 +146,54 @@ class ContentAwareSidebars {
 				$sidebar_list[$sidebar['id']] = $sidebar['name'];
 		}
 		
-		// List of authors
-		$author_list = array();
-		foreach($wpdb->get_results("SELECT ID, display_name FROM $wpdb->users ORDER BY ID ASC") as $user) {
-			$author_list[$user->ID] = $user->display_name;
-		}
-		
 		// Meta fields
-		$this->metadata = array(
-			'post_types'	=> array(
-				'name'	=> __('Post Types', 'content-aware-sidebars'),
-				'id'	=> 'post_types',
-				'desc'	=> '',
-				'val'	=> array(),
-				'type'	=> 'checkbox',
-				'list'	=> $this->post_types
-			),
-			'taxonomies'	=> array(
-				'name'	=> __('Taxonomies', 'content-aware-sidebars'),
-				'id'	=> 'taxonomies',
-				'desc'	=> '',
-				'val'	=> array(),
-				'type'	=> 'checkbox',
-				'list'	=> $this->taxonomies
-			),
-			'authors'	=> array(
-				'name'	=> __('Authors', 'content-aware-sidebars'),
-				'id'	=> 'authors',
-				'desc'	=> '',
-				'val'	=> array(),
-				'type'	=> 'checkbox',
-				'list'	=> $author_list
-			),
-			'page_templates'=> array(
-				'name'	=> __('Page Templates', 'content-aware-sidebars'),
-				'id'	=> 'page_templates',
-				'desc'	=> '',
-				'val'	=> array(),
-				'type'	=> 'checkbox',
-				'list'	=> array_flip(get_page_templates())
-			),
-			'static'	=> array(
-				'name'	=> __('Static Pages', 'content-aware-sidebars'),
-				'id'	=> 'static',
-				'desc'	=> '',
-				'val'	=> array(),
-				'type'	=> 'checkbox',
-				'list'	=> array(
-					'front-page'	=> __('Front Page', 'content-aware-sidebars'),
-					'search'	=> __('Search Results', 'content-aware-sidebars'),
-					'404'		=> __('404 Page', 'content-aware-sidebars')
-				)
-			),
-			'exposure'	=> array(
-				'name'	=> __('Exposure', 'content-aware-sidebars'),
-				'id'	=> 'exposure',
-				'desc'	=> '',
-				'val'	=> 1,
-				'type'	=> 'select',
-				'list'	=> array(
-					 __('Singular', 'content-aware-sidebars'),
-					 __('Singular & Archive', 'content-aware-sidebars'),
-					 __('Archive', 'content-aware-sidebars')
-				 )
-			),
-			'handle'	=> array(
-				'name'	=> _x('Handle','option', 'content-aware-sidebars'),
-				'id'	=> 'handle',
-				'desc'	=> __('Replace host sidebar, merge with it or add sidebar manually.', 'content-aware-sidebars'),
-				'val'	=> 0,
-				'type'	=> 'select',
-				'list'	=> array(
-					__('Replace', 'content-aware-sidebars'),
-					__('Merge', 'content-aware-sidebars'),
-					__('Manual', 'content-aware-sidebars')
-				)
-			),
-			'host'		=> array(
-				'name'	=> __('Host Sidebar', 'content-aware-sidebars'),
-				'id'	=> 'host',
-				'desc'	=> '',
-				'val'	=> 'sidebar-1',
-				'type'	=> 'select',
-				'list'	=> $sidebar_list
-			),
-			'merge-pos'	=> array(
-				'name'	=> __('Merge position', 'content-aware-sidebars'),
-				'id'	=> 'merge-pos',
-				'desc'	=> __('Place sidebar on top or bottom of host when merging.', 'content-aware-sidebars'),
-				'val'	=> 1,
-				'type'	=> 'select',
-				'list'	=> array(
-					__('Top', 'content-aware-sidebars'),
-					__('Bottom', 'content-aware-sidebars')
-				)
+		$this->metadata['exposure'] = array(
+			'name'	=> __('Exposure', 'content-aware-sidebars'),
+			'id'	=> 'exposure',
+			'desc'	=> '',
+			'val'	=> 1,
+			'type'	=> 'select',
+			'list'	=> array(
+				 __('Singular', 'content-aware-sidebars'),
+				 __('Singular & Archive', 'content-aware-sidebars'),
+				 __('Archive', 'content-aware-sidebars')
 			)
 		);
+		$this->metadata['handle'] = array(
+			'name'	=> _x('Handle','option', 'content-aware-sidebars'),
+			'id'	=> 'handle',
+			'desc'	=> __('Replace host sidebar, merge with it or add sidebar manually.', 'content-aware-sidebars'),
+			'val'	=> 0,
+			'type'	=> 'select',
+			'list'	=> array(
+				__('Replace', 'content-aware-sidebars'),
+				__('Merge', 'content-aware-sidebars'),
+				__('Manual', 'content-aware-sidebars')
+			)
+		);
+		$this->metadata['host']	= array(
+			'name'	=> __('Host Sidebar', 'content-aware-sidebars'),
+			'id'	=> 'host',
+			'desc'	=> '',
+			'val'	=> 'sidebar-1',
+			'type'	=> 'select',
+			'list'	=> $sidebar_list
+		);
+		$this->metadata['merge-pos'] = array(
+			'name'	=> __('Merge position', 'content-aware-sidebars'),
+			'id'	=> 'merge-pos',
+			'desc'	=> __('Place sidebar on top or bottom of host when merging.', 'content-aware-sidebars'),
+			'val'	=> 1,
+			'type'	=> 'select',
+			'list'	=> array(
+				__('Top', 'content-aware-sidebars'),
+				__('Bottom', 'content-aware-sidebars')
+			)
+		);
+		
+		// Get metadata from modules
+		$this->metadata = apply_filters('cas_metadata',$this->metadata);	
+		
 	}
 	
 	/**
@@ -229,9 +236,9 @@ class ContentAwareSidebars {
 			'query_var'	=> false,
 			'rewrite'	=> false,
 			'menu_position' => null,
-			'supports'	=> array('title','excerpt','page-attributes'),
+			'supports'	=> array('title','page-attributes','excerpt'),
 			'taxonomies'	=> array_keys($this->taxonomies),
-			'menu_icon'	=> WP_PLUGIN_URL.'/'.plugin_basename(dirname(__FILE__)).'/icon-16.png'
+			'menu_icon'	=> WP_PLUGIN_URL.'/'.plugin_basename(dirname(__FILE__)).'/img/icon-16.png'
 		));
 	}
 	
@@ -255,7 +262,7 @@ class ContentAwareSidebars {
 			9 => sprintf(__('Sidebar scheduled for: <strong>%1$s</strong>. <a href="%2$s">Manage widgets</a>','content-aware-sidebars'),
 			// translators: Publish box date format, see http://php.net/date
 			date_i18n(__('M j, Y @ G:i'),strtotime($post->post_date)),'widgets.php'),
-			10 => sprintf(__('Sidebar draft updated. <a href="%s">Manage widgets</a>','content-aware-sidebars'),'widgets.php'),
+			10 => __('Sidebar draft updated.','content-aware-sidebars'),
 		);
 		return $messages;
 	}
@@ -263,6 +270,8 @@ class ContentAwareSidebars {
 	/**
 	 *
 	 * Remove taxonomy shortcuts from menu and standard meta boxes.
+	 * 
+	 * @action_hook admin_menu
 	 *
 	 */
 	public function clear_admin_menu() {
@@ -302,10 +311,18 @@ class ContentAwareSidebars {
 	/**
 	 *
 	 * Add admin column headers
+	 * 
+	 * @param $columns
 	 *
 	 */
 	public function admin_column_headers($columns) {
+		
 		unset($columns['categories'],$columns['tags']);
+		
+		// Quick fix. Maybe this can be done in the module. Alternative is to build admin gui from scratch.
+		if(defined('QT_SUPPORTED_WP_VERSION'))
+			unset($columns['language']);
+		
 		return array_merge(
 			array_slice($columns, 0, 2, true),
 			array(
@@ -416,8 +433,11 @@ class ContentAwareSidebars {
 	 */
 	public function sidebar_row_actions($actions, $post) {
 		if($post->post_type == 'sidebar' && $post->post_status != 'trash') {
+			
 			//View link is still there in WP3.1
-			if(isset($actions['view'])) unset($actions['view']);
+			if(isset($actions['view']))
+				unset($actions['view']);
+				
 			return array_merge(
 				array_slice($actions, 0, 2, true),
 				array(
@@ -444,10 +464,19 @@ class ContentAwareSidebars {
 		
 		foreach($posts as $post) {
 			
-			$id = 'ca-sidebar-'.$post->ID;
+			// Filter out sidebars with dependent content rules not present. Archives not yet decided.
+			if(!(is_archive() || (is_home() && !is_front_page()))) {
+				$continue = false;
+				$continue = apply_filters('cas_exclude_sidebar', $continue, $post, self::prefix);
+				if($continue)
+					continue;
+			}
+			
+			$id = 'ca-sidebar-'.$post->ID;	
+			$host = get_post_meta($post->ID, self::prefix.'host', true);
 			
 			// Check for correct handling and if host exist
-			if ($post->handle == 2 || !isset($_wp_sidebars_widgets[$post->host]))
+			if ($post->handle == 2 || !isset($_wp_sidebars_widgets[$host]))
 				continue;
 			
 			// Sidebar might not have any widgets. Get it anyway!
@@ -455,14 +484,14 @@ class ContentAwareSidebars {
 				$_wp_sidebars_widgets[$id] = array();
 			
 			// If host has already been replaced, merge with it instead. Might change in future.
-			if($post->handle || isset($handled_already[$post->host])) {
-				if($post->merge_pos)
-					$_wp_sidebars_widgets[$post->host] = array_merge($_wp_sidebars_widgets[$post->host],$_wp_sidebars_widgets[$id]);
+			if($post->handle || isset($handled_already[$host])) {
+				if(get_post_meta($post->ID, self::prefix.'merge-pos', true))
+					$_wp_sidebars_widgets[$host] = array_merge($_wp_sidebars_widgets[$host],$_wp_sidebars_widgets[$id]);
 				else
-					$_wp_sidebars_widgets[$post->host] = array_merge($_wp_sidebars_widgets[$id],$_wp_sidebars_widgets[$post->host]);
+					$_wp_sidebars_widgets[$host] = array_merge($_wp_sidebars_widgets[$id],$_wp_sidebars_widgets[$host]);
 			} else {
-				$_wp_sidebars_widgets[$post->host] = $_wp_sidebars_widgets[$id];
-				$handled_already[$post->host] = 1;
+				$_wp_sidebars_widgets[$host] = $_wp_sidebars_widgets[$id];
+				$handled_already[$host] = 1;
 			}		
 		}
 	}
@@ -474,7 +503,7 @@ class ContentAwareSidebars {
 	 *
 	 */
 	public function get_sidebars() {
-		global $wpdb, $post_type, $post;
+		global $wpdb;
 		
 		// Return cache if present
 		if(!empty($this->sidebar_cache)) {
@@ -483,163 +512,46 @@ class ContentAwareSidebars {
 			else
 				return $this->sidebar_cache;
 		}
-		
-		$joins = "";
-		$where = "";
-		
-		// Front page
-		if(is_front_page()) {
-			
-			$joins .= "LEFT JOIN $wpdb->postmeta static ON static.post_id = posts.ID AND static.meta_key = '".self::prefix."static' ";
-			
-			$where .= "(static.meta_value LIKE '%front-page%') AND ";
-			$where .= "exposure.meta_value <= '1' AND ";	
-		
-		// Single content
-		} elseif(is_singular()) {
-			
-			// Check if content has any taxonomies supported
-			$post_taxonomies = get_object_taxonomies(get_post_type());
-			if($post_taxonomies) {
-				$post_terms = wp_get_object_terms(get_the_ID(),$post_taxonomies);
-				// Check if content has any actual taxonomy terms
-				if($post_terms) {
-					$terms = array();
-					$taxonomies = array();
-					
-					$where .= "(";
-					
-					//Grab posts terms and make where rules for taxonomies.
-					foreach($post_terms as $term) {
-						$terms[] = $term->slug;
-						if(!isset($taxonomies[$term->taxonomy])) {
-							$where .= "post_tax.meta_value LIKE '%".$taxonomies[$term->taxonomy] = $term->taxonomy."%' OR ";
-						}
-					}
-					
-					$joins .= "LEFT JOIN $wpdb->term_relationships term ON term.object_id = posts.ID ";
-					$joins .= "LEFT JOIN $wpdb->term_taxonomy taxonomy ON taxonomy.term_taxonomy_id = term.term_taxonomy_id ";
-					$joins .= "LEFT JOIN $wpdb->terms terms ON terms.term_id = taxonomy.term_id ";
-					$joins .= "LEFT JOIN $wpdb->postmeta post_tax ON post_tax.post_id = posts.ID AND post_tax.meta_key = '".self::prefix."taxonomies'";
-					
-					$where .= "terms.slug IN('".implode("','",$terms)."') ";
-					$where .= ") OR ";
-				}
-			}
-			
-			// Post Type
-			$joins .= "LEFT JOIN $wpdb->postmeta post_types ON post_types.post_id = posts.ID AND post_types.meta_key = '".self::prefix."post_types' ";
-			$where .= "((post_types.meta_value IS NULL OR (post_types.meta_value LIKE '%".serialize(get_post_type())."%' OR post_types.meta_value LIKE '%".serialize((string)get_the_ID())."%'))";
-			$where2 = "AND (post_types.meta_value IS NOT NULL";
 	
-			//Author
-			$joins .= "LEFT JOIN $wpdb->postmeta authors ON authors.post_id = posts.ID AND authors.meta_key = '".self::prefix."authors' ";			
-			$where .= " AND (authors.meta_value IS NULL OR (authors.meta_value LIKE '%authors%' OR authors.meta_value LIKE '%".serialize((string)$post->post_author)."%'))";
-			$where2 .= " OR authors.meta_value IS NOT NULL";
-			
-			//Page Template
-			$template = get_post_meta(get_the_ID(),'_wp_page_template',true);
-			if($template && $template != 'default') {
-				$joins .= "LEFT JOIN $wpdb->postmeta page_templates ON page_templates.post_id = posts.ID AND page_templates.meta_key = '".self::prefix."page_templates' ";		
-				$where .= " AND (page_templates.meta_value IS NULL OR (page_templates.meta_value LIKE '%page_templates%' OR page_templates.meta_value LIKE '%".$template."%'))";
-				$where2 .= " OR page_templates.meta_value IS NOT NULL";
-			}
-			
-			$where2 .= ")";
-	
-			$where .= $where2.") AND ";
-			$where .= "exposure.meta_value <= '1' AND ";
-			
-		// Taxonomy archives
-		} elseif(is_tax() || is_category() || is_tag()) {
-			
-			$term = get_queried_object();
-			
-			$joins .= "LEFT JOIN $wpdb->term_relationships term ON term.object_id = posts.ID ";
-			$joins .= "LEFT JOIN $wpdb->term_taxonomy taxonomy ON taxonomy.term_taxonomy_id = term.term_taxonomy_id ";
-			$joins .= "LEFT JOIN $wpdb->terms terms ON terms.term_id = taxonomy.term_id ";	
-			$joins .= "LEFT JOIN $wpdb->postmeta post_tax ON post_tax.post_id = posts.ID AND post_tax.meta_key = '".self::prefix."taxonomies'";
-				
-			$where .= "(terms.slug = '$term->slug'";
-			$where .= " OR post_tax.meta_value LIKE '%".serialize($term->taxonomy)."%'";
-			$where .= ") AND ";
-			$where .= "exposure.meta_value >= '1' AND ";		
-			
-		// Post Type archives
-		} elseif(is_post_type_archive() || is_home()) {
-			
-			// Home has post as default post type
-			if(!$post_type) $post_type = 'post';
-			
-			$joins .= "LEFT JOIN $wpdb->postmeta post_types ON post_types.post_id = posts.ID AND post_types.meta_key = '".self::prefix."post_types' ";
-			$where .= "(post_types.meta_value LIKE '%".serialize($post_type)."%') AND ";
-			$where .= "exposure.meta_value >= '1' AND ";		
+		$joins = array();
+		$where = array();
 		
-		// Author archive
-		} elseif(is_author()) {
-
-			$joins .= "LEFT JOIN $wpdb->postmeta authors ON authors.post_id = posts.ID AND authors.meta_key = '".self::prefix."authors' ";	
-			$where .= "(authors.meta_value LIKE '%authors%' OR authors.meta_value LIKE '%".serialize((string)get_query_var('author'))."%') AND ";
-			$where .= "exposure.meta_value >= '1' AND ";	
+		// Run hooks for query
+		do_action('cas_sidebar_db');
 		
-		// Search
-		} elseif(is_search()) {
-			
-			$joins .= "LEFT JOIN $wpdb->postmeta static ON static.post_id = posts.ID AND static.meta_key = '".self::prefix."static' ";		
-			$where .= "(static.meta_value LIKE '%search%') AND ";
-			$where .= "exposure.meta_value <= '1' AND ";	
-			
-		// 404
-		} elseif(is_404()) {
-			
-			$joins .= "LEFT JOIN $wpdb->postmeta static ON static.post_id = posts.ID AND static.meta_key = '".self::prefix."static' ";		
-			$where .= "(static.meta_value LIKE '%404%') AND ";
-			$where .= "exposure.meta_value <= '1' AND ";
-			
-		}
+		// Apply hooks for db
+		$joins = apply_filters('cas_sidebar_db_join', $joins, self::prefix);
+		$where = apply_filters('cas_sidebar_db_where', $where);
 		
 		// Check if there are any rules for this type of content
-		if(!$where)
+		if(empty($where))
 			return false;
-		
-		// Show private sidebars or not
-		if(current_user_can('read_private_posts'))
-			$post_status = "IN('publish','private')";
-		else
-			$post_status = "= 'publish'";		
-		$where .= "posts.post_status ".$post_status."";
-		
+
 		// Do query and cache it
 		$wpdb->query('SET OPTION SQL_BIG_SELECTS = 1');
 		$this->sidebar_cache = $wpdb->get_results("
 			SELECT
 				posts.ID,
-				handle.meta_value handle,
-				host.meta_value host,
-				merge_pos.meta_value merge_pos
+				handle.meta_value handle
 			FROM $wpdb->posts posts
 			LEFT JOIN $wpdb->postmeta handle
 				ON handle.post_id = posts.ID
 				AND handle.meta_key = '".self::prefix."handle'
-			LEFT JOIN $wpdb->postmeta host
-				ON host.post_id = posts.ID
-				AND host.meta_key = '".self::prefix."host'
-			LEFT JOIN $wpdb->postmeta merge_pos
-				ON merge_pos.post_id = posts.ID
-				AND merge_pos.meta_key = '".self::prefix."merge-pos'
 			LEFT JOIN $wpdb->postmeta exposure
 				ON exposure.post_id = posts.ID
 				AND exposure.meta_key = '".self::prefix."exposure'
-			$joins
+			".implode(' ',$joins)."
 			WHERE
 				posts.post_type = 'sidebar' AND
-				$where
+				exposure.meta_value ".(is_archive() || is_home() ? '>' : '<')."= '1' AND
+				posts.post_status ".(current_user_can('read_private_posts') ? "IN('publish','private')" : "= 'publish'")." AND 
+				(".implode(' AND ',$where).")
 			GROUP BY posts.ID
 			ORDER BY posts.menu_order ASC, handle.meta_value DESC, posts.post_date DESC
 		");
 		
 		// Return proper cache. If query was empty, tell the cache.
-		return empty($this->sidebar_cache) ? $this->sidebar_cache[0] = false : $this->sidebar_cache;
+		return (empty($this->sidebar_cache) ? $this->sidebar_cache[0] = false : $this->sidebar_cache);
 		
 	}
 	
@@ -652,7 +564,7 @@ class ContentAwareSidebars {
 		
 		// Load metadata
 		$this->_init_metadata();
-		
+
 		// Add boxes
 		// Author Words
 		add_meta_box(
@@ -663,44 +575,9 @@ class ContentAwareSidebars {
 			'side',
 			'high'
 		);
-		// Post Types
-		foreach($this->post_type_objects as $post_type) {
-			add_meta_box(
-				'ca-sidebar-post-type-'.$post_type->name,
-				$post_type->label,
-				array(&$this,'meta_box_post_type'),
-				'sidebar',
-				'normal',
-				'high',
-				$post_type
-			);
-		}
-		// Taxonomies
-		foreach($this->taxonomy_objects as $tax) {
-			add_meta_box(
-				'ca-sidebar-tax-'.$tax->name,
-				$tax->label,
-				array(&$this,'meta_box_taxonomy'),
-				'sidebar',
-				'side',
-				'default',
-				$tax
-			);
-		}
-		
-		// Author and Page Template lists
-		$checkbox_meta_boxes = array('authors','page_templates');
-		foreach($checkbox_meta_boxes as $meta_box) {
-			add_meta_box(
-				'ca-sidebar-'.$meta_box,
-				$this->metadata[$meta_box]['name'],
-				array(&$this,'meta_box_checkboxes'),
-				'sidebar',
-				'side',
-				'default',
-				$meta_box
-			);
-		}
+			
+		// Add module boxes
+		do_action('cas_admin_gui',$this);
 		
 		// Options
 		add_meta_box(
@@ -747,6 +624,7 @@ class ContentAwareSidebars {
 	 *
 	 */
 	public function meta_box_content() {
+		
 		$columns = array(
 			'static',
 			'exposure',
@@ -754,6 +632,14 @@ class ContentAwareSidebars {
 			'merge-pos'
 		);
 		
+		//echo '<div id="cas_tabs">';
+		//
+		//echo '<ul>';
+		//echo '<li class="nav-tab"><a href="#_cas_settings">Settings</a></li>';
+		//echo '<li><a href="#_cas_test">Settings</a></li>';
+		//echo '</ul>';
+		//
+		//echo '<div id="_cas_settings">';
 		echo '<table class="form-table">';
 		foreach($columns as $key => $value) {
 			
@@ -766,6 +652,13 @@ class ContentAwareSidebars {
 			echo '</td></tr>';
 		}
 		echo '</table>';
+		//echo '</div>';
+		//
+		//echo '<div id="_cas_test">';
+		//echo 'hello';
+		//echo '</div>';
+		//
+		//echo '</div>';
 	}
 	
 	/**
@@ -774,6 +667,7 @@ class ContentAwareSidebars {
 	 *
 	 */
 	public function meta_box_author_words() {
+		
 		// Use nonce for verification
 		wp_nonce_field(basename(__FILE__),'_ca-sidebar-nonce');
 		?>
@@ -941,6 +835,7 @@ class ContentAwareSidebars {
 	 *
 	 */
 	public function save_post($post_id) {
+		global $wpdb;
 		
 		// Save button pressed
 		if(!isset($_POST['original_publish']) && !isset($_POST['save_post']))
@@ -968,14 +863,15 @@ class ContentAwareSidebars {
 		// Update metadata
 		foreach ($this->metadata as $field) {
 			$old = get_post_meta($post_id, self::prefix.$field['id'], true);			
-			$new = isset($_POST[$field['id']]) ? $_POST[$field['id']] : '';
+			$new = isset($_POST[$field['id']]) ? $_POST[$field['id']] : '';		
 
-			if ($new != '' && $new != $old) {
-				update_post_meta($post_id, self::prefix.$field['id'], $new);		
+			if ($new != '' && $new != $old) {			
+				update_post_meta($post_id, self::prefix.$field['id'], $new);
+				
 			} elseif ($new == '' && $old != '') {
 				delete_post_meta($post_id, self::prefix.$field['id'], $old);	
 			}
-		}
+		}	
 	}
 	
 	/**
@@ -995,6 +891,7 @@ class ContentAwareSidebars {
 	public function load_admin_scripts() {
 		global $pagenow;
 		if($pagenow != 'edit.php') {
+			//wp_enqueue_script('jquery-ui-tabs');
 			wp_enqueue_script('cas_admin_script');
 		}
 		wp_enqueue_style('cas_admin_style');
@@ -1007,7 +904,7 @@ class ContentAwareSidebars {
 	 */
 	public function prepare_admin_scripts_styles() {
 		wp_register_script('cas_admin_script', WP_PLUGIN_URL.'/'.plugin_basename(dirname(__FILE__)).'/js/cas_admin.js', array('jquery'), '0.1');
-		wp_register_style('cas_admin_style', WP_PLUGIN_URL.'/'.plugin_basename(dirname(__FILE__)).'/style.css', false, '0.1');
+		wp_register_style('cas_admin_style', WP_PLUGIN_URL.'/'.plugin_basename(dirname(__FILE__)).'/css/style.css', false, '0.1');
 	}
 	
 	/**
@@ -1019,9 +916,23 @@ class ContentAwareSidebars {
 		
 		require_once('walker.php');
 		require_once('update_db.php');
+		require_once('modules/abstract.php');
 		
 	}
-		
+	
+	/**
+	 *
+	 * Forge content module
+	 *
+	 */
+	private function _forge_module($module) {
+		if (include_once('modules/'.$module .'.php')) {
+			$class = 'CASModule_'.$module;
+			return new $class;
+		}
+		return false;
+	}
+	
 	/**
 	 *
 	 * Flush rewrite rules on plugin activation
@@ -1084,7 +995,7 @@ function display_ca_sidebar($args = array()) {
 		
 		// Merge if more than one. First one is host.
 		if($i > 0) {
-			if($post->merge_pos)
+			if(get_post_meta($post->ID, ContentAwareSidebars::prefix.'merge-pos', true))
 				$_wp_sidebars_widgets[$host] = array_merge($_wp_sidebars_widgets[$host],$_wp_sidebars_widgets[$id]);
 			else
 				$_wp_sidebars_widgets[$host] = array_merge($_wp_sidebars_widgets[$id],$_wp_sidebars_widgets[$host]);
@@ -1100,3 +1011,5 @@ function display_ca_sidebar($args = array()) {
 		echo $after;
 	}
 }
+
+?>

@@ -1,7 +1,7 @@
 <?php
 
 function cas_run_db_update($current_version) {
-        
+	
         if(current_user_can('update_plugins')) {
                 
                 // Get current plugin db version

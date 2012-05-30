@@ -1,10 +1,11 @@
 === Plugin Name ===
 Contributors: intoxstudio
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=KPZHE6A72LEN4&lc=US&item_name=WordPress%20Plugin%3a%20Content%20Aware%20Sidebars&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted
-Tags: sidebar, widget, content aware, post type, taxonomy, term, archive, singular, seo, dynamic
+Tags: sidebar, widget, content aware, seo, dynamic, flexible
 Requires at least: 3.1
-Tested up to: 3.3.2
+Tested up to: 3.4
 Stable tag: 0.8.3
+License: GPL2
 
 Manage and show sidebars according to the content being viewed.
 
@@ -15,19 +16,32 @@ No extra database tables or table columns will be added.
 
 = Features =
 
-* Show sidebars with:
-	* Specific singulars - e.g. specific posts or pages
-	* Specific (custom) post types
-	* Specific page templates
-	* Singulars containing specific taxonomies or taxonomy terms
-	* Singulars made by specific authors
-	* Specific post type archives, author archives, taxonomy archives or taxonomy term archives
-	* Search results, 404 page and front page
-	* Any combination of the above
-* Merge new sidebars with others, replace them or simply add them to your theme manually with a template tag
+* Show sidebars with all or specific:
+	* Singulars - e.g. some posts or pages
+	* (Custom) Post Types
+	* Page Templates
+	* Singulars with given (custom) taxonomies or taxonomy terms
+	* Singulars by a given author
+	* Post Type Archives
+	* Author Archives
+	* (Custom) Taxonomy Archives or Taxonomy Term Archives
+	* Search results
+	* 404 Page
+	* Front Page
+	* bbPress User Profiles
+	* Languages (qTranslate, Transposh, WPML) 
+	* **Any combination of the above**
+* Merge new sidebars with others, replace others or simply add them to your theme manually with a template tag
 * Create complex content with nested sidebars
 * Private sidebars only for members
 * Schedule sidebars for later publishing
+
+= Officially Supported Plugins =
+
+* bbPress (v2.0.2)
+* qTranslate (v2.5.29)
+* Transposh Translation Filter (v0.8.2)
+* WPML Multilingual Blog/CMS (v2.4.3)
 
 = Translations =
 
@@ -75,6 +89,18 @@ The function accepts URL-style strings as parameters too, like the standard Word
 5. Viewing Another Page. The Content Aware Sidebar has replaced `Main Sidebar`
 
 == Changelog ==
+
+= 1.0 =
+
+* Added: plugin rewritten to flexible modular system
+* Added: support for bbpress, qtranslate, transposh, wpml
+* Added: sidebars with no rules will be shown anywhere
+* Fixed: all present rules now dependent of each other
+* Fixed: sidebar update messages
+* Fixed: specific hooks now not sitewide
+* Fixed: better use of meta cache
+* Fixed: dir structure
+* Fixed: unexpected output notice on plugin activation
 
 = 0.8.3 =
 
