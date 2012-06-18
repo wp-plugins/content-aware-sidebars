@@ -6,6 +6,11 @@
 /**
  *
  * Static Pages Module
+ * 
+ * Detects if current content is:
+ * a) front page
+ * b) search results
+ * c) 404 page
  *
  */
 class CASModule_static extends CASModule {
@@ -47,5 +52,3 @@ class CASModule_static extends CASModule {
 	}
 	
 }
-
-?>

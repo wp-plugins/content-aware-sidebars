@@ -6,7 +6,7 @@
 Plugin Name: Content Aware Sidebars
 Plugin URI: http://www.intox.dk/
 Description: Manage and show sidebars according to the content being viewed.
-Version: 0.8.3
+Version: 1.0
 Author: Joachim Jensen
 Author URI: http://www.intox.dk/
 Text Domain: content-aware-sidebars
@@ -29,16 +29,14 @@ License: GPL2
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 */
+
 final class ContentAwareSidebars {
 	
 	const db_version		= '0.8';
 	const prefix			= '_cas_';
 	
 	private $metadata		= array();
-	private $post_types		= array();
-	private $post_type_objects	= array();
 	private $taxonomies		= array();
-	private $taxonomy_objects	= array();
 	private $sidebar_cache		= array();
 
 	/**
@@ -100,33 +98,23 @@ final class ContentAwareSidebars {
 	 */
 	public function deploy_modules() {
 		
-		// Standard modules
+		// List modules
 		$modules = array(
-			'static',
-			'post_type',
-			'author',
-			'page_template',
-			'taxonomy'
-		);
-		
-		// Modules for supported plugins
-		$plugin_modules = array(
+			'static'		=> true,
+			'post_type'		=> true,
+			'author'		=> true,
+			'page_template'		=> true,
+			'taxonomy'		=> true,
 			'bbpress'		=> function_exists('bbp_get_version'),	// bbPress
 			'qtranslate'		=> defined('QT_SUPPORTED_WP_VERSION'),	// qTranslate
 			'transposh'		=> defined('TRANSPOSH_PLUGIN_VER'),	// Transposh Translation Filter
 			'wpml'			=> defined('ICL_LANGUAGE_CODE')		// WPML Multilingual Blog/CMS
-			
 		);
 		
-		// Add plugin module if plugin is present
-		foreach($plugin_modules as $name => $condition) {
-			if($condition)
-				$modules[] = $name;
-		}
-		
 		// Fire!
-		foreach($modules as $name) {
-			$this->_forge_module($name);
+		foreach($modules as $name => $enabled) {
+			if($enabled)
+				$this->_forge_module($name);
 		}
 		
 	}
@@ -135,6 +123,8 @@ final class ContentAwareSidebars {
 	 *
 	 * Create post meta fields
 	 *
+	 * @global int $post
+	 * @global array $wp_registered_sidebars 
 	 */
 	private function _init_metadata() {
 		global $post, $wp_registered_sidebars;
@@ -205,16 +195,9 @@ final class ContentAwareSidebars {
 		
 		load_plugin_textdomain('content-aware-sidebars', false, dirname( plugin_basename(__FILE__)).'/lang/');
 		
-		// List public post types
-		foreach(get_post_types(array('public'=>true),'objects') as $post_type) {
-			$this->post_types[$post_type->name] = $post_type->label;
-			$this->post_type_objects[$post_type->name] = $post_type;
-		}
-		
 		// List public taxonomies
-		foreach(get_taxonomies(array('public'=>true),'objects') as $tax) {
-			$this->taxonomies[$tax->name] = $tax->label;
-			$this->taxonomy_objects[$tax->name] = $tax;
+		foreach(get_taxonomies(array('public'=>true),'names') as $tax) {
+			$this->taxonomies[] = $tax;
 		}
 		
 		// Register the sidebar type
@@ -237,7 +220,7 @@ final class ContentAwareSidebars {
 			'rewrite'	=> false,
 			'menu_position' => null,
 			'supports'	=> array('title','page-attributes','excerpt'),
-			'taxonomies'	=> array_keys($this->taxonomies),
+			'taxonomies'	=> $this->taxonomies,
 			'menu_icon'	=> WP_PLUGIN_URL.'/'.plugin_basename(dirname(__FILE__)).'/img/icon-16.png'
 		));
 	}
@@ -246,6 +229,9 @@ final class ContentAwareSidebars {
 	 *
 	 * Create update messages
 	 *
+	 * @global type $post
+	 * @param array $messages
+	 * @return array 
 	 */
 	public function sidebar_updated_messages( $messages ) {
 		global $post;
@@ -270,15 +256,13 @@ final class ContentAwareSidebars {
 	/**
 	 *
 	 * Remove taxonomy shortcuts from menu and standard meta boxes.
-	 * 
-	 * @action_hook admin_menu
 	 *
 	 */
 	public function clear_admin_menu() {
-		foreach($this->taxonomies as $key => $value) {
-			remove_submenu_page('edit.php?post_type=sidebar','edit-tags.php?taxonomy='.$key.'&amp;post_type=sidebar');
-			remove_meta_box('tagsdiv-'.$key, 'sidebar', 'side');
-			remove_meta_box($key.'div', 'sidebar', 'side');
+		foreach($this->taxonomies as $name) {
+			remove_submenu_page('edit.php?post_type=sidebar','edit-tags.php?taxonomy='.$name.'&amp;post_type=sidebar');
+			remove_meta_box('tagsdiv-'.$name, 'sidebar', 'side');
+			remove_meta_box($name.'div', 'sidebar', 'side');
 		}
 	}
 	
@@ -312,16 +296,12 @@ final class ContentAwareSidebars {
 	 *
 	 * Add admin column headers
 	 * 
-	 * @param $columns
-	 *
+	 * @param array $columns
+	 * @return array 
 	 */
 	public function admin_column_headers($columns) {
 		
 		unset($columns['categories'],$columns['tags']);
-		
-		// Quick fix. Maybe this can be done in the module. Alternative is to build admin gui from scratch.
-		if(defined('QT_SUPPORTED_WP_VERSION'))
-			unset($columns['language']);
 		
 		return array_merge(
 			array_slice($columns, 0, 2, true),
@@ -338,6 +318,8 @@ final class ContentAwareSidebars {
 	 *
 	 * Make some columns sortable
 	 *
+	 * @param array $columns
+	 * @return array 
 	 */
 	public function admin_column_sortable_headers($columns) {
 		return array_merge(
@@ -354,6 +336,8 @@ final class ContentAwareSidebars {
 	 *
 	 * Manage custom column sorting
 	 * 
+	 * @param array $vars
+	 * @return array 
 	 */
 	public function admin_column_orderby($vars) {
 		if (isset($vars['orderby']) && in_array($vars['orderby'],array('exposure','handle','merge-pos'))) {
@@ -369,6 +353,9 @@ final class ContentAwareSidebars {
 	 *
 	 * Add admin column rows
 	 *
+	 * @param string $column_name
+	 * @param int $post_id
+	 * @return type 
 	 */
 	public function admin_column_rows($column_name,$post_id) {
 		
@@ -392,6 +379,8 @@ final class ContentAwareSidebars {
 	 *
 	 * Remove widget when its sidebar is removed
 	 *
+	 * @param int $post_id
+	 * @return type 
 	 */
 	public function remove_sidebar_widgets($post_id) {
 		
@@ -430,6 +419,9 @@ final class ContentAwareSidebars {
 	 *
 	 * Add admin rows actions
 	 *
+	 * @param array $actions
+	 * @param object $post
+	 * @return type 
 	 */
 	public function sidebar_row_actions($actions, $post) {
 		if($post->post_type == 'sidebar' && $post->post_status != 'trash') {
@@ -454,6 +446,8 @@ final class ContentAwareSidebars {
 	 * Replace or merge a sidebar with content aware sidebars
 	 * Handles content aware sidebars with hosts
 	 *
+	 * @global array $_wp_sidebars_widgets
+	 * @return type 
 	 */
 	public function replace_sidebar() {
 		global $_wp_sidebars_widgets;
@@ -464,14 +458,14 @@ final class ContentAwareSidebars {
 		
 		foreach($posts as $post) {
 			
-			// Filter out sidebars with dependent content rules not present. Archives not yet decided.
-			if(!(is_archive() || (is_home() && !is_front_page()))) {
-				$continue = false;
-				$continue = apply_filters('cas_exclude_sidebar', $continue, $post, self::prefix);
-				if($continue)
-					continue;
-			}
-			
+//			// Filter out sidebars with dependent content rules not present. Archives not yet decided.
+//			if(!(is_archive() || (is_home() && !is_front_page()))) {
+//				$continue = false;
+//				$continue = apply_filters('cas_exclude_sidebar', $continue, $post, self::prefix);
+//				if($continue)
+//					continue;
+//			}
+//			
 			$id = 'ca-sidebar-'.$post->ID;	
 			$host = get_post_meta($post->ID, self::prefix.'host', true);
 			
@@ -499,8 +493,9 @@ final class ContentAwareSidebars {
 	/**
 	 *
 	 * Query sidebars according to content
-	 * @return array|bool
-	 *
+	 * 
+	 * @global type $wpdb
+	 * @return array|boolean 
 	 */
 	public function get_sidebars() {
 		global $wpdb;
@@ -515,6 +510,7 @@ final class ContentAwareSidebars {
 	
 		$joins = array();
 		$where = array();
+		$where2 = array();
 		
 		// Run hooks for query
 		do_action('cas_sidebar_db');
@@ -522,6 +518,7 @@ final class ContentAwareSidebars {
 		// Apply hooks for db
 		$joins = apply_filters('cas_sidebar_db_join', $joins, self::prefix);
 		$where = apply_filters('cas_sidebar_db_where', $where);
+		$where2 = apply_filters('cas_sidebar_db_where2', $where2);
 		
 		// Check if there are any rules for this type of content
 		if(empty($where))
@@ -545,7 +542,7 @@ final class ContentAwareSidebars {
 				posts.post_type = 'sidebar' AND
 				exposure.meta_value ".(is_archive() || is_home() ? '>' : '<')."= '1' AND
 				posts.post_status ".(current_user_can('read_private_posts') ? "IN('publish','private')" : "= 'publish'")." AND 
-				(".implode(' AND ',$where).")
+				(".implode(' AND ',$where).($where2 ? ' AND ('.implode(' OR ',$where2).')' : '').")
 			GROUP BY posts.ID
 			ORDER BY posts.menu_order ASC, handle.meta_value DESC, posts.post_date DESC
 		");
@@ -568,7 +565,7 @@ final class ContentAwareSidebars {
 		// Add boxes
 		// Author Words
 		add_meta_box(
-			'ca-sidebar-author-words',
+			'ca-sidebar-dev-words',
 			__('Words from the author', 'content-aware-sidebars'),
 			array(&$this,'meta_box_author_words'),
 			'sidebar',
@@ -595,6 +592,10 @@ final class ContentAwareSidebars {
 	 *
 	 * Hide some meta boxes from start
 	 *
+	 * @global type $wp_version
+	 * @param array $hidden
+	 * @param object $screen
+	 * @return array 
 	 */
 	public function change_default_hidden( $hidden, $screen ) {
 		global $wp_version;
@@ -682,10 +683,20 @@ final class ContentAwareSidebars {
 			'http://wordpress.org/extend/plugins/content-aware-sidebars/',
 			'http://twitter.com/?status='.__('Check out Content Aware Sidebars for %23WordPress! :)','content-aware-sidebars').' http://tiny.cc/ca-sidebars'
 			); ?></p>
+		<a href="https://twitter.com/share" class="twitter-share-button" data-url="http://wordpress.org/extend/plugins/content-aware-sidebars/" data-text="<?php _e('Check out Content Aware Sidebars :)','content-aware-sidebars') ?>" data-hashtags="WordPress">Tweet</a>
+		<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+		<iframe src="//www.facebook.com/plugins/like.php?href=http%3A%2F%2Fwordpress.org%2Fextend%2Fplugins%2Fcontent-aware-sidebars%2F&amp;send=false&amp;layout=button_count&amp;width=150&amp;show_faces=false&amp;action=like&amp;colorscheme=light&amp;font&amp;height=21&amp;appId=200775686659011" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:150px; height:21px;" allowTransparency="true"></iframe>	
 		</div>
 		<?php
 	}
 	
+	/**
+	 *
+	 * Taxonomy content
+	 * 
+	 * @param object $post
+	 * @param array $box 
+	 */
 	public function meta_box_taxonomy($post, $box) {
 		$meta = get_post_meta($post->ID, self::prefix.'taxonomies', true);
 		$current = $meta != '' ? $meta : array();
@@ -727,6 +738,13 @@ final class ContentAwareSidebars {
 	
 	}
 	
+	/**
+	 *
+	 * Post Type content
+	 * 
+	 * @param object $post
+	 * @param array $box 
+	 */
 	public function meta_box_post_type($post, $box) {
 		$meta = get_post_meta($post->ID, self::prefix.'post_types', true);
 		$current = $meta != '' ? $meta : array();
@@ -771,6 +789,13 @@ final class ContentAwareSidebars {
 
 	}
 	
+	/**
+	 *
+	 * Various content
+	 * 
+	 * @param object $post
+	 * @param array $box 
+	 */
 	public function meta_box_checkboxes($post, $box) {
 		$field = $box['args'];
 		$meta = get_post_meta($post->ID, self::prefix.$field, true);
@@ -800,6 +825,8 @@ final class ContentAwareSidebars {
 	 *
 	 * Create form field for metadata
 	 *
+	 * @global object $post
+	 * @param array $setting 
 	 */
 	private function _form_field($setting) {
 		global $post;
@@ -833,6 +860,9 @@ final class ContentAwareSidebars {
 	 *
 	 * Save meta values for post
 	 *
+	 * @global type $wpdb
+	 * @param int $post_id
+	 * @return type 
 	 */
 	public function save_post($post_id) {
 		global $wpdb;
@@ -887,6 +917,7 @@ final class ContentAwareSidebars {
 	 *
 	 * Load scripts and styles for administration
 	 *
+	 * @global string $pagenow 
 	 */
 	public function load_admin_scripts() {
 		global $pagenow;
@@ -924,6 +955,8 @@ final class ContentAwareSidebars {
 	 *
 	 * Forge content module
 	 *
+	 * @param type $module
+	 * @return object 
 	 */
 	private function _forge_module($module) {
 		if (include_once('modules/'.$module .'.php')) {
@@ -958,7 +991,15 @@ final class ContentAwareSidebars {
 global $ca_sidebars;
 $ca_sidebars = new ContentAwareSidebars();
 
-// Template function
+/**
+ *
+ * Template function
+ * 
+ * @global ContentAwareSidebars $ca_sidebars
+ * @global array $_wp_sidebars_widgets
+ * @param array|string $args
+ * @return type 
+ */
 function display_ca_sidebar($args = array()) {
 	global $ca_sidebars, $_wp_sidebars_widgets;
 	
@@ -1011,5 +1052,3 @@ function display_ca_sidebar($args = array()) {
 		echo $after;
 	}
 }
-
-?>

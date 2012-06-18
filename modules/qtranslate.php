@@ -15,6 +15,13 @@ class CASModule_qtranslate extends CASModule {
 	
 	protected $id = 'language';
 	
+	public function __construct() {
+		parent::__construct();
+		
+		add_filter('manage_edit-sidebar_columns',		array(&$this,'admin_column_headers'));
+		
+	}
+	
 	public function metadata($metadata) {
 		global $q_config;
 		$langs = array();
@@ -54,6 +61,9 @@ class CASModule_qtranslate extends CASModule {
 		return $where;
 	}
 	
+	public function admin_column_headers($columns) {	
+		unset($columns['language']);	
+		return $columns;
+	}
+	
 }
-
-?>

@@ -5,10 +5,10 @@
 
 /**
  *
- * bbPress Module
+ * Transposh Module
  * 
  * Detects if current content is:
- * a) any or specific bbpress user profile
+ * a) in specific language
  *
  */
 class CASModule_transposh extends CASModule {
@@ -57,5 +57,3 @@ class CASModule_transposh extends CASModule {
 	}
 	
 }
-
-?>

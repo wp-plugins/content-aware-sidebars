@@ -1,10 +1,10 @@
 === Plugin Name ===
 Contributors: intoxstudio
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=KPZHE6A72LEN4&lc=US&item_name=WordPress%20Plugin%3a%20Content%20Aware%20Sidebars&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted
-Tags: sidebar, widget, content aware, seo, dynamic, flexible
+Tags: sidebar, widget, content aware, seo, dynamic, flexible, modular
 Requires at least: 3.1
 Tested up to: 3.4
-Stable tag: 0.8.3
+Stable tag: 1.0
 License: GPL2
 
 Manage and show sidebars according to the content being viewed.
@@ -19,9 +19,9 @@ No extra database tables or table columns will be added.
 * Show sidebars with all or specific:
 	* Singulars - e.g. some posts or pages
 	* (Custom) Post Types
-	* Page Templates
 	* Singulars with given (custom) taxonomies or taxonomy terms
 	* Singulars by a given author
+	* Page Templates
 	* Post Type Archives
 	* Author Archives
 	* (Custom) Taxonomy Archives or Taxonomy Term Archives
@@ -36,17 +36,18 @@ No extra database tables or table columns will be added.
 * Private sidebars only for members
 * Schedule sidebars for later publishing
 
-= Officially Supported Plugins =
+= Builtin Plugin Support =
 
-* bbPress (v2.0.2)
-* qTranslate (v2.5.29)
-* Transposh Translation Filter (v0.8.2)
-* WPML Multilingual Blog/CMS (v2.4.3)
+* bbPress (v2.0.2+)
+* qTranslate (v2.5.29+)
+* Transposh Translation Filter (v0.8.2+)
+* WPML Multilingual Blog/CMS (v2.4.3+)
 
 = Translations =
 
 * Danish (da_DK): [Joachim Jensen](http://www.intox.dk/)
 * Italian (it_IT): [Luciano Del Fico](http://www.myweb2.it/)
+* Lithuanian (lt_LT): [Vincent G](http://host1free.com/)
 
 If you have translated the plugin into your language or updated an existing translation, please send the .po and .mo files to jv[at]intox.dk.
 Download the latest [.pot file](http://plugins.svn.wordpress.org/content-aware-sidebars/trunk/lang/content-aware-sidebars.pot) or the [.po file in your language](http://plugins.svn.wordpress.org/content-aware-sidebars/trunk/lang/).
@@ -93,8 +94,8 @@ The function accepts URL-style strings as parameters too, like the standard Word
 = 1.0 =
 
 * Added: plugin rewritten to flexible modular system
-* Added: support for bbpress, qtranslate, transposh, wpml
-* Added: sidebars with no rules will be shown anywhere
+* Added: builtin support for bbpress, qtranslate, transposh, wpml
+* Added: lithuanian translation
 * Fixed: all present rules now dependent of each other
 * Fixed: sidebar update messages
 * Fixed: specific hooks now not sitewide

@@ -70,5 +70,3 @@ class CASModule_post_type extends CASModule {
 	}
 	
 }
-
-?>

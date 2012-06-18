@@ -61,5 +61,3 @@ class CASModule_author extends CASModule {
 	}
 	
 }
-
-?>

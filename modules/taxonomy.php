@@ -77,7 +77,7 @@ class CASModule_taxonomy extends CASModule {
 		$joins = "LEFT JOIN $wpdb->term_relationships term ON term.object_id = posts.ID ";
 		$joins .= "LEFT JOIN $wpdb->term_taxonomy taxonomy ON taxonomy.term_taxonomy_id = term.term_taxonomy_id ";
 		$joins .= "LEFT JOIN $wpdb->terms terms ON terms.term_id = taxonomy.term_id ";
-		$joins .= "LEFT JOIN $wpdb->postmeta post_tax ON post_tax.post_id = posts.ID AND post_tax.meta_key = '".$prefix."taxonomies'";
+		$joins .= "LEFT JOIN $wpdb->postmeta taxonomies ON taxonomies.post_id = posts.ID AND taxonomies.meta_key = '".$prefix."taxonomies'";
 		
 		$join[$this->id] = $joins;
 		
@@ -92,26 +92,26 @@ class CASModule_taxonomy extends CASModule {
 			$taxonomies = array();
 						
 			//Grab posts terms and make where rules for taxonomies.
-			$where = array();
+			$tax_where[] = "taxonomies.meta_value IS NULL";
 			foreach($this->post_terms as $term) {
 				$terms[] = $term->slug;
 				if(!isset($taxonomies[$term->taxonomy])) {
-					$where[] = "post_tax.meta_value LIKE '%".$taxonomies[$term->taxonomy] = $term->taxonomy."%'";
+					$tax_where[] = "taxonomies.meta_value LIKE '%".$taxonomies[$term->taxonomy] = $term->taxonomy."%'";
 				}
 			}
-			
-			//PROBLEM WITH SEVERAL TAXONOMIES!
-			
-			$where[$this->id] = "(terms.slug IS NULL OR terms.slug IN('".implode("','",$terms)."')) AND (post_tax.meta_value IS NULL OR ".implode(' OR ',$where).")";
+
+			$where[$this->id] = "(terms.slug IS NULL OR terms.slug IN('".implode("','",$terms)."')) AND (".implode(' OR ',$tax_where).")";
 			return $where;
 		}
 		$term = get_queried_object();
-		//PROBLEM WITH SEVERAL TAXONOMIES!
-		$where[$this->id] = "(terms.slug = '$term->slug' OR post_tax.meta_value LIKE '%".serialize($term->taxonomy)."%')";
+		
+		$where[$this->id] = "(terms.slug = '$term->slug' OR taxonomies.meta_value LIKE '%".serialize($term->taxonomy)."%')";
 		return $where;
 		
 	}
 	
+	public function db_where2($where) {
+		$where[$this->id] = "terms.slug IS NOT NULL OR taxonomies.meta_value IS NOT NULL";
+		return $where;
+	}
 }
-
-?>

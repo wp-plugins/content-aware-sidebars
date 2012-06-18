@@ -13,6 +13,8 @@
  */
 class CASModule_bbpress extends CASModule {
 	
+	protected $id = 'authors';
+	
 	public function metadata($metadata) {
 		return $metadata;
 	}
@@ -32,5 +34,3 @@ class CASModule_bbpress extends CASModule {
 	}
 	
 }
-
-?>

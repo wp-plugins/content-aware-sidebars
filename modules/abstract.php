@@ -41,8 +41,7 @@ abstract class CASModule {
 		if($this->is_content()) {
 			add_filter('cas_sidebar_db_join',	array(&$this,'db_join'),10,2);
 			add_filter('cas_sidebar_db_where',	array(&$this,'db_where'));
-		} else {
-			add_filter('cas_exclude_sidebar',	array(&$this,'exclude_sidebar'),10,3);
+			add_filter('cas_sidebar_db_where2',	array(&$this,'db_where2'));
 		}
 	}
 	
@@ -64,11 +63,14 @@ abstract class CASModule {
 		
 	}
 	
-	abstract protected function admin_gui($class);
-	abstract protected function metadata($metadata);
-	abstract protected function is_content();
-	abstract protected function db_where($args);
+	public function db_where2($where) {
+		$where[$this->id] = "{$this->id}.meta_value IS NOT NULL";
+		return $where;
+	}
+	
+	abstract public function admin_gui($class);
+	abstract public function metadata($metadata);
+	abstract public function is_content();
+	abstract public function db_where($where);
 	
 }
-
-?>

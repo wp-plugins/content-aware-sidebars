@@ -6,6 +6,10 @@
 /**
  *
  * Page Template Module
+ * 
+ * Detects if current content has:
+ * a) any or specific page template
+ *
  *
  */
 class CASModule_page_template extends CASModule {
@@ -53,5 +57,3 @@ class CASModule_page_template extends CASModule {
 	}
 	
 }
-
-?>
