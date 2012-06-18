@@ -10,6 +10,10 @@
  */
 class CAS_Walker_Checklist extends Walker {
 	
+	/**
+	 * @param type $tree_type
+	 * @param type $db_fields 
+	 */
 	function __construct($tree_type, $db_fields) {
 		
 		$this->tree_type = $tree_type;
@@ -17,16 +21,33 @@ class CAS_Walker_Checklist extends Walker {
 		
 	}
 	
+	/**
+	 * @param type $output
+	 * @param type $depth
+	 * @param type $args 
+	 */
 	public function start_lvl(&$output, $depth, $args) {
 		$indent = str_repeat("\t", $depth);
 		$output .= "$indent<ul class='children'>\n";
 	}
 	
+	/**
+	 * @param type $output
+	 * @param type $depth
+	 * @param type $args 
+	 */
 	public function end_lvl(&$output, $depth, $args) {
 		$indent = str_repeat("\t", $depth);
 		$output .= "$indent</ul>\n";
 	}
 	
+	/**
+	 * @param type $output
+	 * @param type $term
+	 * @param type $depth
+	 * @param type $args
+	 * @return type 
+	 */
 	public function start_el(&$output, $term, $depth, $args) {
 		extract($args);
 		
@@ -56,6 +77,12 @@ class CAS_Walker_Checklist extends Walker {
 
         }
 
+	/**
+	 * @param string $output
+	 * @param type $term
+	 * @param type $depth
+	 * @param type $args 
+	 */
 	public function end_el(&$output, $term, $depth, $args) {
 		$output .= "</li>\n";
 	}
@@ -66,6 +93,8 @@ class CAS_Walker_Checklist extends Walker {
  *
  * Show terms checklist
  *
+ * @param type $post_id
+ * @param type $args 
  */
 function cas_terms_checklist($post_id = 0, $args = array()) {
  	$defaults = array(
@@ -121,6 +150,12 @@ function cas_terms_checklist($post_id = 0, $args = array()) {
  *
  * Show checklist for popular terms
  *
+ * @global type $post_ID
+ * @param type $taxonomy
+ * @param type $default
+ * @param type $number
+ * @param type $echo
+ * @return type 
  */
 function cas_popular_terms_checklist( $taxonomy, $default = 0, $number = 10, $echo = true ) {
 	global $post_ID;
@@ -158,6 +193,8 @@ function cas_popular_terms_checklist( $taxonomy, $default = 0, $number = 10, $ec
  *
  * Show posts checklist
  *
+ * @param type $post_id
+ * @param type $args 
  */
 function cas_posts_checklist($post_id = 0, $args = array()) {
  	$defaults = array(
@@ -207,5 +244,3 @@ function cas_posts_checklist($post_id = 0, $args = array()) {
 	// Then the rest of them
 	echo call_user_func_array(array(&$walker, 'walk'), array($posts, 0, $args));
 }
-
-?>

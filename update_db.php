@@ -1,7 +1,17 @@
 <?php
+/**
+ * @package Content Aware Sidebars
+ */
 
+/**
+ *
+ * Run updates
+ * 
+ * @param type $current_version
+ * @return boolean 
+ */
 function cas_run_db_update($current_version) {
-        
+	
         if(current_user_can('update_plugins')) {
                 
                 // Get current plugin db version
@@ -52,6 +62,8 @@ function cas_run_db_update($current_version) {
  * Version 0 -> 0.8
  * Introduces database version management, adds preficed keys to metadata
  *
+ * @global type $wpdb
+ * @param type $return 
  */
 function cas_update_to_08($return) {
         global $wpdb;
@@ -94,5 +106,3 @@ function cas_update_to_08($return) {
         $return = true;
         
 }     
-
-?>

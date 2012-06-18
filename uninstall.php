@@ -1,4 +1,8 @@
 <?php
+/**
+ * @package Content Aware Sidebars
+ */
+
 if(!defined('WP_UNINSTALL_PLUGIN')) {
 	exit();
 }
@@ -16,4 +20,3 @@ foreach($posts as $post) {
 	wp_delete_post($post->ID, true);
 }
 
-?>

@@ -10,6 +10,8 @@ jQuery(document).ready(function($) {
         
         handleSidebarHandle();
         
+	//$( "#cas_tabs" ).tabs();
+        
         /**
          *
          * Handle "Show with All" checkbox
@@ -32,7 +34,8 @@ jQuery(document).ready(function($) {
         
         /**
          *
-         * The state of a "Show with All" checkbox will control the accessibility of the respective checkboxes for specific entities
+         * The state of a "Show with All" checkbox will control the
+         * accessibility of the respective checkboxes for specific entities
          * If state is checked, they will be disabled
          *
          */
@@ -68,7 +71,8 @@ jQuery(document).ready(function($) {
         
         /**
          *
-         * The value of Handle selection will control the accessibility of the host sidebar selection
+         * The value of Handle selection will control the
+         * accessibility of the host sidebar selection
          * If Handling is manual, selection of host sidebar will be disabled
          *
          */

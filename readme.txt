@@ -1,37 +1,56 @@
-﻿=== Plugin Name ===
+=== Plugin Name ===
 Contributors: intoxstudio
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=KPZHE6A72LEN4&lc=US&item_name=WordPress%20Plugin%3a%20Content%20Aware%20Sidebars&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted
-Tags: sidebar, widget, content aware, post type, taxonomy, term, archive, singular, seo, dynamic
+Tags: sidebar, widget, content aware, seo, dynamic, flexible, modular
 Requires at least: 3.1
-Tested up to: 3.3.1
-Stable tag: 0.8.2
+Tested up to: 3.4
+Stable tag: 1.0
+License: GPL2
 
 Manage and show sidebars according to the content being viewed.
 
 == Description ==
 
-Manage an infinite number of sidebars. Make your WordPress site even more dynamic and boost SEO by controlling what content the sidebars should be displayed with. Creating flexible, dynamic sidebars has never been easier, and no code is needed at all as everything is easily done in the administration. 
+Manage an infinite number of sidebars. Make your WordPress site even more dynamic and boost SEO by controlling what content the sidebars should be displayed with. Creating flexible, dynamic sidebars has never been easier, and no code is needed at all as everything is easily done in the administration.
 No extra database tables or table columns will be added.
 
 = Features =
 
-* Show sidebars with:
-	* Specific singulars - e.g. specific posts or pages
-	* Specific (custom) post types
-	* Specific page templates
-	* Singulars containing specific taxonomies or taxonomy terms
-	* Singulars made by specific authors
-	* Specific post type archives, author archives, taxonomy archives or taxonomy term archives
-	* Search results, 404 page and front page
-	* Any combination of the above
-* Merge new sidebars with others, replace them or simply add them to your theme manually with a template tag
+* Show sidebars with all or specific:
+	* Singulars - e.g. some posts or pages
+	* (Custom) Post Types
+	* Singulars with given (custom) taxonomies or taxonomy terms
+	* Singulars by a given author
+	* Page Templates
+	* Post Type Archives
+	* Author Archives
+	* (Custom) Taxonomy Archives or Taxonomy Term Archives
+	* Search results
+	* 404 Page
+	* Front Page
+	* bbPress User Profiles
+	* Languages (qTranslate, Transposh, WPML) 
+	* **Any combination of the above**
+* Merge new sidebars with others, replace others or simply add them to your theme manually with a template tag
 * Create complex content with nested sidebars
 * Private sidebars only for members
 * Schedule sidebars for later publishing
 
+= Builtin Plugin Support =
+
+* bbPress (v2.0.2+)
+* qTranslate (v2.5.29+)
+* Transposh Translation Filter (v0.8.2+)
+* WPML Multilingual Blog/CMS (v2.4.3+)
+
 = Translations =
 
-Content Aware Sidebars can now be translated. If you want to help, please contact jv[at]intox.dk.
+* Danish (da_DK): [Joachim Jensen](http://www.intox.dk/)
+* Italian (it_IT): [Luciano Del Fico](http://www.myweb2.it/)
+* Lithuanian (lt_LT): [Vincent G](http://host1free.com/)
+
+If you have translated the plugin into your language or updated an existing translation, please send the .po and .mo files to jv[at]intox.dk.
+Download the latest [.pot file](http://plugins.svn.wordpress.org/content-aware-sidebars/trunk/lang/content-aware-sidebars.pot) or the [.po file in your language](http://plugins.svn.wordpress.org/content-aware-sidebars/trunk/lang/).
 
 = Contact =
 
@@ -42,13 +61,13 @@ www.intox.dk
 1. Upload the full plugin directory to your `/wp-content/plugins/` directory or install the plugin through `Plugins` in the administration 
 1. Activate the plugin through `Plugins` in the administration
 1. Have fun creating your first sidebar
-1. Optional: Insert `<?php display_ca_sidebar(); ?>` in a template if you have a special spot for the new, manual handled, sidebars.
+1. Optional: Insert `<?php display_ca_sidebar( $args ); ?>` in a template if you have a special spot for the new, manual handled, sidebars.
 
 == Frequently Asked Questions ==
 
-If you have any questions not answered here, feel free to contact jv[at]intox.dk.
+If you have any questions not answered here, head to the [Support Forum](http://wordpress.org/tags/content-aware-sidebars?forum_id=10) or [contact me directly](http://www.intox.dk/kontakt/).
 
-= How do I use display_ca_sidebar()? =
+= How do I use display_ca_sidebar( $args )? =
 
 This function is optional and handles all sidebars that are set to be handled manually. It can be inserted anywhere on your site in any quantity, either as it is, or with the following parameters:
 
@@ -71,6 +90,24 @@ The function accepts URL-style strings as parameters too, like the standard Word
 5. Viewing Another Page. The Content Aware Sidebar has replaced `Main Sidebar`
 
 == Changelog ==
+
+= 1.0 =
+
+* Added: plugin rewritten to flexible modular system
+* Added: builtin support for bbpress, qtranslate, transposh, wpml
+* Added: lithuanian translation
+* Fixed: all present rules now dependent of each other
+* Fixed: sidebar update messages
+* Fixed: specific hooks now not sitewide
+* Fixed: better use of meta cache
+* Fixed: dir structure
+* Fixed: unexpected output notice on plugin activation
+
+= 0.8.3 =
+
+* Added: Danish and Italian translation
+* Fixed: sidebar query might be larger than max_join_size
+* Fixed: row content in admin overview would be loaded with post types with matching keys
 
 = 0.8.2 =
 
@@ -184,7 +221,3 @@ The function accepts URL-style strings as parameters too, like the standard Word
 
 * Hello World
  
-
-
-
-
