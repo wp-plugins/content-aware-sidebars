@@ -369,7 +369,7 @@ final class ContentAwareSidebars {
 		
 		if($column_name == 'handle' && $current < 2) {		
 			$host = get_post_meta($post_id,self::prefix.'host',true);			
-			$current_from_list .= ": ".(isset($this->metadata['host']['list'][$host]) ? $this->metadata['host']['list'][$host] : "<span class='red'>Needs update</span>");		
+			$current_from_list .= ": ".(isset($this->metadata['host']['list'][$host]) ? $this->metadata['host']['list'][$host] : '<span style="color:red;">'.__('Please update Host Sidebar','content-aware-sidebars').'</span>');		
 		}		
 		echo $current_from_list;
 	}
