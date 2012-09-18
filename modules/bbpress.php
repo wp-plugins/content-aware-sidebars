@@ -14,23 +14,18 @@
 class CASModule_bbpress extends CASModule {
 	
 	protected $id = 'authors';
-	
-	public function metadata($metadata) {
-		return $metadata;
-	}
-	
-	public function admin_gui($class) {
-		
-	}
+	protected $name = 'bbPress';
 	
 	public function is_content() {
 		return bbp_is_single_user();
 	}
 	
-	public function db_where($where) {
-		$where[$this->id] = "(authors.meta_value LIKE '%authors%' OR authors.meta_value LIKE '%".serialize((string)bbp_get_displayed_user_id())."%')";
-		return $where;
-		
+	public function db_where() {
+		return "(authors.meta_value = 'authors' OR authors.meta_value = '".bbp_get_displayed_user_id()."')";	
+	}
+
+	public function _get_content() {
+		return 0;
 	}
 	
 }

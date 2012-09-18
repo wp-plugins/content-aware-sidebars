@@ -23,15 +23,11 @@ function cas_run_db_update($current_version) {
                 if($installed_version == $current_version)
                         return true;
                         
-                $versions = array('0.8');
-                $retry = array_flip($versions);
+                $versions = array('0.8','1.1');
                 
-                //Launch updates            
+		//Launch updates            
                 for($i = 0; $i < sizeof($versions); $i++){
                         $return = false;
-                        
-                        //After failing 3 times, something must be wrong
-                        if($retry[$versions[$i]] == 3) break;
                         
                         if(version_compare($installed_version,$versions[$i],'<')) {
                                 
@@ -41,9 +37,6 @@ function cas_run_db_update($current_version) {
                                         call_user_func_array($function, array(&$return));
                                         if($return) {
                                                 $installed_version = $versions[$i];
-                                        } else {
-                                                $retry[$versions[$i]]++;
-                                                $i--;
                                         }
                                 }      
                         }
@@ -58,12 +51,23 @@ function cas_run_db_update($current_version) {
 }
 
 /**
+ * Version 0.8 -> 1.1
+ * Serialized metadata gets their own rows
+ * 
+ * @param boolean $return
+ */
+function cas_update_to_11($return) {
+	
+	$return = true;
+}
+
+/**
  *
  * Version 0 -> 0.8
  * Introduces database version management, adds preficed keys to metadata
  *
- * @global type $wpdb
- * @param type $return 
+ * @global object $wpdb
+ * @param boolean $return 
  */
 function cas_update_to_08($return) {
         global $wpdb;

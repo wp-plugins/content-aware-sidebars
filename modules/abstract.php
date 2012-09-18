@@ -11,6 +11,7 @@
 abstract class CASModule {
 	
 	protected $id;
+	protected $name;
 	
 	/**
 	 *
@@ -20,35 +21,50 @@ abstract class CASModule {
 	public function __construct() {
 		if(!isset($this->id))
 			$this->id = substr(get_class($this),strpos(get_class($this),'_')+1);
+	
+	}
+	
+	public function meta_box_tab() {
+		if(!$this->_get_content())
+			return;
+		echo '<li><a href="#cas-'.$this->id.'">'.__($this->name,'content-aware-sidebars').'</a></li>'."\n";
+	}
+	
+	public function meta_box_content() {
+		global $post;
 		
-		add_filter('cas_metadata',	array(&$this,'metadata'));
-		add_action('cas_admin_gui',	array(&$this,'admin_gui'));
-		add_action('cas_sidebar_db',	array(&$this,'init_content'));
-	
-	}
-	
-	public function get_id() {
-		return $this->id;
-	}
-	
-	/**
-	 *
-	 * Add hooks to plugin
-	 *
-	 */
-	public function init_content() {
+		if(!$this->_get_content())
+			return;
 		
-		if($this->is_content()) {
-			add_filter('cas_sidebar_db_join',	array(&$this,'db_join'),10,2);
-			add_filter('cas_sidebar_db_where',	array(&$this,'db_where'));
-			add_filter('cas_sidebar_db_where2',	array(&$this,'db_where2'));
-		}
+		echo '<div class="cas-rule-content" id="cas-'.$this->id.'">';
+		$field = $this->id;
+		$meta = get_post_meta($post->ID, ContentAwareSidebars::prefix.$field, false);
+		$current = $meta != '' ? $meta : array();
+		?>
+		<p>
+			<label><input type="checkbox" name="<?php echo $field; ?>[]" value="<?php echo $field; ?>" <?php checked(in_array($field, $current), true, true); ?> /> <?php printf(__('Show with All %s','content-aware-sidebars'),$this->name); ?></label>
+		</p>
+		<div id="list-<?php echo $field; ?>" class="categorydiv" style="min-height:100%;">
+			<ul id="<?php echo $field; ?>-tabs" class="category-tabs">
+				<li class="tabs"><a href="#<?php echo $field; ?>-all" tabindex="3"><?php _e('View All'); ?></a></li>
+			</ul>		
+			<div id="<?php echo $field; ?>-all" class="tabs-panel"  style="min-height:100%;">
+				<ul id="authorlistchecklist" class="list:<?php echo $field; ?> categorychecklist form-no-clear">
+					<?php
+					foreach($this->_get_content() as $id => $name) {
+						echo '<li><label><input type="checkbox" name="'.$field.'[]" value="'.$id.'"'.checked(in_array($id,$current), true, false).' /> '.$name.'</label></li>'."\n";
+					}
+					?>
+				</ul>
+			</div>
+		</div>
+<?php	
+		echo '</div>';
 	}
 	
-	public function db_join($join, $prefix) {
+	public function db_join() {
 		global $wpdb;
-		$join[$this->id] = "LEFT JOIN $wpdb->postmeta {$this->id} ON {$this->id}.post_id = posts.ID AND {$this->id}.meta_key = '".$prefix.$this->id."' ";
-		return $join;
+		return "LEFT JOIN $wpdb->postmeta {$this->id} ON {$this->id}.post_id = posts.ID AND {$this->id}.meta_key = '".ContentAwareSidebars::prefix.$this->id."' ";
 	}
 	
 	public function exclude_sidebar($continue, $post, $prefix) {
@@ -63,14 +79,16 @@ abstract class CASModule {
 		
 	}
 	
-	public function db_where2($where) {
-		$where[$this->id] = "{$this->id}.meta_value IS NOT NULL";
-		return $where;
+	public function db_where2() {
+		return "{$this->id}.meta_value IS NOT NULL";
 	}
 	
-	abstract public function admin_gui($class);
-	abstract public function metadata($metadata);
+	public function get_id() {
+		return $this->id;
+	}
+	
+	abstract protected function _get_content();
 	abstract public function is_content();
-	abstract public function db_where($where);
+	abstract public function db_where();
 	
 }

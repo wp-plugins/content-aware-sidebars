@@ -14,46 +14,25 @@
 class CASModule_transposh extends CASModule {
 	
 	protected $id = 'language';
-	
-	public function metadata($metadata) {
-		global $my_transposh_plugin;
-		$langs = array();
-			
-		foreach(explode(',',$my_transposh_plugin->options->get_viewable_langs()) as $lng) {
-			$langs[$lng] = transposh_consts::get_language_orig_name($lng);
-		}
-			
-		$metadata['language'] = array(
-			'name'	=> __('Languages', 'content-aware-sidebars'),
-			'id'	=> 'language',
-			'val'	=> array(),
-			'type'	=> 'checkbox',
-			'list'	=> $langs
-		);
-		return $metadata;
-	}
-	
-	public function admin_gui($class) {
-		add_meta_box(
-			'ca-sidebar-transposh',
-			__('Languages', 'content-aware-sidebars'),
-			array(&$class,'meta_box_checkboxes'),
-			'sidebar',
-			'side',
-			'default',
-			'language'
-		);
-	}
+	protected $name = 'Languages';
 	
 	public function is_content() {
 		return true;
 	}
 	
-	public function db_where($where) {
+	public function db_where() {
 		global $my_transposh_plugin;
-		$where[$this->id] = "(language.meta_value IS NULL OR (language.meta_value LIKE '%language%' OR language.meta_value LIKE '%".serialize($my_transposh_plugin->tgl)."%'))";
-		return $where;
+		return "(language.meta_value IS NULL OR (language.meta_value = 'language' OR language.meta_value = '".$my_transposh_plugin->tgl."'))";
 		
+	}
+
+	public function _get_content() {
+		global $my_transposh_plugin;
+		$langs = array();
+		foreach(explode(',',$my_transposh_plugin->options->get_viewable_langs()) as $lng) {
+			$langs[$lng] = transposh_consts::get_language_orig_name($lng);
+		}
+		return $langs;
 	}
 	
 }

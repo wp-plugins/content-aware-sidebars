@@ -71,7 +71,7 @@ class CAS_Walker_Checklist extends Walker {
 			$value = $taxonomy->hierarchical ? 'term_id' : 'slug';
 			$class = in_array( $term->term_id, $popular_terms ) ? ' class="popular-category"' : '';
                 
-			$output .= "\n".'<li id="'.$taxonomy->name.'-'.$term->term_id.'"$class><label class="selectit"><input value="'.$term->$value.'" type="checkbox" name="'.$name.'[]" id="in-'.$taxonomy->name.'-'.$term->term_id.'"'.checked(in_array($term->term_id,$selected_terms),true,false).disabled(empty($disabled),false,false).'/> '.esc_html( apply_filters('the_category', $term->name )) . '</label>';
+			$output .= "\n".'<li id="'.$taxonomy->name.'-'.$term->term_id.'"'.$class.'><label class="selectit"><input value="'.$term->$value.'" type="checkbox" name="'.$name.'[]" id="in-'.$taxonomy->name.'-'.$term->term_id.'"'.checked(in_array($term->term_id,$selected_terms),true,false).disabled(empty($disabled),false,false).'/> '.esc_html( apply_filters('the_category', $term->name )) . '</label>';
 		
 		}
 
@@ -215,7 +215,7 @@ function cas_posts_checklist($post_id = 0, $args = array()) {
 	);
 
 	if($post_id)
-		$args['selected_cats'] = (array)get_post_meta($post_id, '_cas_post_types', true);
+		$args['selected_cats'] = get_post_meta($post_id, '_cas_post_types', false);
 	else
 		$args['selected_cats'] = array();
 

@@ -1,13 +1,13 @@
 === Plugin Name ===
 Contributors: intoxstudio
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=KPZHE6A72LEN4&lc=US&item_name=WordPress%20Plugin%3a%20Content%20Aware%20Sidebars&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted
-Tags: sidebar, widget, content aware, seo, dynamic, flexible, modular
+Tags: sidebar, widget, content aware, seo, dynamic, flexible, modular, bbpress
 Requires at least: 3.1
-Tested up to: 3.4
+Tested up to: 3.4.2
 Stable tag: 1.0
 License: GPL2
 
-Manage and show sidebars according to the content being viewed.
+Create and display sidebars according to the content being viewed.
 
 == Description ==
 
@@ -16,7 +16,8 @@ No extra database tables or table columns will be added.
 
 = Features =
 
-* Show sidebars with all or specific:
+* Easy-to-use sidebar manager
+* Display sidebars with all or specific:
 	* Singulars - e.g. some posts or pages
 	* (Custom) Post Types
 	* Singulars with given (custom) taxonomies or taxonomy terms
@@ -91,6 +92,18 @@ The function accepts URL-style strings as parameters too, like the standard Word
 
 == Changelog ==
 
+= 1.1 =
+
+* Added: tabbed content on edit screen
+* Added: bbpress forum-topic dependency###
+* Added: sidebars hidden on password protected content
+* Fixed: performance gain by dropping serialized metadata
+* Fixed: database data update module revised###
+* Fixed: css class in posts and terms walker
+* Fixed: edit screen meta box settings cleared on plugin deletion####
+* Fixed: limit of max 200 of each content type on edit screen (temp)
+* Removed: individual content meta boxes on edit screen
+
 = 1.0 =
 
 * Added: plugin rewritten to flexible modular system
@@ -105,7 +118,7 @@ The function accepts URL-style strings as parameters too, like the standard Word
 
 = 0.8.3 =
 
-* Added: Danish and Italian translation
+* Added: danish and italian translation
 * Fixed: sidebar query might be larger than max_join_size
 * Fixed: row content in admin overview would be loaded with post types with matching keys
 
@@ -204,6 +217,10 @@ The function accepts URL-style strings as parameters too, like the standard Word
 * First stable release
 
 == Upgrade Notice ==
+
+= 1.1 =
+
+* Content Aware Sidebar data in your database will be updated automatically. Remember to backup this data before updating the plugin.
 
 = 0.8 =
 

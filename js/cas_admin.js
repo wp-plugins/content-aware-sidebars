@@ -10,7 +10,7 @@ jQuery(document).ready(function($) {
         
         handleSidebarHandle();
         
-	//$( "#cas_tabs" ).tabs();
+	$( "#cas-rules .inside" ).tabs();
         
         /**
          *

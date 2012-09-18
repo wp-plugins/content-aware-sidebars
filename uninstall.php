@@ -9,6 +9,7 @@ if(!defined('WP_UNINSTALL_PLUGIN')) {
 
 // Remove db version
 delete_option('cas_db_version');
+//update_user_option( $user->ID, 'metaboxhidden_sidebar', $hidden, true );
 
 // Remove all sidebars
 $posts = get_posts(array(
