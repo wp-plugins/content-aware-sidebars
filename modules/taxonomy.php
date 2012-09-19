@@ -14,11 +14,15 @@
  */
 class CASModule_taxonomy extends CASModule {
 	
-	protected $id = 'taxonomies';
-	protected $name = 'Taxonomies';
 	private $taxonomy_objects;
 	private $post_taxonomies;
 	private $post_terms;
+	
+	public function __construct() {
+		parent::__construct();
+		$this->id = 'taxonomies';
+		$this->name = __('Taxonomies','content-aware-sidebars');
+	}
 	
 	public function is_content() {		
 		if(is_singular()) {

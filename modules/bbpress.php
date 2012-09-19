@@ -13,8 +13,11 @@
  */
 class CASModule_bbpress extends CASModule {
 	
-	protected $id = 'authors';
-	protected $name = 'bbPress';
+	public function __construct() {
+		parent::__construct();
+		$this->id = 'authors';
+		$this->name = __('bbPress','content-aware-sidebars');
+	}
 	
 	public function is_content() {
 		return bbp_is_single_user();

@@ -13,8 +13,11 @@
  */
 class CASModule_wpml extends CASModule {
 	
-	protected $id = 'language';
-	protected $name = 'Languages';
+	public function __construct() {
+		parent::__construct();
+		$this->id = 'language';
+		$this->name = __('Languages','content-aware-sidebars');
+	}
 	
 	public function is_content() {
 		return true;

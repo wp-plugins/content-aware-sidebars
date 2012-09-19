@@ -13,11 +13,10 @@
  */
 class CASModule_qtranslate extends CASModule {
 	
-	protected $id = 'language';
-	protected $name = 'Languages';
-	
 	public function __construct() {
 		parent::__construct();
+		$this->id = 'language';
+		$this->name = __('Languages','content-aware-sidebars');
 		
 		add_filter('manage_edit-sidebar_columns',		array(&$this,'admin_column_headers'));
 		

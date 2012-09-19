@@ -15,7 +15,11 @@
  */
 class CASModule_static extends CASModule {
 	
-	protected $name = 'Static';
+	public function __construct() {
+		parent::__construct();
+		$this->id = 'static';
+		$this->name = __('Static Pages','content-aware-sidebars');
+	}
 	
 	public function _get_content() {
 		return array(

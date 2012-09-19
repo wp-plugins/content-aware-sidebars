@@ -19,15 +19,13 @@ abstract class CASModule {
 	 *
 	 */
 	public function __construct() {
-		if(!isset($this->id))
-			$this->id = substr(get_class($this),strpos(get_class($this),'_')+1);
-	
+		$this->id = substr(get_class($this),strpos(get_class($this),'_')+1);
 	}
 	
 	public function meta_box_tab() {
 		if(!$this->_get_content())
 			return;
-		echo '<li><a href="#cas-'.$this->id.'">'.__($this->name,'content-aware-sidebars').'</a></li>'."\n";
+		echo '<li><a href="#cas-'.$this->id.'">'.$this->name.'</a></li>'."\n";
 	}
 	
 	public function meta_box_content() {

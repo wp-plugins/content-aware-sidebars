@@ -14,9 +14,13 @@
  */
 class CASModule_post_type extends CASModule {
 	
-	protected $id = 'post_types';
-	protected $name = 'Post Types';
 	private $post_type_objects;
+	
+	public function __construct() {
+		parent::__construct();
+		$this->id = 'post_types';
+		$this->name = __('Post Types','content-aware-sidebars');
+	}
 	
 	public function _get_content() {
 		

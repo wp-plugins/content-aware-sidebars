@@ -14,8 +14,11 @@
  */
 class CASModule_author extends CASModule {
 	
-	protected $id = 'authors';
-	protected $name = 'Authors';
+	public function __construct() {
+		parent::__construct();
+		$this->id = 'authors';
+		$this->name = __('Authors','content-aware-sidebars');
+	}
 	
 	public function is_content() {
 		return (is_singular() && !is_front_page()) || is_author();

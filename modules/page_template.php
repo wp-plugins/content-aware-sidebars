@@ -14,8 +14,11 @@
  */
 class CASModule_page_template extends CASModule {
 	
-	protected $id = 'page_templates';
-	protected $name = 'Page Templates';
+	public function __construct() {
+		parent::__construct();
+		$this->id = 'page_templates';
+		$this->name = __('Page Templates','content-aware-sidebars');
+	}
 	
 	public function is_content() {		
 		if(is_singular() && !('page' == get_option( 'show_on_front') && get_option('page_on_front') == get_the_ID())) {

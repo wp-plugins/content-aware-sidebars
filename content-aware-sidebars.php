@@ -113,6 +113,8 @@ final class ContentAwareSidebars {
 			'wpml'			=> defined('ICL_LANGUAGE_CODE')		// WPML Multilingual Blog/CMS
 		);
 		
+		load_plugin_textdomain('content-aware-sidebars', false, dirname( plugin_basename(__FILE__)).'/lang/');
+		
 		// Fire!
 		foreach($modules as $name => $enabled) {
 			if($enabled)
@@ -191,8 +193,6 @@ final class ContentAwareSidebars {
 	 *
 	 */
 	public function init_sidebar_type() {
-		
-		load_plugin_textdomain('content-aware-sidebars', false, dirname( plugin_basename(__FILE__)).'/lang/');
 		
 		// List public taxonomies
 		foreach(get_taxonomies(array('public'=>true),'names') as $tax) {
