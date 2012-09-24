@@ -1,12 +1,13 @@
 <?php
 /**
  * @package Content Aware Sidebars
+ * @author Joachim Jensen <jv@intox.dk>
  */
 /*
 Plugin Name: Content Aware Sidebars
 Plugin URI: http://www.intox.dk/
 Description: Manage and show sidebars according to the content being viewed.
-Version: 1.0
+Version: 1.1
 Author: Joachim Jensen
 Author URI: http://www.intox.dk/
 Text Domain: content-aware-sidebars
@@ -32,12 +33,14 @@ License: GPL2
 
 final class ContentAwareSidebars {
 	
-	const db_version		= '0.8';
+	const db_version		= '1.1';
 	const prefix			= '_cas_';
 	
 	private $metadata		= array();
 	private $taxonomies		= array();
 	private $sidebar_cache		= array();
+	
+	private $modules		= array();
 
 	/**
 	 *
@@ -59,11 +62,8 @@ final class ContentAwareSidebars {
 		add_action('widgets_init',				array(&$this,'create_sidebars'));
 		
 		// On admin requests
-		add_action('admin_menu',				array(&$this,'clear_admin_menu'));
-		add_action('admin_init',				array(&$this,'prepare_admin_scripts_styles'));
-		add_action('admin_print_scripts-edit.php',		array(&$this,'load_admin_scripts'));
-		add_action('admin_print_scripts-post-new.php',		array(&$this,'load_admin_scripts'));
-		add_action('admin_print_scripts-post.php',		array(&$this,'load_admin_scripts'));
+		add_action('admin_menu',				array(&$this,'clear_admin_menu'));	
+		add_action('admin_enqueue_scripts',			array(&$this,'load_admin_scripts'));
 		
 		// On post type and taxonomy requests
 		add_action('delete_post',				array(&$this,'remove_sidebar_widgets'));
@@ -111,10 +111,12 @@ final class ContentAwareSidebars {
 			'wpml'			=> defined('ICL_LANGUAGE_CODE')		// WPML Multilingual Blog/CMS
 		);
 		
+		load_plugin_textdomain('content-aware-sidebars', false, dirname( plugin_basename(__FILE__)).'/lang/');
+		
 		// Fire!
 		foreach($modules as $name => $enabled) {
 			if($enabled)
-				$this->_forge_module($name);
+				$this->modules[$name] = $this->_forge_module($name);
 		}
 		
 	}
@@ -181,9 +183,6 @@ final class ContentAwareSidebars {
 			)
 		);
 		
-		// Get metadata from modules
-		$this->metadata = apply_filters('cas_metadata',$this->metadata);	
-		
 	}
 	
 	/**
@@ -192,8 +191,6 @@ final class ContentAwareSidebars {
 	 *
 	 */
 	public function init_sidebar_type() {
-		
-		load_plugin_textdomain('content-aware-sidebars', false, dirname( plugin_basename(__FILE__)).'/lang/');
 		
 		// List public taxonomies
 		foreach(get_taxonomies(array('public'=>true),'names') as $tax) {
@@ -370,7 +367,7 @@ final class ContentAwareSidebars {
 		
 		if($column_name == 'handle' && $current < 2) {		
 			$host = get_post_meta($post_id,self::prefix.'host',true);			
-			$current_from_list .= ": ".(isset($this->metadata['host']['list'][$host]) ? $this->metadata['host']['list'][$host] : "HOST NOT FOUND");		
+			$current_from_list .= ": ".(isset($this->metadata['host']['list'][$host]) ? $this->metadata['host']['list'][$host] : '<span style="color:red;">'.__('Please update Host Sidebar','content-aware-sidebars').'</span>');		
 		}		
 		echo $current_from_list;
 	}
@@ -421,7 +418,7 @@ final class ContentAwareSidebars {
 	 *
 	 * @param array $actions
 	 * @param object $post
-	 * @return type 
+	 * @return array 
 	 */
 	public function sidebar_row_actions($actions, $post) {
 		if($post->post_type == 'sidebar' && $post->post_status != 'trash') {
@@ -500,6 +497,9 @@ final class ContentAwareSidebars {
 	public function get_sidebars() {
 		global $wpdb;
 		
+		if(post_password_required())
+			return false;
+		
 		// Return cache if present
 		if(!empty($this->sidebar_cache)) {
 			if($this->sidebar_cache[0] == false)
@@ -507,18 +507,19 @@ final class ContentAwareSidebars {
 			else
 				return $this->sidebar_cache;
 		}
-	
+		
 		$joins = array();
 		$where = array();
 		$where2 = array();
 		
-		// Run hooks for query
-		do_action('cas_sidebar_db');
-		
-		// Apply hooks for db
-		$joins = apply_filters('cas_sidebar_db_join', $joins, self::prefix);
-		$where = apply_filters('cas_sidebar_db_where', $where);
-		$where2 = apply_filters('cas_sidebar_db_where2', $where2);
+		// Get rules
+		foreach($this->modules as $module) {
+			if($module->is_content()) {
+				$joins[] = apply_filters("cas-db-join-".$module->get_id(), $module->db_join());
+				$where[] = apply_filters("cas-db-where-".$module->get_id(), $module->db_where());
+				$where2[] = $module->db_where2();
+			}
+		}
 		
 		// Check if there are any rules for this type of content
 		if(empty($where))
@@ -565,25 +566,31 @@ final class ContentAwareSidebars {
 		// Add boxes
 		// Author Words
 		add_meta_box(
-			'ca-sidebar-dev-words',
+			'cas-dev-words',
 			__('Words from the author', 'content-aware-sidebars'),
 			array(&$this,'meta_box_author_words'),
 			'sidebar',
 			'side',
 			'high'
 		);
-			
-		// Add module boxes
-		do_action('cas_admin_gui',$this);
 		
-		// Options
+		// Module rules
 		add_meta_box(
-			'ca-sidebar',
-			__('Options', 'content-aware-sidebars'),
-			array(&$this,'meta_box_content'),
+			'cas-rules',
+			__('Content', 'content-aware-sidebars'),
+			array(&$this,'meta_box_rules'),
 			'sidebar',
 			'normal',
 			'high'
+		);
+			
+		// Options
+		add_meta_box(
+			'cas-options',
+			__('Options', 'content-aware-sidebars'),
+			array(&$this,'meta_box_options'),
+			'sidebar',
+			'side'
 		);
 	}
 	
@@ -609,7 +616,7 @@ final class ContentAwareSidebars {
 		
 		if ($condition && get_user_option( 'metaboxhidden_sidebar' ) === false) {
 		
-			$hidden_meta_boxes = array('postexcerpt','pageparentdiv','ca-sidebar-tax-post_format','ca-sidebar-post-type-attachment','ca-sidebar-authors');
+			$hidden_meta_boxes = array('postexcerpt','pageparentdiv');
 			$hidden = array_merge($hidden,$hidden_meta_boxes);
 		
 			$user = wp_get_current_user();
@@ -619,47 +626,37 @@ final class ContentAwareSidebars {
 		return $hidden;
 	}
 	
+	public function meta_box_rules() {
+		echo '<div id="cas-accordion">'."\n";
+		foreach($this->modules as $module) {
+			$module->meta_box_content();
+		}
+		echo '</div>'."\n";
+	}
+	
 	/**
 	 *
 	 * Options content
 	 *
 	 */
-	public function meta_box_content() {
+	public function meta_box_options() {
 		
 		$columns = array(
-			'static',
 			'exposure',
 			'handle' => 'handle,host',
 			'merge-pos'
 		);
 		
-		//echo '<div id="cas_tabs">';
-		//
-		//echo '<ul>';
-		//echo '<li class="nav-tab"><a href="#_cas_settings">Settings</a></li>';
-		//echo '<li><a href="#_cas_test">Settings</a></li>';
-		//echo '</ul>';
-		//
-		//echo '<div id="_cas_settings">';
-		echo '<table class="form-table">';
 		foreach($columns as $key => $value) {
 			
-			echo '<tr><th scope="row">'.$this->metadata[is_numeric($key) ? $value : $key]['name'].'</th>';
-			echo '<td>';
+			echo '<span>'.$this->metadata[is_numeric($key) ? $value : $key]['name'].':';
+			echo '<p>';
 			$values = explode(',',$value);
 			foreach($values as $val) {
 				$this->_form_field($val);
 			}
-			echo '</td></tr>';
+			echo '</p></span>';
 		}
-		echo '</table>';
-		//echo '</div>';
-		//
-		//echo '<div id="_cas_test">';
-		//echo 'hello';
-		//echo '</div>';
-		//
-		//echo '</div>';
 	}
 	
 	/**
@@ -692,137 +689,6 @@ final class ContentAwareSidebars {
 	
 	/**
 	 *
-	 * Taxonomy content
-	 * 
-	 * @param object $post
-	 * @param array $box 
-	 */
-	public function meta_box_taxonomy($post, $box) {
-		$meta = get_post_meta($post->ID, self::prefix.'taxonomies', true);
-		$current = $meta != '' ? $meta : array();
-		
-		$taxonomy = $box['args'];
-		
-		$terms = get_terms($taxonomy->name, array('get' => 'all'));
-
-		if (!$terms || is_wp_error($terms)) {
-			echo '<p>'.__('No items.').'</p>';	
-		} else {
-		
-?>
-	<div id="taxonomy-<?php echo $taxonomy->name; ?>" class="categorydiv">
-		<ul id="<?php echo $taxonomy->name; ?>-tabs" class="category-tabs">
-			<li class="hide-if-no-js"><a href="#<?php echo $taxonomy->name; ?>-pop" tabindex="3"><?php _e( 'Most Used' ); ?></a></li>
-			<li class="tabs"><a href="#<?php echo $taxonomy->name; ?>-all" tabindex="3"><?php _e('View All'); ?></a></li>
-		</ul>
-
-		<div id="<?php echo $taxonomy->name; ?>-pop" class="tabs-panel" style="display: none;height:inherit;max-height:200px;">
-			<ul id="<?php echo $taxonomy->name; ?>checklist-pop" class="categorychecklist form-no-clear" >
-				<?php $popular_ids = cas_popular_terms_checklist($taxonomy); ?>
-			</ul>
-		</div>
-		
-		<div id="<?php echo $taxonomy->name; ?>-all" class="tabs-panel" style="height:inherit;max-height:200px;">
-			<input type="hidden" name="<?php echo ($taxonomy->name == "category" ? "post_category[]" : "tax_input[$taxonomy->name]"); ?>" value="0" />
-			<ul id="<?php echo $taxonomy->name; ?>checklist" class="list:<?php echo $taxonomy->name?> categorychecklist form-no-clear">
-				<?php cas_terms_checklist($post->ID, array('taxonomy' => $taxonomy,'popular_terms' => $popular_ids, 'terms' => $terms)) ?>
-			</ul>
-		</div>
-	</div>
-<?php
-		}
-	
-		echo '<p style="padding:6px 0 4px;">'."\n";
-		echo '<label><input type="checkbox" name="taxonomies[]" value="'.$taxonomy->name.'"'.(in_array($taxonomy->name,$current) ? ' checked="checked"' : '').' /> '.sprintf(__('Show with %s','content-aware-sidebars'),$taxonomy->labels->all_items).'</label>'."\n";
-		echo '</p>'."\n";
-	
-	}
-	
-	/**
-	 *
-	 * Post Type content
-	 * 
-	 * @param object $post
-	 * @param array $box 
-	 */
-	public function meta_box_post_type($post, $box) {
-		$meta = get_post_meta($post->ID, self::prefix.'post_types', true);
-		$current = $meta != '' ? $meta : array();
-		$post_type = $box['args'];
-		
-		$exclude = array();
-		if($post_type->name == 'page' && 'page' == get_option( 'show_on_front')) {
-			$exclude[] = get_option('page_on_front');
-			$exclude[] = get_option('page_for_posts');
-		}
-		
-		//WP3.1 does not support (array) as post_status
-		$posts = get_posts(array(
-			'numberposts'	=> -1,
-			'post_type'	=> $post_type->name,
-			'post_status'	=> 'publish,private,future',
-			'exclude'	=> $exclude
-		));
-		
-		if (!$posts || is_wp_error($posts)) {
-			echo '<p>'.__('No items.').'</p>';	
-		} else {
-		
-?>	
-		<div id="posttype-<?php echo $post_type->name; ?>" class="categorydiv">
-		<ul id="posttype-<?php echo $post_type->name; ?>-tabs" class="category-tabs">
-			<li class="tabs"><a href="#<?php echo $post_type->name; ?>-all" tabindex="3"><?php _e('View All'); ?></a></li>
-		</ul>		
-		<div id="<?php echo $post_type->name; ?>-all" class="tabs-panel" style="height:inherit;max-height:200px;">
-			<ul id="<?php echo $post_type->name; ?>checklist" class="list:<?php echo $post_type->name?> categorychecklist form-no-clear">
-				<?php cas_posts_checklist($post->ID, array('post_type' => $post_type,'posts'=>$posts)); ?>
-			</ul>
-		</div>
-		</div>	
-<?php	
-		}
-		
-		//WP3.1.4 does not support $post_type->labels->all_items
-		echo '<p style="padding:6px 0 4px;">'."\n";
-		echo '<label><input type="checkbox" name="post_types[]" value="'.$post_type->name.'"'.(in_array($post_type->name,$current) ? ' checked="checked"' : '').' /> '.sprintf(__('Show with All %s','content-aware-sidebars'),$post_type->label).'</label>'."\n";
-		echo '</p>'."\n";
-
-	}
-	
-	/**
-	 *
-	 * Various content
-	 * 
-	 * @param object $post
-	 * @param array $box 
-	 */
-	public function meta_box_checkboxes($post, $box) {
-		$field = $box['args'];
-		$meta = get_post_meta($post->ID, self::prefix.$field, true);
-		$current = $meta != '' ? $meta : array();
-		?>
-		<div id="list-<?php echo $field; ?>" class="categorydiv">
-			<ul id="<?php echo $field; ?>-tabs" class="category-tabs">
-				<li class="tabs"><a href="#<?php echo $field; ?>-all" tabindex="3"><?php _e('View All'); ?></a></li>
-			</ul>		
-			<div id="<?php echo $field; ?>-all" class="tabs-panel" style="height:inherit;max-height:200px;">
-				<ul id="authorlistchecklist" class="list:<?php echo $field; ?> categorychecklist form-no-clear">
-					<?php
-					foreach($this->metadata[$field]['list'] as $id => $name) {
-						echo '<li><label><input type="checkbox" name="'.$field.'[]" value="'.$id.'"'.(in_array($id,$current) ? ' checked="checked"' : '').' /> '.$name.'</label></li>'."\n";
-					}
-					?>
-				</ul>
-			</div>
-		</div>
-		<p style="padding:6px 0 4px;">
-			<label><input type="checkbox" name="<?php echo $field; ?>[]" value="<?php echo $field; ?>"<?php echo (in_array($field,$current) ? ' checked="checked"' : ''); ?> /> <?php printf(__('Show with All %s','content-aware-sidebars'),$this->metadata[$field]['name']); ?></label>
-		</p>
-<?php	
-	}
-	
-	/**
-	 *
 	 * Create form field for metadata
 	 *
 	 * @global object $post
@@ -836,7 +702,7 @@ final class ContentAwareSidebars {
 		$current = $meta != '' ? $meta : $setting['val'];
 		switch($setting['type']) {
 			case 'select' :			
-				echo '<select style="width:200px;" name="'.$setting['id'].'">'."\n";
+				echo '<select style="width:250px;" name="'.$setting['id'].'">'."\n";
 				foreach($setting['list'] as $key => $value) {
 					echo '<option value="'.$key.'"'.($key == $current ? ' selected="selected"' : '').'>'.$value.'</option>'."\n";
 				}
@@ -891,17 +757,39 @@ final class ContentAwareSidebars {
 		$this->_init_metadata();
 		
 		// Update metadata
-		foreach ($this->metadata as $field) {
-			$old = get_post_meta($post_id, self::prefix.$field['id'], true);			
-			$new = isset($_POST[$field['id']]) ? $_POST[$field['id']] : '';		
-
+		foreach ($this->metadata as $field) {			
+			$new = isset($_POST[$field['id']]) ? $_POST[$field['id']] : '';
+			$old = get_post_meta($post_id, self::prefix.$field['id'], true);
+			
 			if ($new != '' && $new != $old) {			
 				update_post_meta($post_id, self::prefix.$field['id'], $new);
-				
 			} elseif ($new == '' && $old != '') {
-				delete_post_meta($post_id, self::prefix.$field['id'], $old);	
+				delete_post_meta($post_id, self::prefix.$field['id'], $old);
 			}
-		}	
+		}
+		// Update module data
+		foreach ($this->modules as $module) {
+			$new = isset($_POST[$module->get_id()]) ? $_POST[$module->get_id()] : ''; 
+			$old = array_flip(get_post_meta($post_id, self::prefix.$module->get_id(), false));
+			
+			if(is_array($new)) {
+				// Skip existing data or insert new data
+				foreach($new as $new_single) {
+					if(isset($old[$new_single])) {
+						unset($old[$new_single]);
+					} else {
+						add_post_meta($post_id, self::prefix.$module->get_id(), $new_single);
+					}
+				}
+				// Remove existing data that have not been skipped
+				foreach($old as $old_key => $old_value) {
+					delete_post_meta($post_id, self::prefix.$module->get_id(), $old_key);
+				}
+			} elseif(!empty($old)) {
+				// Remove any old values when $new is empty
+				delete_post_meta($post_id, self::prefix.$module->get_id());
+			}
+		}
 	}
 	
 	/**
@@ -919,23 +807,28 @@ final class ContentAwareSidebars {
 	 *
 	 * @global string $pagenow 
 	 */
-	public function load_admin_scripts() {
-		global $pagenow;
-		if($pagenow != 'edit.php') {
-			//wp_enqueue_script('jquery-ui-tabs');
+	public function load_admin_scripts($hook) {
+		global $wp_version;
+		
+		wp_register_script('cas_admin_script', WP_PLUGIN_URL.'/'.plugin_basename(dirname(__FILE__)).'/js/cas_admin.js', array('jquery'), '0.1', true);
+		wp_register_style('cas_admin_style', WP_PLUGIN_URL.'/'.plugin_basename(dirname(__FILE__)).'/css/style.css', array(), '0.1');
+		
+		if($hook == 'post.php' || $hook == 'post-new.php') {
+			// WordPress < 3.3 does not have jQuery UI accordion
+			if($wp_version < 3.3) {
+				//die(var_dump($wp_version < 3.3));
+				wp_register_script('cas-jquery-ui-accordion', WP_PLUGIN_URL.'/'.plugin_basename(dirname(__FILE__)).'/js/jquery.ui.accordion.js', array('jquery-ui-core','jquery-ui-widget'), '1.8.9', true);
+				wp_enqueue_script('cas-jquery-ui-accordion');
+			} else {
+				wp_enqueue_script('jquery-ui-accordion');
+			}
 			wp_enqueue_script('cas_admin_script');
+			
+			wp_enqueue_style('cas_admin_style');
+		} else if($hook == 'edit.php') {
+			wp_enqueue_style('cas_admin_style');
 		}
-		wp_enqueue_style('cas_admin_style');
-	}
-	
-	/**
-	 *
-	 * Prepare scripts and styles for administration
-	 *
-	 */
-	public function prepare_admin_scripts_styles() {
-		wp_register_script('cas_admin_script', WP_PLUGIN_URL.'/'.plugin_basename(dirname(__FILE__)).'/js/cas_admin.js', array('jquery'), '0.1');
-		wp_register_style('cas_admin_style', WP_PLUGIN_URL.'/'.plugin_basename(dirname(__FILE__)).'/css/style.css', false, '0.1');
+		
 	}
 	
 	/**
