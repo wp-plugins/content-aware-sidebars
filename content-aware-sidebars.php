@@ -1,12 +1,13 @@
 <?php
 /**
  * @package Content Aware Sidebars
+ * @author Joachim Jensen <jv@intox.dk>
  */
 /*
 Plugin Name: Content Aware Sidebars
 Plugin URI: http://www.intox.dk/
 Description: Manage and show sidebars according to the content being viewed.
-Version: 1.0
+Version: 1.1
 Author: Joachim Jensen
 Author URI: http://www.intox.dk/
 Text Domain: content-aware-sidebars
@@ -32,7 +33,7 @@ License: GPL2
 
 final class ContentAwareSidebars {
 	
-	const db_version		= '0.8';
+	const db_version		= '1.1';
 	const prefix			= '_cas_';
 	
 	private $metadata		= array();
@@ -61,11 +62,8 @@ final class ContentAwareSidebars {
 		add_action('widgets_init',				array(&$this,'create_sidebars'));
 		
 		// On admin requests
-		add_action('admin_menu',				array(&$this,'clear_admin_menu'));
-		add_action('admin_init',				array(&$this,'prepare_admin_scripts_styles'));
-		add_action('admin_print_scripts-edit.php',		array(&$this,'load_admin_scripts'));
-		add_action('admin_print_scripts-post-new.php',		array(&$this,'load_admin_scripts'));
-		add_action('admin_print_scripts-post.php',		array(&$this,'load_admin_scripts'));
+		add_action('admin_menu',				array(&$this,'clear_admin_menu'));	
+		add_action('admin_enqueue_scripts',			array(&$this,'load_admin_scripts'));
 		
 		// On post type and taxonomy requests
 		add_action('delete_post',				array(&$this,'remove_sidebar_widgets'));
@@ -452,7 +450,7 @@ final class ContentAwareSidebars {
 		global $_wp_sidebars_widgets;
 		
 		$posts = $this->get_sidebars();
-		if(!$posts || post_password_required())
+		if(!$posts)
 			return;
 		
 		foreach($posts as $post) {
@@ -499,6 +497,9 @@ final class ContentAwareSidebars {
 	public function get_sidebars() {
 		global $wpdb;
 		
+		if(post_password_required())
+			return false;
+		
 		// Return cache if present
 		if(!empty($this->sidebar_cache)) {
 			if($this->sidebar_cache[0] == false)
@@ -514,8 +515,8 @@ final class ContentAwareSidebars {
 		// Get rules
 		foreach($this->modules as $module) {
 			if($module->is_content()) {
-				$joins[] = $module->db_join();
-				$where[] = $module->db_where();
+				$joins[] = apply_filters("cas-db-join-".$module->get_id(), $module->db_join());
+				$where[] = apply_filters("cas-db-where-".$module->get_id(), $module->db_where());
 				$where2[] = $module->db_where2();
 			}
 		}
@@ -565,7 +566,7 @@ final class ContentAwareSidebars {
 		// Add boxes
 		// Author Words
 		add_meta_box(
-			'ca-sidebar-dev-words',
+			'cas-dev-words',
 			__('Words from the author', 'content-aware-sidebars'),
 			array(&$this,'meta_box_author_words'),
 			'sidebar',
@@ -585,12 +586,11 @@ final class ContentAwareSidebars {
 			
 		// Options
 		add_meta_box(
-			'ca-sidebar',
+			'cas-options',
 			__('Options', 'content-aware-sidebars'),
 			array(&$this,'meta_box_options'),
 			'sidebar',
-			'normal',
-			'high'
+			'side'
 		);
 	}
 	
@@ -627,17 +627,11 @@ final class ContentAwareSidebars {
 	}
 	
 	public function meta_box_rules() {
-		echo '<ul id="cas-tab-wrapper">'."\n";
-		foreach($this->modules as $module) {
-			$module->meta_box_tab();
-		}
-		echo '</ul>'."\n";
-		echo '<div id="cas-rule-wrapper">';
+		echo '<div id="cas-accordion">'."\n";
 		foreach($this->modules as $module) {
 			$module->meta_box_content();
 		}
-		echo '</div>';
-		echo '<div style="clear:both;"></div>';
+		echo '</div>'."\n";
 	}
 	
 	/**
@@ -653,18 +647,16 @@ final class ContentAwareSidebars {
 			'merge-pos'
 		);
 		
-		echo '<table class="form-table">';
 		foreach($columns as $key => $value) {
 			
-			echo '<tr><th scope="row">'.$this->metadata[is_numeric($key) ? $value : $key]['name'].'</th>';
-			echo '<td>';
+			echo '<span>'.$this->metadata[is_numeric($key) ? $value : $key]['name'].':';
+			echo '<p>';
 			$values = explode(',',$value);
 			foreach($values as $val) {
 				$this->_form_field($val);
 			}
-			echo '</td></tr>';
+			echo '</p></span>';
 		}
-		echo '</table>';
 	}
 	
 	/**
@@ -710,7 +702,7 @@ final class ContentAwareSidebars {
 		$current = $meta != '' ? $meta : $setting['val'];
 		switch($setting['type']) {
 			case 'select' :			
-				echo '<select style="width:200px;" name="'.$setting['id'].'">'."\n";
+				echo '<select style="width:250px;" name="'.$setting['id'].'">'."\n";
 				foreach($setting['list'] as $key => $value) {
 					echo '<option value="'.$key.'"'.($key == $current ? ' selected="selected"' : '').'>'.$value.'</option>'."\n";
 				}
@@ -781,22 +773,20 @@ final class ContentAwareSidebars {
 			$old = array_flip(get_post_meta($post_id, self::prefix.$module->get_id(), false));
 			
 			if(is_array($new)) {
+				// Skip existing data or insert new data
 				foreach($new as $new_single) {
 					if(isset($old[$new_single])) {
 						unset($old[$new_single]);
-						//echo 'skipped '.$field['id'].' '.$new_single.'<br>';
 					} else {
-						//echo 'added '.$field['id'].' '.$new_single.'<br>';
 						add_post_meta($post_id, self::prefix.$module->get_id(), $new_single);
 					}
 				}
+				// Remove existing data that have not been skipped
 				foreach($old as $old_key => $old_value) {
-					//echo 'deleted '.$field['id'].' '.$old_key.'<br>';
 					delete_post_meta($post_id, self::prefix.$module->get_id(), $old_key);
 				}
 			} elseif(!empty($old)) {
 				// Remove any old values when $new is empty
-				//echo 'deleted all '.$field['id'].'<br>';
 				delete_post_meta($post_id, self::prefix.$module->get_id());
 			}
 		}
@@ -817,23 +807,28 @@ final class ContentAwareSidebars {
 	 *
 	 * @global string $pagenow 
 	 */
-	public function load_admin_scripts() {
-		global $pagenow;
-		if($pagenow != 'edit.php') {
-			wp_enqueue_script('jquery-ui-tabs');
+	public function load_admin_scripts($hook) {
+		global $wp_version;
+		
+		wp_register_script('cas_admin_script', WP_PLUGIN_URL.'/'.plugin_basename(dirname(__FILE__)).'/js/cas_admin.js', array('jquery'), '0.1', true);
+		wp_register_style('cas_admin_style', WP_PLUGIN_URL.'/'.plugin_basename(dirname(__FILE__)).'/css/style.css', array(), '0.1');
+		
+		if($hook == 'post.php' || $hook == 'post-new.php') {
+			// WordPress < 3.3 does not have jQuery UI accordion
+			if($wp_version < 3.3) {
+				//die(var_dump($wp_version < 3.3));
+				wp_register_script('cas-jquery-ui-accordion', WP_PLUGIN_URL.'/'.plugin_basename(dirname(__FILE__)).'/js/jquery.ui.accordion.js', array('jquery-ui-core','jquery-ui-widget'), '1.8.9', true);
+				wp_enqueue_script('cas-jquery-ui-accordion');
+			} else {
+				wp_enqueue_script('jquery-ui-accordion');
+			}
 			wp_enqueue_script('cas_admin_script');
+			
+			wp_enqueue_style('cas_admin_style');
+		} else if($hook == 'edit.php') {
+			wp_enqueue_style('cas_admin_style');
 		}
-		wp_enqueue_style('cas_admin_style');
-	}
-	
-	/**
-	 *
-	 * Prepare scripts and styles for administration
-	 *
-	 */
-	public function prepare_admin_scripts_styles() {
-		wp_register_script('cas_admin_script', WP_PLUGIN_URL.'/'.plugin_basename(dirname(__FILE__)).'/js/cas_admin.js', array('jquery'), '0.1');
-		wp_register_style('cas_admin_style', WP_PLUGIN_URL.'/'.plugin_basename(dirname(__FILE__)).'/css/style.css', false, '0.1');
+		
 	}
 	
 	/**

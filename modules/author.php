@@ -1,6 +1,7 @@
 <?php
 /**
  * @package Content Aware Sidebars
+ * @author Joachim Jensen <jv@intox.dk>
  */
 
 /**
@@ -27,14 +28,14 @@ class CASModule_author extends CASModule {
 	public function db_where() {
 		global $post;
 		$author = (string)(is_singular() ? $post->post_author : get_query_var('author'));
-		return "(authors.meta_value IS NULL OR (authors.meta_value = 'authors' OR authors.meta_value = '".$author."'))";
+		return "(authors.meta_value IS NULL OR authors.meta_value IN('authors','".$author."'))";
 		
 	}
 
 	public function _get_content() {
 		global $wpdb;
 		$author_list = array();
-		foreach($wpdb->get_results("SELECT ID, display_name FROM $wpdb->users ORDER BY ID ASC") as $user) {
+		foreach($wpdb->get_results("SELECT ID, display_name FROM $wpdb->users ORDER BY ID ASC LIMIT 0,200") as $user) {
 			$author_list[$user->ID] = $user->display_name;
 		}
 		return $author_list;

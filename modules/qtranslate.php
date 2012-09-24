@@ -1,6 +1,7 @@
 <?php
 /**
  * @package Content Aware Sidebars
+ * @author Joachim Jensen <jv@intox.dk>
  */
 
 /**
@@ -26,8 +27,8 @@ class CASModule_qtranslate extends CASModule {
 		return true;
 	}
 	
-	public function db_where($where) {
-		return "(language.meta_value IS NULL OR (language.meta_value = 'language' OR language.meta_value = '".qtrans_getLanguage()."'))";
+	public function db_where() {
+		return "(language.meta_value IS NULL OR language.meta_value IN('language','".qtrans_getLanguage()."'))";
 	}
 	
 	public function admin_column_headers($columns) {	

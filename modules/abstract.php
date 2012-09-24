@@ -1,6 +1,7 @@
 <?php
 /**
  * @package Content Aware Sidebars
+ * @author Joachim Jensen <jv@intox.dk>
  */
 
 /**
@@ -22,18 +23,13 @@ abstract class CASModule {
 		$this->id = substr(get_class($this),strpos(get_class($this),'_')+1);
 	}
 	
-	public function meta_box_tab() {
-		if(!$this->_get_content())
-			return;
-		echo '<li><a href="#cas-'.$this->id.'">'.$this->name.'</a></li>'."\n";
-	}
-	
 	public function meta_box_content() {
 		global $post;
 		
 		if(!$this->_get_content())
 			return;
 		
+		echo '<h4><a href="#">'.$this->name.'</a></h4>'."\n";
 		echo '<div class="cas-rule-content" id="cas-'.$this->id.'">';
 		$field = $this->id;
 		$meta = get_post_meta($post->ID, ContentAwareSidebars::prefix.$field, false);

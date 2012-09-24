@@ -1,6 +1,7 @@
 <?php
 /**
  * @package Content Aware Sidebars
+ * @author Joachim Jensen <jv@intox.dk>
  */
 
 /**
@@ -25,7 +26,7 @@ class CASModule_transposh extends CASModule {
 	
 	public function db_where() {
 		global $my_transposh_plugin;
-		return "(language.meta_value IS NULL OR (language.meta_value = 'language' OR language.meta_value = '".$my_transposh_plugin->tgl."'))";
+		return "(language.meta_value IS NULL OR language.meta_value IN('language','".$my_transposh_plugin->tgl."'))";
 		
 	}
 

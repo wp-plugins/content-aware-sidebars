@@ -1,6 +1,7 @@
 <?php
 /**
  * @package Content Aware Sidebars
+ * @author Joachim Jensen <jv@intox.dk>
  */
 
 /**
@@ -32,7 +33,7 @@ class CASModule_post_type extends CASModule {
 	
 	public function db_where() {
 		if(is_singular()) {
-			return "(post_types.meta_value IS NULL OR (post_types.meta_value = '".get_post_type()."' OR post_types.meta_value = '".get_the_ID()."'))";
+			return "(post_types.meta_value IS NULL OR post_types.meta_value IN('".get_post_type()."','".get_the_ID()."'))";
 		}
 		global $post_type;
 		
@@ -40,19 +41,13 @@ class CASModule_post_type extends CASModule {
 		if(!$post_type) $post_type = 'post';
 		return "(post_types.meta_value IS NULL OR post_types.meta_value = '".$post_type."')";
 	}
-	
-	public function meta_box_tab() {
-		foreach ($this->_get_post_types() as $post_type) {
-			echo '<li><a href="#cas-' . $this->id . '-' . $post_type->name . '">' . $post_type->label . '</a></li>';
-		}
-	}
 
 	public function meta_box_content() {
 		global $post;
 
 		foreach ($this->_get_post_types() as $post_type) {
-
-			echo '<div class="cas-rule-content" id="cas-' . $this->id . '-' . $post_type->name . '">';
+			echo '<h4><a href="#">' . $post_type->label . '</a></h4>'."\n";
+			echo '<div class="cas-rule-content" id="cas-' . $this->id . '-' . $post_type->name . '">'."\n";
 			$meta = get_post_meta($post->ID, ContentAwareSidebars::prefix . 'post_types', false);
 			$current = $meta != '' ? $meta : array();
 

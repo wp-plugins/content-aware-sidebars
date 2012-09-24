@@ -1,6 +1,7 @@
 <?php
 /**
  * @package Content Aware Sidebars
+ * @author Joachim Jensen <jv@intox.dk>
  */
 
 /**
@@ -32,7 +33,7 @@ class CASModule_page_template extends CASModule {
 	
 	public function db_where() {
 		$template = get_post_meta(get_the_ID(),'_wp_page_template',true);
-		return "(page_templates.meta_value IS NULL OR (page_templates.meta_value = 'page_templates' OR page_templates.meta_value = '".$template."'))";
+		return "(page_templates.meta_value IS NULL OR page_templates.meta_value IN('page_templates','".$template."'))";
 	}
 
 	public function _get_content() {

@@ -16,6 +16,7 @@ function cas_run_db_update($current_version) {
                 
                 // Get current plugin db version
                 $installed_version = get_option('cas_db_version');
+		
 		if($installed_version === false)
                         $installed_version = 0;
                 
@@ -24,28 +25,23 @@ function cas_run_db_update($current_version) {
                         return true;
                         
                 $versions = array('0.8','1.1');
-                
+		
 		//Launch updates            
                 for($i = 0; $i < sizeof($versions); $i++){
                         $return = false;
-                        
-                        if(version_compare($installed_version,$versions[$i],'<')) {
-                                
-                                $function = 'cas_update_to_'.str_replace('.','',$versions[$i]);
-                                
+			
+                        if(version_compare($installed_version,$versions[$i],'<')) {                           
+                                $function = 'cas_update_to_'.str_replace('.','',$versions[$i]);                             
                                 if(function_exists($function)) {
                                         call_user_func_array($function, array(&$return));
-                                        if($return) {
-                                                $installed_version = $versions[$i];
+                                        // Update database on success
+					if($return) {		
+						update_option('cas_db_version',$installed_version = $versions[$i]);
                                         }
                                 }      
                         }
                 }
-                
-                // Update database on success
-                if($return)
-                        update_option('cas_db_version',$installed_version);
-                
+		
                 return $return;
         }
 }
@@ -56,7 +52,38 @@ function cas_run_db_update($current_version) {
  * 
  * @param boolean $return
  */
-function cas_update_to_11($return) {
+function cas_update_to_11(&$return) {
+	
+	$moduledata = array(
+		'static',
+		'post_types',
+		'authors',
+		'page_templates',
+		'taxonomies',
+		'language'
+	);
+	
+	// Get all sidebars
+	$posts = get_posts(array(
+		'numberposts'     => -1,
+		'post_type'       => 'sidebar',
+		'post_status'     => 'publish,pending,draft,future,private,trash'
+	));
+	
+	if(!empty($posts)) {
+		foreach($posts as $post) {
+			foreach($moduledata as $field) {
+				// Remove old serialized data and insert it again properly
+				$old = get_post_meta($post->ID, ContentAwareSidebars::prefix.$field, true);
+				if($old != '') {
+					delete_post_meta($post->ID, ContentAwareSidebars::prefix.$field, $old);
+					foreach((array)$old as $new_single) {
+						add_post_meta($post->ID, ContentAwareSidebars::prefix.$field, $new_single);
+					}
+				}
+			}
+		}
+	}
 	
 	$return = true;
 }
@@ -69,7 +96,7 @@ function cas_update_to_11($return) {
  * @global object $wpdb
  * @param boolean $return 
  */
-function cas_update_to_08($return) {
+function cas_update_to_08(&$return) {
         global $wpdb;
         
         $prefix = '_cas_';
@@ -93,9 +120,7 @@ function cas_update_to_08($return) {
 	",'sidebar'));
         
         //Check if there is any
-        if(empty($posts)) {
-                $return = true;
-        } else {
+        if(!empty($posts)) {
                 //Update the meta keys
                 foreach($metadata as $meta) {
                         $wpdb->query("

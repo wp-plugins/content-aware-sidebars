@@ -1,6 +1,14 @@
 /**
  * @package Content Aware Sidebars
+ * @author Joachim Jensen <jv@intox.dk>
  */
+
+jQuery( "#cas-accordion" ).accordion({
+	header: 'h4',
+	autoHeight: false,
+	collapsible: true
+});
+
 jQuery(document).ready(function($) {
         
         handleAllCheckbox("post_types","posttype");
@@ -10,7 +18,17 @@ jQuery(document).ready(function($) {
         
         handleSidebarHandle();
         
-	$( "#cas-rules .inside" ).tabs();
+	/**
+	 *
+	 * Set tickers
+	 *
+	 */
+	$('.cas-rule-content :input').each( function() {
+		$(this).parents('.cas-rule-content').prev().toggleClass('cas-tick',$('#'+$(this).parents('.cas-rule-content').attr('id')+' :input:checked').length > 0);	
+	});
+	$('.cas-rule-content :input').change( function() {
+		$(this).parents('.cas-rule-content').prev().toggleClass('cas-tick',$('#'+$(this).parents('.cas-rule-content').attr('id')+' :input:checked').length > 0);	
+	});
         
         /**
          *

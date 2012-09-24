@@ -1,6 +1,7 @@
 <?php
 /**
  * @package Content Aware Sidebars
+ * @author Joachim Jensen <jv@intox.dk>
  */
 
 /**
@@ -60,19 +61,18 @@ class CASModule_taxonomy extends CASModule {
 			$taxonomies = array();
 						
 			//Grab posts terms and make where rules for taxonomies.
-			$tax_where[] = "taxonomies.meta_value IS NULL";
 			foreach($this->post_terms as $term) {
 				$terms[] = $term->slug;
 				if(!isset($taxonomies[$term->taxonomy])) {
-					$tax_where[] = "taxonomies.meta_value = '".$taxonomies[$term->taxonomy] = $term->taxonomy."'";
+					$taxonomies[$term->taxonomy] = $term->taxonomy;
 				}
 			}
 
-			return "(terms.slug IS NULL OR terms.slug IN('".implode("','",$terms)."')) AND (".implode(' OR ',$tax_where).")";
+			return "(terms.slug IS NULL OR terms.slug IN('".implode("','",$terms)."')) AND (taxonomies.meta_value IS NULL OR taxonomies.meta_value IN('".implode("','",$taxonomies)."'))";
 		}
 		$term = get_queried_object();
 		
-		return "(terms.slug = '$term->slug' OR taxonomies.meta_value = '".$term->taxonomy."')";
+		return "(terms.slug IN('$term->slug','".$term->taxonomy."'))";
 		
 	}
 	
@@ -83,17 +83,12 @@ class CASModule_taxonomy extends CASModule {
 	public function _get_content() {
 		
 	}
-	
-	public function meta_box_tab() {
-		foreach ($this->_get_taxonomies() as $taxonomy) {
-			echo '<li><a href="#cas-' . $this->id . '-' . $taxonomy->name . '">' . $taxonomy->label . '</a></li>';
-		}
-	}
 
 	public function meta_box_content() {
 		global $post;
 
 		foreach ($this->_get_taxonomies() as $taxonomy) {
+			echo '<h4><a href="#">' . $taxonomy->label . '</a></h4>'."\n";
 			echo '<div class="cas-rule-content" id="cas-' . $this->id . '-' . $taxonomy->name . '">';
 
 			$meta = get_post_meta($post->ID, ContentAwareSidebars::prefix . 'taxonomies', false);
@@ -129,7 +124,7 @@ class CASModule_taxonomy extends CASModule {
 					</div>
 				<?php
 			}
-			echo '</div>';
+			echo '</div>'."\n";
 		}
 	}
 	

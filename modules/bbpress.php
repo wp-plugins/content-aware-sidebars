@@ -1,6 +1,7 @@
 <?php
 /**
  * @package Content Aware Sidebars
+ * @author Joachim Jensen <jv@intox.dk>
  */
 
 /**
@@ -17,6 +18,8 @@ class CASModule_bbpress extends CASModule {
 		parent::__construct();
 		$this->id = 'authors';
 		$this->name = __('bbPress','content-aware-sidebars');
+		
+		add_filter('cas-db-where-post_types', array(&$this,'add_forum_dependency'));
 	}
 	
 	public function is_content() {
@@ -29,6 +32,13 @@ class CASModule_bbpress extends CASModule {
 
 	public function _get_content() {
 		return 0;
+	}
+	
+	public function add_forum_dependency($where) {
+		if(is_singular(array('topic','reply'))) {
+			$where = "(post_types.meta_value IS NULL OR post_types.meta_value IN('".get_post_type()."','".get_the_ID()."','".bbp_get_forum_id()."','forum'))";
+		}
+		return $where;
 	}
 	
 }

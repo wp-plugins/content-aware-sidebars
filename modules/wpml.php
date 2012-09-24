@@ -1,6 +1,7 @@
 <?php
 /**
  * @package Content Aware Sidebars
+ * @author Joachim Jensen <jv@intox.dk>
  */
 
 /**
@@ -23,8 +24,8 @@ class CASModule_wpml extends CASModule {
 		return true;
 	}
 	
-	public function db_where($where) {
-		return "(language.meta_value IS NULL OR (language.meta_value = 'language' OR language.meta_value = '".ICL_LANGUAGE_CODE."'))";	
+	public function db_where() {
+		return "(language.meta_value IS NULL OR language.meta_value IN('language','".ICL_LANGUAGE_CODE."'))";	
 	}
 
 	public function _get_content() {
