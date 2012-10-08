@@ -16,6 +16,7 @@ function cas_run_db_update($current_version) {
                 
                 // Get current plugin db version
                 $installed_version = get_option('cas_db_version');
+		
 		if($installed_version === false)
                         $installed_version = 0;
                 
@@ -23,38 +24,70 @@ function cas_run_db_update($current_version) {
                 if($installed_version == $current_version)
                         return true;
                         
-                $versions = array('0.8');
-                $retry = array_flip($versions);
-                
-                //Launch updates            
-                for($i = 0; $i < sizeof($versions); $i++){
-                        $return = false;
-                        
-                        //After failing 3 times, something must be wrong
-                        if($retry[$versions[$i]] == 3) break;
-                        
-                        if(version_compare($installed_version,$versions[$i],'<')) {
-                                
-                                $function = 'cas_update_to_'.str_replace('.','',$versions[$i]);
-                                
+                $versions = array(0.8,1.1);
+		
+		//Launch updates
+		foreach($versions as $version) {
+			$return = false;
+			
+                        if(version_compare($installed_version,$version,'<')) {                           
+                                $function = 'cas_update_to_'.str_replace('.','',$version);                             
                                 if(function_exists($function)) {
-                                        call_user_func_array($function, array(&$return));
-                                        if($return) {
-                                                $installed_version = $versions[$i];
-                                        } else {
-                                                $retry[$versions[$i]]++;
-                                                $i--;
+					
+					$return = $function();
+					
+                                        // Update database on success
+					if($return) {		
+						update_option('cas_db_version',$installed_version = $version);
                                         }
-                                }      
+                                }
                         }
-                }
-                
-                // Update database on success
-                if($return)
-                        update_option('cas_db_version',$installed_version);
-                
+		}
+		
                 return $return;
         }
+}
+
+/**
+ * Version 0.8 -> 1.1
+ * Serialized metadata gets their own rows
+ * 
+ * @param boolean $return
+ */
+function cas_update_to_11() {
+	
+	$moduledata = array(
+		'static',
+		'post_types',
+		'authors',
+		'page_templates',
+		'taxonomies',
+		'language'
+	);
+	
+	// Get all sidebars
+	$posts = get_posts(array(
+		'numberposts'     => -1,
+		'post_type'       => 'sidebar',
+		'post_status'     => 'publish,pending,draft,future,private,trash'
+	));
+	
+	if(!empty($posts)) {
+		foreach($posts as $post) {
+			foreach($moduledata as $field) {
+				// Remove old serialized data and insert it again properly
+				$old = get_post_meta($post->ID, ContentAwareSidebars::prefix.$field, true);
+				if($old != '') {
+					delete_post_meta($post->ID, ContentAwareSidebars::prefix.$field, $old);
+					foreach((array)$old as $new_single) {
+						add_post_meta($post->ID, ContentAwareSidebars::prefix.$field, $new_single);
+					}
+				}
+			}
+		}
+	}
+	
+	return true;
 }
 
 /**
@@ -62,10 +95,10 @@ function cas_run_db_update($current_version) {
  * Version 0 -> 0.8
  * Introduces database version management, adds preficed keys to metadata
  *
- * @global type $wpdb
- * @param type $return 
+ * @global object $wpdb
+ * @param boolean $return 
  */
-function cas_update_to_08($return) {
+function cas_update_to_08() {
         global $wpdb;
         
         $prefix = '_cas_';
@@ -89,9 +122,7 @@ function cas_update_to_08($return) {
 	",'sidebar'));
         
         //Check if there is any
-        if(empty($posts)) {
-                $return = true;
-        } else {
+        if(!empty($posts)) {
                 //Update the meta keys
                 foreach($metadata as $meta) {
                         $wpdb->query("
@@ -101,8 +132,10 @@ function cas_update_to_08($return) {
                                 AND post_id IN(".implode(',',$posts).")
                         ");
                 }
+		// Clear cache for new meta keys
+		wp_cache_flush();
         }
         
-        $return = true;
+        return true;
         
 }     

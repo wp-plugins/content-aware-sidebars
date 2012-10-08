@@ -1,22 +1,23 @@
 === Plugin Name ===
 Contributors: intoxstudio
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=KPZHE6A72LEN4&lc=US&item_name=WordPress%20Plugin%3a%20Content%20Aware%20Sidebars&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted
-Tags: sidebar, widget, content aware, seo, dynamic, flexible, modular
+Tags: sidebar, widget, content aware, seo, dynamic, flexible, modular, bbpress, qtranslate, transposh, wpml
 Requires at least: 3.1
-Tested up to: 3.4
-Stable tag: 1.0
+Tested up to: 3.4.2
+Stable tag: 1.1.1
 License: GPL2
 
-Manage and show sidebars according to the content being viewed.
+Create and display sidebars according to the content being viewed.
 
 == Description ==
 
-Manage an infinite number of sidebars. Make your WordPress site even more dynamic and boost SEO by controlling what content the sidebars should be displayed with. Creating flexible, dynamic sidebars has never been easier, and no code is needed at all as everything is easily done in the administration.
+Manage an infinite number of sidebars. Make your WordPress site even more dynamic and boost SEO by controlling what content the sidebars should be displayed with. Creating flexible, dynamic sidebars has never been easier, and no code is needed at all as everything is easily done in the administration panel.
 No extra database tables or table columns will be added.
 
 = Features =
 
-* Show sidebars with all or specific:
+* Easy-to-use sidebar manager
+* Display sidebars with all or specific:
 	* Singulars - e.g. some posts or pages
 	* (Custom) Post Types
 	* Singulars with given (custom) taxonomies or taxonomy terms
@@ -83,13 +84,34 @@ The function accepts URL-style strings as parameters too, like the standard Word
 
 == Screenshots ==
 
-1. Add a new Content Aware Sidebar to be displayed with All Posts and Another Page. It replaces `Main Sidebar`
+1. Add a new Content Aware Sidebar to be displayed with all Posts that contains Very Categorized. It replaces `Main Sidebar`
 2. Simple overview of all created Content Aware Sidebars
 3. Add widgets to the newly added sidebar
 4. Viewing front page of site. `Main Sidebar` is displayed
-5. Viewing Another Page. The Content Aware Sidebar has replaced `Main Sidebar`
+5. Viewing a Post that contains Very Categorized. `Very Categorized Posts` sidebar has replaced `Main Sidebar`
 
 == Changelog ==
+
+= 1.1.1 =
+
+* Fixed: slight css changes on edit screen
+* Fixed: tick.png included
+* Fixed: taxonomy terms could influence each other in rare cases
+* Fixed: taxonomy wide rules for taxonomy archives
+* Fixed: cache caused db update module to skip 1.1 update if going from 0
+
+= 1.1 =
+
+* Added: improved gui on edit screen including content accordion 
+* Added: bbpress forum-topic dependency
+* Added: sidebars hidden on password protected content
+* Added: relevant usermeta cleared on plugin deletion
+* Fixed: performance gain by dropping serialized metadata
+* Fixed: database data update module revised
+* Fixed: css class in posts and terms walker
+* Fixed: limit of max 200 of each content type on edit screen (temp)
+* Fixed: style and scripts loaded properly
+* Removed: individual content meta boxes on edit screen
 
 = 1.0 =
 
@@ -105,7 +127,7 @@ The function accepts URL-style strings as parameters too, like the standard Word
 
 = 0.8.3 =
 
-* Added: Danish and Italian translation
+* Added: danish and italian translation
 * Fixed: sidebar query might be larger than max_join_size
 * Fixed: row content in admin overview would be loaded with post types with matching keys
 
@@ -204,6 +226,10 @@ The function accepts URL-style strings as parameters too, like the standard Word
 * First stable release
 
 == Upgrade Notice ==
+
+= 1.1 =
+
+* Content Aware Sidebar data in your database will be updated automatically. Remember to backup this data before updating the plugin.
 
 = 0.8 =
 
