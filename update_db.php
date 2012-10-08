@@ -24,23 +24,25 @@ function cas_run_db_update($current_version) {
                 if($installed_version == $current_version)
                         return true;
                         
-                $versions = array('0.8','1.1');
+                $versions = array(0.8,1.1);
 		
-		//Launch updates            
-                for($i = 0; $i < sizeof($versions); $i++){
-                        $return = false;
+		//Launch updates
+		foreach($versions as $version) {
+			$return = false;
 			
-                        if(version_compare($installed_version,$versions[$i],'<')) {                           
-                                $function = 'cas_update_to_'.str_replace('.','',$versions[$i]);                             
+                        if(version_compare($installed_version,$version,'<')) {                           
+                                $function = 'cas_update_to_'.str_replace('.','',$version);                             
                                 if(function_exists($function)) {
-                                        call_user_func_array($function, array(&$return));
+					
+					$return = $function();
+					
                                         // Update database on success
 					if($return) {		
-						update_option('cas_db_version',$installed_version = $versions[$i]);
+						update_option('cas_db_version',$installed_version = $version);
                                         }
-                                }      
+                                }
                         }
-                }
+		}
 		
                 return $return;
         }
@@ -52,7 +54,7 @@ function cas_run_db_update($current_version) {
  * 
  * @param boolean $return
  */
-function cas_update_to_11(&$return) {
+function cas_update_to_11() {
 	
 	$moduledata = array(
 		'static',
@@ -85,7 +87,7 @@ function cas_update_to_11(&$return) {
 		}
 	}
 	
-	$return = true;
+	return true;
 }
 
 /**
@@ -96,7 +98,7 @@ function cas_update_to_11(&$return) {
  * @global object $wpdb
  * @param boolean $return 
  */
-function cas_update_to_08(&$return) {
+function cas_update_to_08() {
         global $wpdb;
         
         $prefix = '_cas_';
@@ -130,8 +132,10 @@ function cas_update_to_08(&$return) {
                                 AND post_id IN(".implode(',',$posts).")
                         ");
                 }
+		// Clear cache for new meta keys
+		wp_cache_flush();
         }
         
-        $return = true;
+        return true;
         
 }     

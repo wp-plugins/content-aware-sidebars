@@ -16,7 +16,6 @@
 class CASModule_taxonomy extends CASModule {
 	
 	private $taxonomy_objects;
-	private $post_taxonomies;
 	private $post_terms;
 	
 	public function __construct() {
@@ -28,9 +27,9 @@ class CASModule_taxonomy extends CASModule {
 	public function is_content() {		
 		if(is_singular()) {
 			// Check if content has any taxonomies supported
-			$this->post_taxonomies = get_object_taxonomies(get_post_type());
-			if($this->post_taxonomies) {
-				$this->post_terms = wp_get_object_terms(get_the_ID(),$this->post_taxonomies);
+			$taxonomies = get_object_taxonomies(get_post_type());
+			if($taxonomies) {
+				$this->post_terms = wp_get_object_terms(get_the_ID(),$taxonomies);
 				// Check if content has any actual taxonomy terms
 				if($this->post_terms) {
 					return true;
@@ -58,21 +57,25 @@ class CASModule_taxonomy extends CASModule {
 		
 		if(is_singular()) {
 			$terms = array();
-			$taxonomies = array();
 						
-			//Grab posts terms and make where rules for taxonomies.
+			//Grab posts taxonomies and terms and sort them
 			foreach($this->post_terms as $term) {
-				$terms[] = $term->slug;
-				if(!isset($taxonomies[$term->taxonomy])) {
-					$taxonomies[$term->taxonomy] = $term->taxonomy;
-				}
+				$terms[$term->taxonomy][] = $term->slug;
+			}
+			
+			// Make rules for taxonomies and terms
+			foreach($terms as $taxonomy => $term_arr) {
+				$termrules[] = "(taxonomy.taxonomy = '".$taxonomy."' AND terms.slug IN('".implode("','",$term_arr)."'))";
+				$taxrules[] = $taxonomy;
 			}
 
-			return "(terms.slug IS NULL OR terms.slug IN('".implode("','",$terms)."')) AND (taxonomies.meta_value IS NULL OR taxonomies.meta_value IN('".implode("','",$taxonomies)."'))";
+			return "(terms.slug IS NULL OR ".implode(" OR ",$termrules).") AND (taxonomies.meta_value IS NULL OR taxonomies.meta_value IN('".implode("','",$taxrules)."'))";
+		
+			
 		}
 		$term = get_queried_object();
 		
-		return "(terms.slug IN('$term->slug','".$term->taxonomy."'))";
+		return "((taxonomy.taxonomy = '".$term->taxonomy."' AND terms.slug = '".$term->slug."') OR taxonomies.meta_value = '".$term->taxonomy."')";
 		
 	}
 	

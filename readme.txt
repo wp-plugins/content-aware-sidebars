@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=KPZHE
 Tags: sidebar, widget, content aware, seo, dynamic, flexible, modular, bbpress, qtranslate, transposh, wpml
 Requires at least: 3.1
 Tested up to: 3.4.2
-Stable tag: 1.1
+Stable tag: 1.1.1
 License: GPL2
 
 Create and display sidebars according to the content being viewed.
@@ -91,6 +91,14 @@ The function accepts URL-style strings as parameters too, like the standard Word
 5. Viewing a Post that contains Very Categorized. `Very Categorized Posts` sidebar has replaced `Main Sidebar`
 
 == Changelog ==
+
+= 1.1.1 =
+
+* Fixed: slight css changes on edit screen
+* Fixed: tick.png included
+* Fixed: taxonomy terms could influence each other in rare cases
+* Fixed: taxonomy wide rules for taxonomy archives
+* Fixed: cache caused db update module to skip 1.1 update if going from 0
 
 = 1.1 =
 
