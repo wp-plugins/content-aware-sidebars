@@ -58,7 +58,7 @@ class CAS_Walker_Checklist extends Walker {
 				return;
 			}
 			
-			$output .= "\n".'<li id="'.$post_type->name.'-'.$term->ID.'"><label class="selectit"><input value="'.$term->ID.'" type="checkbox" name="post_types[]" id="in-'.$post_type->name.'-'.$term->ID.'"'.checked(in_array($term->ID,$selected_cats),true,false).disabled(empty($disabled),false,false).'/> '.esc_html( $term->post_title ).'</label>';
+			$output .= "\n".'<li id="'.$post_type->name.'-'.$term->ID.'"><label class="selectit"><input class="cas-post_types-'.$post_type->name.'" value="'.$term->ID.'" type="checkbox" name="post_types[]" id="in-'.$post_type->name.'-'.$term->ID.'"'.checked(in_array($term->ID,$selected_cats),true,false).disabled(empty($disabled),false,false).'/> '.esc_html( $term->post_title ).'</label>';
 			
 		} else {
 			
@@ -71,7 +71,7 @@ class CAS_Walker_Checklist extends Walker {
 			$value = $taxonomy->hierarchical ? 'term_id' : 'slug';
 			$class = in_array( $term->term_id, $popular_terms ) ? ' class="popular-category"' : '';
                 
-			$output .= "\n".'<li id="'.$taxonomy->name.'-'.$term->term_id.'"'.$class.'><label class="selectit"><input value="'.$term->$value.'" type="checkbox" name="'.$name.'[]" id="in-'.$taxonomy->name.'-'.$term->term_id.'"'.checked(in_array($term->term_id,$selected_terms),true,false).disabled(empty($disabled),false,false).'/> '.esc_html( apply_filters('the_category', $term->name )) . '</label>';
+			$output .= "\n".'<li id="'.$taxonomy->name.'-'.$term->term_id.'"'.$class.'><label class="selectit"><input class="cas-taxonomies-'.$taxonomy->name.'" value="'.$term->$value.'" type="checkbox" name="'.$name.'[]" id="in-'.$taxonomy->name.'-'.$term->term_id.'"'.checked(in_array($term->term_id,$selected_terms),true,false).disabled(empty($disabled),false,false).'/> '.esc_html( apply_filters('the_category', $term->name )) . '</label>';
 		
 		}
 
@@ -179,7 +179,7 @@ function cas_popular_terms_checklist( $taxonomy, $default = 0, $number = 10, $ec
 
 		<li id="<?php echo $id; ?>" class="popular-category">
 			<label class="selectit">
-			<input id="in-<?php echo $id; ?>" type="checkbox"<?php echo in_array( $term->term_id, $checked_terms ) ? ' checked="checked"' : ''; ?> value="<?php echo $term->term_id; ?>"<?php echo $disabled ?>/>
+			<input class="cas-taxonomies-<?php echo $taxonomy->name; ?>" id="in-<?php echo $id; ?>" type="checkbox"<?php echo in_array( $term->term_id, $checked_terms ) ? ' checked="checked"' : ''; ?> value="<?php echo $term->term_id; ?>"<?php echo $disabled ?>/>
 				<?php echo esc_html( apply_filters( 'the_category', $term->name ) ); ?>
 			</label>
 		</li>
@@ -211,7 +211,7 @@ function cas_posts_checklist($post_id = 0, $args = array()) {
 
         $args = array(
 		'post_type'	=> $post_type,
-		'disabled'	=> !current_user_can($post_type->cap->edit_post)
+		//'disabled'	=> !current_user_can($post_type->cap->read_post,$post_type)
 	);
 
 	if($post_id)

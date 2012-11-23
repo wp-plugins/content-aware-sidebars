@@ -7,7 +7,7 @@
 Plugin Name: Content Aware Sidebars
 Plugin URI: http://www.intox.dk/
 Description: Manage and show sidebars according to the content being viewed.
-Version: 1.1.1
+Version: 1.1.2
 Author: Joachim Jensen
 Author URI: http://www.intox.dk/
 Text Domain: content-aware-sidebars
@@ -38,7 +38,7 @@ final class ContentAwareSidebars {
 	
 	private $metadata		= array();
 	private $taxonomies		= array();
-	private $sidebar_cache		= array();
+	private $sidebar_cache	= array();
 	
 	private $modules		= array();
 
@@ -49,44 +49,44 @@ final class ContentAwareSidebars {
 	 */
 	public function __construct() {
 		
-		register_activation_hook(__FILE__,			array(&$this,'plugin_activation'));
-		register_deactivation_hook(__FILE__,			array(&$this,'plugin_deactivation'));
+		register_activation_hook(__FILE__,					array(&$this,'plugin_activation'));
+		register_deactivation_hook(__FILE__,				array(&$this,'plugin_deactivation'));
 		
 		$this->_load_dependencies();
 		
 		// WordPress Hooks. Somewhat ordered by execution
 		
 		// On sitewide requests
-		add_action('plugins_loaded',				array(&$this,'deploy_modules'));
-		add_action('init',					array(&$this,'init_sidebar_type'),99);
-		add_action('widgets_init',				array(&$this,'create_sidebars'));
+		add_action('plugins_loaded',						array(&$this,'deploy_modules'));
+		add_action('init',									array(&$this,'init_sidebar_type'),99);
+		add_action('widgets_init',							array(&$this,'create_sidebars'));
 		
 		// On admin requests
-		add_action('admin_menu',				array(&$this,'clear_admin_menu'));	
-		add_action('admin_enqueue_scripts',			array(&$this,'load_admin_scripts'));
+		add_action('admin_menu',							array(&$this,'clear_admin_menu'));	
+		add_action('admin_enqueue_scripts',					array(&$this,'load_admin_scripts'));
 		
 		// On post type and taxonomy requests
-		add_action('delete_post',				array(&$this,'remove_sidebar_widgets'));
-		add_action('save_post', 				array(&$this,'save_post'));
+		add_action('delete_post',							array(&$this,'remove_sidebar_widgets'));
+		add_action('save_post',								array(&$this,'save_post'));
 		
 		// Order not known yet
-		add_action('add_meta_boxes_sidebar',			array(&$this,'create_meta_boxes'));
+		add_action('add_meta_boxes_sidebar',				array(&$this,'create_meta_boxes'));
 		
-		add_filter('default_hidden_meta_boxes',			array(&$this,'change_default_hidden'),10,2);	
-		add_filter('manage_edit-sidebar_columns',		array(&$this,'admin_column_headers'));
+		add_filter('default_hidden_meta_boxes',				array(&$this,'change_default_hidden'),10,2);	
+		add_filter('manage_edit-sidebar_columns',			array(&$this,'admin_column_headers'));
 		add_filter('manage_edit-sidebar_sortable_columns',	array(&$this,'admin_column_sortable_headers'));
-		add_filter('manage_posts_custom_column',		array(&$this,'admin_column_rows'),10,3);
-		add_filter('post_row_actions',				array(&$this,'sidebar_row_actions'),10,2);
-		add_filter('post_updated_messages', 			array(&$this,'sidebar_updated_messages'));
+		add_filter('manage_posts_custom_column',			array(&$this,'admin_column_rows'),10,3);
+		add_filter('post_row_actions',						array(&$this,'sidebar_row_actions'),10,2);
+		add_filter('post_updated_messages',					array(&$this,'sidebar_updated_messages'));
 		
 		
 		// Sitewide hooks that should not be loaded sitewide here
 		if(is_admin()) {
-			add_filter('request',				array(&$this,'admin_column_orderby'));
+			add_filter('request',							array(&$this,'admin_column_orderby'));
 			
-			add_action('wp_loaded',				array(&$this,'db_update'));	
+			add_action('wp_loaded',							array(&$this,'db_update'));	
 		} else {
-			add_filter('wp',				array(&$this,'replace_sidebar'));
+			add_filter('wp',								array(&$this,'replace_sidebar'));
 		}
 		
 	}
@@ -103,10 +103,10 @@ final class ContentAwareSidebars {
 			'static'		=> true,
 			'post_type'		=> true,
 			'author'		=> true,
-			'page_template'		=> true,
+			'page_template'	=> true,
 			'taxonomy'		=> true,
 			'bbpress'		=> function_exists('bbp_get_version'),	// bbPress
-			'qtranslate'		=> defined('QT_SUPPORTED_WP_VERSION'),	// qTranslate
+			'qtranslate'	=> defined('QT_SUPPORTED_WP_VERSION'),	// qTranslate
 			'transposh'		=> defined('TRANSPOSH_PLUGIN_VER'),	// Transposh Translation Filter
 			'wpml'			=> defined('ICL_LANGUAGE_CODE')		// WPML Multilingual Blog/CMS
 		);
@@ -200,25 +200,25 @@ final class ContentAwareSidebars {
 		// Register the sidebar type
 		register_post_type('sidebar',array(
 			'labels'	=> array(
-				'name'			=> __('Sidebars', 'content-aware-sidebars'),
-				'singular_name'		=> __('Sidebar', 'content-aware-sidebars'),
-				'add_new'		=> _x('Add New', 'sidebar', 'content-aware-sidebars'),
-				'add_new_item'		=> __('Add New Sidebar', 'content-aware-sidebars'),
-				'edit_item'		=> __('Edit Sidebar', 'content-aware-sidebars'),
-				'new_item'		=> __('New Sidebar', 'content-aware-sidebars'),
-				'all_items'		=> __('All Sidebars', 'content-aware-sidebars'),
-				'view_item'		=> __('View Sidebar', 'content-aware-sidebars'),
-				'search_items'		=> __('Search Sidebars', 'content-aware-sidebars'),
-				'not_found'		=> __('No sidebars found', 'content-aware-sidebars'),
+				'name'					=> __('Sidebars', 'content-aware-sidebars'),
+				'singular_name'			=> __('Sidebar', 'content-aware-sidebars'),
+				'add_new'				=> _x('Add New', 'sidebar', 'content-aware-sidebars'),
+				'add_new_item'			=> __('Add New Sidebar', 'content-aware-sidebars'),
+				'edit_item'				=> __('Edit Sidebar', 'content-aware-sidebars'),
+				'new_item'				=> __('New Sidebar', 'content-aware-sidebars'),
+				'all_items'				=> __('All Sidebars', 'content-aware-sidebars'),
+				'view_item'				=> __('View Sidebar', 'content-aware-sidebars'),
+				'search_items'			=> __('Search Sidebars', 'content-aware-sidebars'),
+				'not_found'				=> __('No sidebars found', 'content-aware-sidebars'),
 				'not_found_in_trash'	=> __('No sidebars found in Trash', 'content-aware-sidebars')
 			),
-			'show_ui'	=> true, 
-			'query_var'	=> false,
-			'rewrite'	=> false,
-			'menu_position' => null,
-			'supports'	=> array('title','page-attributes','excerpt'),
-			'taxonomies'	=> $this->taxonomies,
-			'menu_icon'	=> WP_PLUGIN_URL.'/'.plugin_basename(dirname(__FILE__)).'/img/icon-16.png'
+			'show_ui'					=> true, 
+			'query_var'					=> false,
+			'rewrite'					=> false,
+			'menu_position'				=> null,
+			'supports'					=> array('title','page-attributes','excerpt'),
+			'taxonomies'				=> $this->taxonomies,
+			'menu_icon'					=> WP_PLUGIN_URL.'/'.plugin_basename(dirname(__FILE__)).'/img/icon-16.png'
 		));
 	}
 	
@@ -273,14 +273,14 @@ final class ContentAwareSidebars {
 		//WP3.1 does not support (array) as post_status
 		$posts = get_posts(array(
 			'numberposts'	=> -1,
-			'post_type'	=> 'sidebar',
+			'post_type'		=> 'sidebar',
 			'post_status'	=> 'publish,private,future'
 		));
 		foreach($posts as $post) {
 			register_sidebar( array(
-				'name'		=> $post->post_title,
+				'name'			=> $post->post_title,
 				'description'	=> $post->post_excerpt,
-				'id'		=> 'ca-sidebar-'.$post->ID,
+				'id'			=> 'ca-sidebar-'.$post->ID,
 				'before_widget'	=> '<li id="%1$s" class="widget-container %2$s">',
 				'after_widget'	=> '</li>',
 				'before_title'	=> '<h3 class="widget-title">',

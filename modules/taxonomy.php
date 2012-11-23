@@ -100,7 +100,7 @@ class CASModule_taxonomy extends CASModule {
 			$terms = get_terms($taxonomy->name, array('get' => 'all','number' => 200));
 
 			echo '<p>' . "\n";
-			echo '<label><input type="checkbox" name="taxonomies[]" value="' . $taxonomy->name . '"' . checked(in_array($taxonomy->name, $current), true, false) . ' /> ' . sprintf(__('Show with %s', 'content-aware-sidebars'), $taxonomy->labels->all_items) . '</label>' . "\n";
+			echo '<label><input class="cas-chk-all" type="checkbox" name="taxonomies[]" value="' . $taxonomy->name . '"' . checked(in_array($taxonomy->name, $current), true, false) . ' /> ' . sprintf(__('Show with %s', 'content-aware-sidebars'), $taxonomy->labels->all_items) . '</label>' . "\n";
 			echo '</p>' . "\n";
 			if (!$terms || is_wp_error($terms)) {
 				echo '<p>' . __('No items.') . '</p>';
