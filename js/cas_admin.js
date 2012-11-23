@@ -6,104 +6,86 @@
 jQuery( "#cas-accordion" ).accordion({
 	header: 'h4',
 	autoHeight: false,
-	collapsible: true
+	collapsible: true,
+	heightStyle: 'content'
 });
 
 jQuery(document).ready(function($) {
         
-        handleAllCheckbox("post_types","posttype");
-        handleAllCheckbox("taxonomies","taxonomy");
-        handleAllCheckbox("authors","list");
-        handleAllCheckbox("page_templates","list");
-        
-        handleSidebarHandle();
+	handleSidebarHandle();
         
 	/**
 	 *
-	 * Set tickers
+	 * Set tickers if at least one checkbox is checked
 	 *
 	 */
 	$('.cas-rule-content :input').each( function() {
-		$(this).parents('.cas-rule-content').prev().toggleClass('cas-tick',$('#'+$(this).parents('.cas-rule-content').attr('id')+' :input:checked').length > 0);	
+		toggleTick(this);
 	});
 	$('.cas-rule-content :input').change( function() {
-		$(this).parents('.cas-rule-content').prev().toggleClass('cas-tick',$('#'+$(this).parents('.cas-rule-content').attr('id')+' :input:checked').length > 0);	
+		toggleTick(this);
 	});
+	
+	/**
+	 *
+	 * Toggle specific checkboxes depending on "show with all" checkbox
+	 *
+	 */
+	$('.cas-rule-content .cas-chk-all').each( function() {
+		toggleAllSpecific(this);
+	});
+	$('.cas-rule-content .cas-chk-all').change( function() {
+		toggleAllSpecific(this);
+	});
+	
+	function toggleTick(checkbox) {
+		$(checkbox).parents('.cas-rule-content').prev().toggleClass('cas-tick',$('#'+$(checkbox).parents('.cas-rule-content').attr('id')+' :input:checked').length > 0);
+	}
+	
+	function toggleAllSpecific(checkbox) {
+		var checkboxes = $(".cas-rule-content ."+$(checkbox).parents('.cas-rule-content').attr("id"));
+		if($(checkbox).is(":checked")) {
+			$(checkboxes).attr("disabled", true);   
+		} else {
+			$(checkboxes).removeAttr("disabled");  
+		}
+	}
         
-        /**
-         *
-         * Handle "Show with All" checkbox
-         *
-         */
-        function handleAllCheckbox(name,type) {
+	/**
+	 *
+	 * Handle the Handle selection
+	 *
+	 */
+	function handleSidebarHandle() {
                 
-                var checkbox = "input[name='"+name+"[]']";
+		var name = "select[name='handle']";
                 
-                // Execute on ready for each checkbox
-                $(checkbox).each(function() {
-                        disenableSingleCheckboxes($(this),type);
-                });
+		// Execute on ready
+		$(name).each(function(){
+			endisableHostSidebars($(this));
+		});
                 
-                // Execute on change
-                $(checkbox).change(function(){
-                        disenableSingleCheckboxes($(this),type);
-                });
-        }
+		// Execute on change
+		$(name).change(function(){
+			endisableHostSidebars($(this));
+		});
+	}
         
-        /**
-         *
-         * The state of a "Show with All" checkbox will control the
-         * accessibility of the respective checkboxes for specific entities
-         * If state is checked, they will be disabled
-         *
-         */
-        function disenableSingleCheckboxes(checkbox,type) {
-                var checkboxes = "#"+type+"-"+checkbox.val()+" :input";
-
-                if(checkbox.is(":checked")) {
-                        $(checkboxes).attr("disabled", true);   
-                } else {
-                        $(checkboxes).removeAttr("disabled");  
-                }
-        }
-        
-        /**
-         *
-         * Handle the Handle selection
-         *
-         */
-        function handleSidebarHandle() {
-                
-                var name = "select[name='handle']";
-                
-                // Execute on ready
-                $(name).each(function(){
-                        endisableHostSidebars($(this));
-                });
-                
-                // Execute on change
-                $(name).change(function(){
-                        endisableHostSidebars($(this));
-                });
-        }
-        
-        /**
-         *
-         * The value of Handle selection will control the
-         * accessibility of the host sidebar selection
-         * If Handling is manual, selection of host sidebar will be disabled
-         *
-         */
-        function endisableHostSidebars(select) {
-                var name = "select[name='host']";
-                if(select.val() == 2) {
-                        $(name).hide();
-                        $(name).attr("disabled", true);
+	/**
+	 * The value of Handle selection will control the
+	 * accessibility of the host sidebar selection
+	 * If Handling is manual, selection of host sidebar will be disabled
+	 */
+	function endisableHostSidebars(select) {
+		var name = "select[name='host']";
+		if(select.val() == 2) {
+			$(name).hide();
+			$(name).attr("disabled", true);
                         
-                } else {
-                        $(name).show();
-                        $(name).removeAttr("disabled");
-                }
-        }
+		} else {
+			$(name).show();
+			$(name).removeAttr("disabled");
+		}
+	}
         
 });

@@ -3,8 +3,8 @@ Contributors: intoxstudio
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=KPZHE6A72LEN4&lc=US&item_name=WordPress%20Plugin%3a%20Content%20Aware%20Sidebars&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted
 Tags: sidebar, widget, content aware, seo, dynamic, flexible, modular, bbpress, qtranslate, transposh, wpml
 Requires at least: 3.1
-Tested up to: 3.4.2
-Stable tag: 1.1.1
+Tested up to: 3.5
+Stable tag: 1.1.2
 License: GPL2
 
 Create and display sidebars according to the content being viewed.
@@ -91,6 +91,12 @@ The function accepts URL-style strings as parameters too, like the standard Word
 5. Viewing a Post that contains Very Categorized. `Very Categorized Posts` sidebar has replaced `Main Sidebar`
 
 == Changelog ==
+
+= 1.1.2 =
+
+* Added: wordpress 3.5 compatibility 
+* Fixed: slight css changes on edit screen
+* Fixed: "show with all" checkbox toggles other checkboxes correctly
 
 = 1.1.1 =
 

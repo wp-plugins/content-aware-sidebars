@@ -67,7 +67,7 @@ class CASModule_post_type extends CASModule {
 			
 			//WP3.1.4 does not support $post_type->labels->all_items
 			echo '<p>' . "\n";
-			echo '<label><input type="checkbox" name="post_types[]" value="' . $post_type->name . '"' . checked(in_array($post_type->name, $current), true, false) . ' /> ' . sprintf(__('Show with All %s', 'content-aware-sidebars'), $post_type->label) . '</label>' . "\n";
+			echo '<label><input class="cas-chk-all" type="checkbox" name="post_types[]" value="' . $post_type->name . '"' . checked(in_array($post_type->name, $current), true, false) . ' /> ' . sprintf(__('Show with All %s', 'content-aware-sidebars'), $post_type->label) . '</label>' . "\n";
 			echo '</p>' . "\n";
 
 			if (!$posts || is_wp_error($posts)) {

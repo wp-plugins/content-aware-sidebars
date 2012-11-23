@@ -36,7 +36,7 @@ abstract class CASModule {
 		$current = $meta != '' ? $meta : array();
 		?>
 		<p>
-			<label><input type="checkbox" name="<?php echo $field; ?>[]" value="<?php echo $field; ?>" <?php checked(in_array($field, $current), true, true); ?> /> <?php printf(__('Show with All %s','content-aware-sidebars'),$this->name); ?></label>
+			<label><input class="cas-chk-all" type="checkbox" name="<?php echo $field; ?>[]" value="<?php echo $field; ?>" <?php checked(in_array($field, $current), true, true); ?> /> <?php printf(__('Show with All %s','content-aware-sidebars'),$this->name); ?></label>
 		</p>
 		<div id="list-<?php echo $field; ?>" class="categorydiv" style="min-height:100%;">
 			<ul id="<?php echo $field; ?>-tabs" class="category-tabs">
@@ -46,7 +46,7 @@ abstract class CASModule {
 				<ul id="authorlistchecklist" class="list:<?php echo $field; ?> categorychecklist form-no-clear">
 					<?php
 					foreach($this->_get_content() as $id => $name) {
-						echo '<li><label><input type="checkbox" name="'.$field.'[]" value="'.$id.'"'.checked(in_array($id,$current), true, false).' /> '.$name.'</label></li>'."\n";
+						echo '<li><label><input class="cas-' . $this->id . '" type="checkbox" name="'.$field.'[]" value="'.$id.'"'.checked(in_array($id,$current), true, false).' /> '.$name.'</label></li>'."\n";
 					}
 					?>
 				</ul>
