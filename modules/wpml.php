@@ -28,7 +28,7 @@ class CASModule_wpml extends CASModule {
 		return "(language.meta_value IS NULL OR language.meta_value IN('language','".ICL_LANGUAGE_CODE."'))";	
 	}
 
-	public function _get_content() {
+	protected function _get_content() {
 		$langs = array();
 		
 		foreach(icl_get_languages('skip_missing=N') as $lng) {
