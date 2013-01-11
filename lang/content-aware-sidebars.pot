@@ -1,237 +1,246 @@
-# Copyright (C) 2012 Content Aware Sidebars
+# Copyright (C) 2013 Content Aware Sidebars
 # This file is distributed under the same license as the Content Aware Sidebars package.
 msgid ""
 msgstr ""
-"Project-Id-Version: Content Aware Sidebars 1.0\n"
+"Project-Id-Version: Content Aware Sidebars 1.1.2\n"
 "Report-Msgid-Bugs-To: http://wordpress.org/tag/content-aware-sidebars\n"
-"POT-Creation-Date: 2012-09-19 11:11:11+00:00\n"
+"POT-Creation-Date: 2013-01-07 16:09:52+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"PO-Revision-Date: 2012-MO-DA HO:MI+ZONE\n"
+"PO-Revision-Date: 2013-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 
-#: content-aware-sidebars.php:145 content-aware-sidebars.php:308
+#: content-aware-sidebars.php:150 content-aware-sidebars.php:327
 msgid "Exposure"
 msgstr ""
 
-#: content-aware-sidebars.php:151
+#: content-aware-sidebars.php:156
 msgid "Singular"
 msgstr ""
 
-#: content-aware-sidebars.php:152
+#: content-aware-sidebars.php:157
 msgid "Singular & Archive"
 msgstr ""
 
-#: content-aware-sidebars.php:153
+#: content-aware-sidebars.php:158
 msgid "Archive"
 msgstr ""
 
-#: content-aware-sidebars.php:157 content-aware-sidebars.php:309
+#: content-aware-sidebars.php:162 content-aware-sidebars.php:328
 msgctxt "option"
 msgid "Handle"
 msgstr ""
 
-#: content-aware-sidebars.php:159
+#: content-aware-sidebars.php:164
 msgid "Replace host sidebar, merge with it or add sidebar manually."
 msgstr ""
 
-#: content-aware-sidebars.php:163
+#: content-aware-sidebars.php:168
 msgid "Replace"
 msgstr ""
 
-#: content-aware-sidebars.php:164
+#: content-aware-sidebars.php:169
 msgid "Merge"
 msgstr ""
 
-#: content-aware-sidebars.php:165
+#: content-aware-sidebars.php:170
 msgid "Manual"
 msgstr ""
 
-#: content-aware-sidebars.php:169
+#: content-aware-sidebars.php:174
 msgid "Host Sidebar"
 msgstr ""
 
-#: content-aware-sidebars.php:177 content-aware-sidebars.php:310
+#: content-aware-sidebars.php:182 content-aware-sidebars.php:329
 msgid "Merge position"
 msgstr ""
 
-#: content-aware-sidebars.php:179
+#: content-aware-sidebars.php:184
 msgid "Place sidebar on top or bottom of host when merging."
 msgstr ""
 
-#: content-aware-sidebars.php:183
+#: content-aware-sidebars.php:188
 msgid "Top"
 msgstr ""
 
-#: content-aware-sidebars.php:184
+#: content-aware-sidebars.php:189
 msgid "Bottom"
 msgstr ""
 
-#: content-aware-sidebars.php:205
+#: content-aware-sidebars.php:210
 msgid "Sidebars"
 msgstr ""
 
-#: content-aware-sidebars.php:206
+#: content-aware-sidebars.php:211
 msgid "Sidebar"
 msgstr ""
 
-#: content-aware-sidebars.php:207
+#: content-aware-sidebars.php:212
 msgctxt "sidebar"
 msgid "Add New"
 msgstr ""
 
-#: content-aware-sidebars.php:208
+#: content-aware-sidebars.php:213
 msgid "Add New Sidebar"
 msgstr ""
 
-#: content-aware-sidebars.php:209
+#: content-aware-sidebars.php:214
 msgid "Edit Sidebar"
 msgstr ""
 
-#: content-aware-sidebars.php:210
+#: content-aware-sidebars.php:215
 msgid "New Sidebar"
 msgstr ""
 
-#: content-aware-sidebars.php:211
+#: content-aware-sidebars.php:216
 msgid "All Sidebars"
 msgstr ""
 
-#: content-aware-sidebars.php:212
+#: content-aware-sidebars.php:217
 msgid "View Sidebar"
 msgstr ""
 
-#: content-aware-sidebars.php:213
+#: content-aware-sidebars.php:218
 msgid "Search Sidebars"
 msgstr ""
 
-#: content-aware-sidebars.php:214
+#: content-aware-sidebars.php:219
 msgid "No sidebars found"
 msgstr ""
 
-#: content-aware-sidebars.php:215
+#: content-aware-sidebars.php:220
 msgid "No sidebars found in Trash"
 msgstr ""
 
-#: content-aware-sidebars.php:239
+#: content-aware-sidebars.php:253
 msgid "Sidebar updated. <a href=\"%s\">Manage widgets</a>"
 msgstr ""
 
-#: content-aware-sidebars.php:242
+#: content-aware-sidebars.php:256
 msgid "Sidebar updated."
 msgstr ""
 
-#: content-aware-sidebars.php:244
+#: content-aware-sidebars.php:258
 msgid "Sidebar published. <a href=\"%s\">Manage widgets</a>"
 msgstr ""
 
-#: content-aware-sidebars.php:245
+#: content-aware-sidebars.php:259
 msgid "Sidebar saved."
 msgstr ""
 
-#: content-aware-sidebars.php:246
+#: content-aware-sidebars.php:260
 msgid "Sidebar submitted. <a href=\"%s\">Manage widgets</a>"
 msgstr ""
 
-#: content-aware-sidebars.php:247
+#: content-aware-sidebars.php:261
 msgid ""
 "Sidebar scheduled for: <strong>%1$s</strong>. <a href=\"%2$s\">Manage "
 "widgets</a>"
 msgstr ""
 
 #. translators: Publish box date format, see http:php.net/date
-#: content-aware-sidebars.php:249
+#: content-aware-sidebars.php:263
 msgid "M j, Y @ G:i"
 msgstr ""
 
-#: content-aware-sidebars.php:250
+#: content-aware-sidebars.php:264
 msgid "Sidebar draft updated."
 msgstr ""
 
-#: content-aware-sidebars.php:372
+#: content-aware-sidebars.php:391
 msgid "Please update Host Sidebar"
 msgstr ""
 
-#: content-aware-sidebars.php:435
+#: content-aware-sidebars.php:454
 msgid "Manage Widgets"
 msgstr ""
 
-#: content-aware-sidebars.php:569
+#: content-aware-sidebars.php:651
 msgid "Words from the author"
 msgstr ""
 
-#: content-aware-sidebars.php:579
+#: content-aware-sidebars.php:661
 msgid "Content"
 msgstr ""
 
-#: content-aware-sidebars.php:589
+#: content-aware-sidebars.php:671
 msgid "Options"
 msgstr ""
 
-#: content-aware-sidebars.php:685
+#: content-aware-sidebars.php:766
 msgid "If you love this plugin, please consider donating."
 msgstr ""
 
-#: content-aware-sidebars.php:687
+#: content-aware-sidebars.php:768
 msgid ""
 "Remember to <a class=\"button\" href=\"%1$s\" target=\"_blank\">rate</a> and "
 "<a class=\"button\" href=\"%2$s\" target=\"_blank\">share</a> it too!"
 msgstr ""
 
-#: content-aware-sidebars.php:689
+#: content-aware-sidebars.php:770
 msgid "Check out Content Aware Sidebars for %23WordPress! :)"
 msgstr ""
 
-#: content-aware-sidebars.php:691
+#: content-aware-sidebars.php:772
 msgid "Check out Content Aware Sidebars :)"
 msgstr ""
 
-#: modules/abstract.php:43 modules/post_type.php:75
+#: modules/abstract.php:39 modules/post_type.php:78
 msgid "Show with All %s"
 msgstr ""
 
-#: modules/abstract.php:47 modules/post_type.php:85 modules/taxonomy.php:114
+#: modules/abstract.php:43 modules/post_type.php:88 modules/taxonomy.php:121
 msgid "View All"
 msgstr ""
 
-#: modules/author.php:20
+#: modules/author.php:21
 msgid "Authors"
 msgstr ""
 
-#: modules/bbpress.php:19
-msgid "bbPress"
+#: modules/bbpress.php:20
+msgid "bbPress User Profiles"
 msgstr ""
 
-#: modules/page_template.php:20
+#: modules/bp_member.php:20
+msgid "BuddyPress Members"
+msgstr ""
+
+#: modules/page_template.php:21
 msgid "Page Templates"
 msgstr ""
 
-#: modules/post_type.php:22
-msgid "Post Types"
-msgstr ""
-
-#: modules/post_type.php:79 modules/taxonomy.php:108
-msgid "No items."
-msgstr ""
-
-#: modules/qtranslate.php:19 modules/transposh.php:19 modules/wpml.php:19
+#: modules/polylang.php:20 modules/qtranslate.php:20 modules/transposh.php:20
+#: modules/wpml.php:20
 msgid "Languages"
 msgstr ""
 
-#: modules/static.php:21
+#: modules/post_type.php:23
+msgid "Post Types"
+msgstr ""
+
+#: modules/post_type.php:73 modules/taxonomy.php:107
+msgid "Automatically select new children of a selected ancestor"
+msgstr ""
+
+#: modules/post_type.php:82 modules/taxonomy.php:115
+msgid "No items."
+msgstr ""
+
+#: modules/static.php:22
 msgid "Static Pages"
 msgstr ""
 
-#: modules/static.php:26
+#: modules/static.php:27
 msgid "Front Page"
 msgstr ""
 
-#: modules/static.php:27
+#: modules/static.php:28
 msgid "Search Results"
 msgstr ""
 
-#: modules/static.php:28
+#: modules/static.php:29
 msgid "404 Page"
 msgstr ""
 
@@ -239,11 +248,11 @@ msgstr ""
 msgid "Taxonomies"
 msgstr ""
 
-#: modules/taxonomy.php:105
+#: modules/taxonomy.php:111
 msgid "Show with %s"
 msgstr ""
 
-#: modules/taxonomy.php:113
+#: modules/taxonomy.php:120
 msgid "Most Used"
 msgstr ""
 
@@ -251,9 +260,9 @@ msgstr ""
 msgid "Content Aware Sidebars"
 msgstr ""
 
-#. #-#-#-#-#  plugin.pot (Content Aware Sidebars 1.0)  #-#-#-#-#
+#. #-#-#-#-#  plugin.pot (Content Aware Sidebars 1.1.2)  #-#-#-#-#
 #. Plugin URI of the plugin/theme
-#. #-#-#-#-#  plugin.pot (Content Aware Sidebars 1.0)  #-#-#-#-#
+#. #-#-#-#-#  plugin.pot (Content Aware Sidebars 1.1.2)  #-#-#-#-#
 #. Author URI of the plugin/theme
 msgid "http://www.intox.dk/"
 msgstr ""

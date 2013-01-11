@@ -16,8 +16,8 @@ class CASModule_bbpress extends CASModule {
 	
 	public function __construct() {
 		parent::__construct();
-		$this->id = 'authors';
-		$this->name = __('bbPress','content-aware-sidebars');
+		$this->id = 'bb_profile';
+		$this->name = __('bbPress User Profiles','content-aware-sidebars');
 		
 		add_filter('cas-db-where-post_types', array(&$this,'add_forum_dependency'));
 	}
@@ -27,11 +27,16 @@ class CASModule_bbpress extends CASModule {
 	}
 	
 	public function db_where() {
-		return "(authors.meta_value = 'authors' OR authors.meta_value = '".bbp_get_displayed_user_id()."')";	
+		return "(bb_profile.meta_value = 'bb_profile' OR bb_profile.meta_value = '".bbp_get_displayed_user_id()."')";	
 	}
 
 	public function _get_content() {
-		return 0;
+		global $wpdb;
+		$author_list = array();
+		foreach($wpdb->get_results("SELECT ID, display_name FROM $wpdb->users ORDER BY ID ASC LIMIT 0,200") as $user) {
+			$author_list[$user->ID] = $user->display_name;
+		}
+		return $author_list;
 	}
 	
 	public function add_forum_dependency($where) {

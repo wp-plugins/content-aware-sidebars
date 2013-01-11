@@ -22,6 +22,9 @@ class CASModule_taxonomy extends CASModule {
 		parent::__construct();
 		$this->id = 'taxonomies';
 		$this->name = __('Taxonomies','content-aware-sidebars');
+		
+		add_action('created_term', array(&$this,'term_ancestry_check'),10,3);
+		
 	}
 	
 	public function is_content() {		
@@ -57,15 +60,15 @@ class CASModule_taxonomy extends CASModule {
 		
 		if(is_singular()) {
 			$terms = array();
-						
+
 			//Grab posts taxonomies and terms and sort them
 			foreach($this->post_terms as $term) {
-				$terms[$term->taxonomy][] = $term->slug;
+				$terms[$term->taxonomy][] = $term->term_id;
 			}
 			
 			// Make rules for taxonomies and terms
-			foreach($terms as $taxonomy => $term_arr) {
-				$termrules[] = "(taxonomy.taxonomy = '".$taxonomy."' AND terms.slug IN('".implode("','",$term_arr)."'))";
+			foreach($terms as $taxonomy => $term_arr) {  
+				$termrules[] = "(taxonomy.taxonomy = '".$taxonomy."' AND terms.term_id IN('".implode("','",$term_arr)."'))";
 				$taxrules[] = $taxonomy;
 			}
 
@@ -99,9 +102,15 @@ class CASModule_taxonomy extends CASModule {
 
 			$terms = get_terms($taxonomy->name, array('get' => 'all','number' => 200));
 
+			if($taxonomy->hierarchical) {
+				echo '<p>' . "\n";
+				echo '<label><input type="checkbox" name="taxonomies[]" value="_cas_sub_' . $taxonomy->name . '"' . checked(in_array("_cas_sub_" . $taxonomy->name, $current), true, false) . ' /> ' . __('Automatically select new children of a selected ancestor', 'content-aware-sidebars') . '</label>' . "\n";
+				echo '</p>' . "\n";
+			}
 			echo '<p>' . "\n";
-			echo '<label><input type="checkbox" name="taxonomies[]" value="' . $taxonomy->name . '"' . checked(in_array($taxonomy->name, $current), true, false) . ' /> ' . sprintf(__('Show with %s', 'content-aware-sidebars'), $taxonomy->labels->all_items) . '</label>' . "\n";
+			echo '<label><input class="cas-chk-all" type="checkbox" name="taxonomies[]" value="' . $taxonomy->name . '"' . checked(in_array($taxonomy->name, $current), true, false) . ' /> ' . sprintf(__('Show with %s', 'content-aware-sidebars'), $taxonomy->labels->all_items) . '</label>' . "\n";
 			echo '</p>' . "\n";
+			
 			if (!$terms || is_wp_error($terms)) {
 				echo '<p>' . __('No items.') . '</p>';
 			} else {
@@ -139,6 +148,48 @@ class CASModule_taxonomy extends CASModule {
 			}
 		}
 		return $this->taxonomy_objects;
+	}
+	
+	/**
+	 * 
+	 * Auto-select children of selected ancestor
+	 * 
+	 * @param int $term_id
+	 * @param int $tt_id
+	 * @param string $taxonomy
+	 */
+	public function term_ancestry_check($term_id, $tt_id, $taxonomy) {
+		
+		if(is_taxonomy_hierarchical($taxonomy)) {
+			$term = get_term($term_id, $taxonomy);
+
+			if($term->parent != '0') {	
+				// Get sidebars with term ancestor wanting to auto-select term
+				$posts = new WP_Query(array(
+					'post_type'					=> 'sidebar',
+					'meta_query'				=> array(
+						array(
+							'key'				=> ContentAwareSidebars::prefix . $this->id,
+							'value'				=> '_cas_sub_' . $taxonomy,
+							'compare'			=> '='
+						)
+					),
+					'tax_query' => array(
+						array(
+							'taxonomy'			=> $taxonomy,
+							'field'				=> 'id',
+							'terms'				=> get_ancestors($term_id, $taxonomy),
+							'include_children'	=> false
+						)
+					)
+				));
+				if($posts) {
+					foreach($posts as $post) {
+						wp_set_post_terms($post->ID, $term_id, $taxonomy, true);
+					}
+				}
+			}
+		}
 	}
 
 }

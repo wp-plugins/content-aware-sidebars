@@ -21,9 +21,12 @@ class CASModule_post_type extends CASModule {
 		parent::__construct();
 		$this->id = 'post_types';
 		$this->name = __('Post Types','content-aware-sidebars');
+		
+		add_action('transition_post_status', array(&$this,'post_ancestry_check'),10,3);
+		
 	}
 	
-	public function _get_content() {
+	protected function _get_content() {
 		
 	}
 	
@@ -65,9 +68,14 @@ class CASModule_post_type extends CASModule {
 				'exclude'	=> $exclude
 			));
 			
+			if($post_type->hierarchical) {
+				echo '<p>' . "\n";
+				echo '<label><input type="checkbox" name="post_types[]" value="_cas_sub_' . $post_type->name . '"' . checked(in_array("_cas_sub_" . $post_type->name, $current), true, false) . ' /> ' . __('Automatically select new children of a selected ancestor', 'content-aware-sidebars') . '</label>' . "\n";
+				echo '</p>' . "\n";
+			}
 			//WP3.1.4 does not support $post_type->labels->all_items
 			echo '<p>' . "\n";
-			echo '<label><input type="checkbox" name="post_types[]" value="' . $post_type->name . '"' . checked(in_array($post_type->name, $current), true, false) . ' /> ' . sprintf(__('Show with All %s', 'content-aware-sidebars'), $post_type->label) . '</label>' . "\n";
+			echo '<label><input class="cas-chk-all" type="checkbox" name="post_types[]" value="' . $post_type->name . '"' . checked(in_array($post_type->name, $current), true, false) . ' /> ' . sprintf(__('Show with All %s', 'content-aware-sidebars'), $post_type->label) . '</label>' . "\n";
 			echo '</p>' . "\n";
 
 			if (!$posts || is_wp_error($posts)) {
@@ -100,6 +108,54 @@ class CASModule_post_type extends CASModule {
 			}
 		}
 		return $this->post_type_objects;
+	}
+	
+	/**
+	 * 
+	 * @param string $new_status
+	 * @param string $old_status
+	 * @param object $post
+	 */
+	public function post_ancestry_check($new_status, $old_status, $post) {
+		
+		if($post->post_type != 'sidebar') {
+			
+			$status = array('publish','private','future');
+			// Only new posts are relevant
+			if(!in_array($old_status,$status) && in_array($new_status,$status)) {
+				
+				$post_type = get_post_type_object($post->post_type);
+				if($post_type->hierarchical && $post_type->public && $post->parent != '0') {
+				
+					// Get sidebars with post ancestor wanting to auto-select post
+					$sidebars = new WP_Query(array(
+						'post_type'				=> 'sidebar',
+						'meta_query'			=> array(
+							'relation'			=> 'AND',
+							array(
+								'key'			=> ContentAwareSidebars::prefix . $this->id,
+								'value'			=> '_cas_sub_' . $post->post_type,
+								'compare'		=> '='
+							),
+							array(
+								'key'			=> ContentAwareSidebars::prefix . $this->id,
+								'value'			=> get_ancestors($post->ID,$post->post_type),
+								'type'			=> 'numeric',
+								'compare'		=> 'IN'
+							)
+						)
+					));
+					if($sidebars) {
+						foreach($sidebars as $sidebar) {
+							add_post_meta($sidebar->ID, ContentAwareSidebars::prefix.$this->id, $post->ID);
+						}
+					}
+
+			}
+		}
+			
+		}
+		
 	}
 
 }

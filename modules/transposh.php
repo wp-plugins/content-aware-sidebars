@@ -30,7 +30,7 @@ class CASModule_transposh extends CASModule {
 		
 	}
 
-	public function _get_content() {
+	protected function _get_content() {
 		global $my_transposh_plugin;
 		$langs = array();
 		foreach(explode(',',$my_transposh_plugin->options->get_viewable_langs()) as $lng) {
