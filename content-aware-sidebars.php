@@ -7,14 +7,14 @@
 Plugin Name: Content Aware Sidebars
 Plugin URI: http://www.intox.dk/
 Description: Manage and show sidebars according to the content being viewed.
-Version: 1.1.2
+Version: 1.2
 Author: Joachim Jensen
 Author URI: http://www.intox.dk/
 Text Domain: content-aware-sidebars
 Domain Path: /lang/
 License: GPL2
 
-    Copyright 2011-2012  Joachim Jensen  (email : jv@intox.dk)
+    Copyright 2011-2013  Joachim Jensen  (email : jv@intox.dk)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License, version 2, as 

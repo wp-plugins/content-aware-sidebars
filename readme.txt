@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=KPZHE
 Tags: sidebar, widget area, content aware, context aware, seo, dynamic, flexible, modular, bbpress, buddypress, qtranslate, polylang, transposh, wpml
 Requires at least: 3.1
 Tested up to: 3.5
-Stable tag: 1.1.2
+Stable tag: 1.2
 License: GPL2
 
 Create and display sidebars according to the content being viewed.
@@ -71,17 +71,17 @@ www.intox.dk
 
 If you have any questions not answered here, head to the [Support Forum](http://wordpress.org/tags/content-aware-sidebars?forum_id=10) or [contact me directly](http://www.intox.dk/kontakt/).
 
-= Does my theme support this plugin? =
+= Will Content Aware Sidebars work with my theme? =
 
-Most likely. If the theme supports widget areas/sidebars, new sidebars can be created to replace or merge with those.
+Yes. If the theme supports dynamic widget areas/sidebars, new sidebars can be created to replace or merge with those.
 If not, it is still possible to create sidebars and then use the function `display_ca_sidebar()` in the theme.
 
-= My new sidebar is not shown where I expect it to? =
+= My new sidebar is not displayed where I expect it to? =
 
 All content rules are dependent of each other (when they collide), which makes it possible to create extremely focused rules for where to display a sidebar; e.g. with posts written by a given author and with a given category.
 However, this also means that it currently is not possible to create a single sidebar that should be displayed with posts by a given author or posts with a given category.
 
-Note the exposure setting, as it determines whether the selected rules apply to archives, singulars or both.
+Note the exposure setting as it determines whether the selected rules apply to archives, singulars or both.
 
 = How do I use display_ca_sidebar( $args )? =
 
