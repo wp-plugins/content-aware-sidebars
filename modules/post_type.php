@@ -15,25 +15,53 @@
  */
 class CASModule_post_type extends CASModule {
 	
+	/**
+	 * Registered public post types
+	 * @var array
+	 */
 	private $post_type_objects;
 	
+	/**
+	 * Constructor
+	 */
 	public function __construct() {
 		parent::__construct();
 		$this->id = 'post_types';
-		$this->name = __('Post Types','content-aware-sidebars');
+		$this->name = __('Post Types',ContentAwareSidebars::domain);
 		
 		add_action('transition_post_status', array(&$this,'post_ancestry_check'),10,3);
-		
+
+		add_action('wp_ajax_cas-autocomplete-'.$this->id, array(&$this,'ajax_posts_search'));
+
 	}
 	
+	/**
+	 * Get registered post types
+	 * @return array 
+	 */
 	protected function _get_content() {
-		
+		if (empty($this->post_type_objects)) {
+			// List public post types
+			foreach (get_post_types(array('public' => true), 'objects') as $post_type) {
+				$this->post_type_objects[$post_type->name] = $post_type;
+			}
+		}
+		return $this->post_type_objects;
 	}
 	
+	/**
+	 * Determine if content is relevant
+	 * @return boolean 
+	 */
 	public function is_content() {
 		return ((is_singular() || is_home()) && !is_front_page()) || is_post_type_archive();
 	}
 	
+	/**
+	 * Query where
+	 * @global string $post_type
+	 * @return string 
+	 */
 	public function db_where() {
 		if(is_singular()) {
 			return "(post_types.meta_value IS NULL OR post_types.meta_value IN('".get_post_type()."','".get_the_ID()."'))";
@@ -45,10 +73,18 @@ class CASModule_post_type extends CASModule {
 		return "(post_types.meta_value IS NULL OR post_types.meta_value = '".$post_type."')";
 	}
 
+	/**
+	 * Meta box content
+	 * @global object $post
+	 * @return void 
+	 */
 	public function meta_box_content() {
-		global $post;
+		global $post, $wpdb;
 
-		foreach ($this->_get_post_types() as $post_type) {
+		wp_enqueue_script('jquery-ui-tabs');
+
+		foreach ($this->_get_content() as $post_type) {
+
 			echo '<h4><a href="#">' . $post_type->label . '</a></h4>'."\n";
 			echo '<div class="cas-rule-content" id="cas-' . $this->id . '-' . $post_type->name . '">'."\n";
 			$meta = get_post_meta($post->ID, ContentAwareSidebars::prefix . 'post_types', false);
@@ -60,65 +96,123 @@ class CASModule_post_type extends CASModule {
 				$exclude[] = get_option('page_for_posts');
 			}
 
-			//WP3.1 does not support (array) as post_status
-			$posts = get_posts(array(
-				'numberposts'	=> 200,
-				'post_type'	=> $post_type->name,
-				'post_status'	=> 'publish,private,future',
-				'exclude'	=> $exclude
-			));
-			
+			$number_of_posts = (int)$wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = '{$post_type->name}' AND post_status IN('publish','private','future')");
+
+			echo '<div style="min-height:100%;">'."\n";
+
 			if($post_type->hierarchical) {
 				echo '<p>' . "\n";
-				echo '<label><input type="checkbox" name="post_types[]" value="_cas_sub_' . $post_type->name . '"' . checked(in_array("_cas_sub_" . $post_type->name, $current), true, false) . ' /> ' . __('Automatically select new children of a selected ancestor', 'content-aware-sidebars') . '</label>' . "\n";
+				echo '<label><input type="checkbox" name="post_types[]" value="'.ContentAwareSidebars::prefix.'sub_' . $post_type->name . '"' . checked(in_array(ContentAwareSidebars::prefix."sub_" . $post_type->name, $current), true, false) . ' /> ' . __('Automatically select new children of a selected ancestor', ContentAwareSidebars::domain) . '</label>' . "\n";
 				echo '</p>' . "\n";
 			}
+			
 			//WP3.1.4 does not support $post_type->labels->all_items
 			echo '<p>' . "\n";
-			echo '<label><input class="cas-chk-all" type="checkbox" name="post_types[]" value="' . $post_type->name . '"' . checked(in_array($post_type->name, $current), true, false) . ' /> ' . sprintf(__('Show with All %s', 'content-aware-sidebars'), $post_type->label) . '</label>' . "\n";
+			echo '<label><input class="cas-chk-all" type="checkbox" name="post_types[]" value="' . $post_type->name . '"' . checked(in_array($post_type->name, $current), true, false) . ' /> ' . sprintf(__('Show with All %s', ContentAwareSidebars::domain), $post_type->label) . '</label>' . "\n";
 			echo '</p>' . "\n";
 
-			if (!$posts || is_wp_error($posts)) {
+			if (!$number_of_posts) {
 				echo '<p>' . __('No items.') . '</p>';
 			} else {
 
-?>	
-						<div id="posttype-<?php echo $post_type->name; ?>" class="categorydiv" style="min-height:100%;">
-						<ul id="posttype-<?php echo $post_type->name; ?>-tabs" class="category-tabs">
-							<li class="tabs"><a href="#<?php echo $post_type->name; ?>-all" tabindex="3"><?php _e('View All'); ?></a></li>
-						</ul>		
-						<div id="<?php echo $post_type->name; ?>-all" class="tabs-panel" style="min-height:100%;">
-							<ul id="<?php echo $post_type->name; ?>checklist" class="list:<?php echo $post_type->name ?> categorychecklist form-no-clear">
-				<?php cas_posts_checklist($post->ID, array('post_type' => $post_type, 'posts' => $posts)); ?>
-							</ul>
-						</div>
-						</div>	
-				<?php
+				//WP3.1 does not support (array) as post_status
+				$posts = get_posts(array(
+					'posts_per_page'	=> 20,
+					'post_type'	=> $post_type->name,
+					'post_status'	=> 'publish,private,future',
+					'exclude'	=> array_merge($exclude,$current)
+				));
+				if(!empty($current)) {
+					$selected = get_posts(array(
+				'include'	=> $current,
+				'post_type'	=> $post_type->name
+			
+			));
+				} else {
+					$selected = array();
+				}
+
+
+			echo __('Search',ContentAwareSidebars::domain).' <input class="cas-autocomplete-' . $this->id . '-'. $post_type->name . ' cas-autocomplete" id="cas-autocomplete-' . $this->id . '" type="text" name="cas-autocomplete" value="" /> <input type="button" id="cas_add_url" class="button" value="'.__('Add',ContentAwareSidebars::domain).'"/>'."\n";
+
+
+			echo '<ul class="list:'.$field.' categorychecklist form-no-clear">'."\n";
+
+			$this->post_checklist($post->ID, $post_type, array_merge($selected,$posts), $current);
+
+			echo '</ul>'."\n";
+				
 			}
 
+			echo '</div>';
 			echo '</div>';
 		}
 	}
 
-	private function _get_post_types() {
-		if (empty($this->post_type_objects)) {
-			// List public post types
-			foreach (get_post_types(array('public' => true), 'objects') as $post_type) {
-				$this->post_type_objects[$post_type->name] = $post_type;
+	private function post_checklist($post_id = 0, $post_type, $posts, $selected_ids) {
+
+		$walker = new CAS_Walker_Checklist('post',array ('parent' => 'post_parent', 'id' => 'ID'));
+
+		$args = array(
+			'post_type'	=> $post_type,
+			'selected_cats' => $post_id ? $selected_ids : array()
+		);
+		
+		$checked_posts = array();
+		
+		foreach( $posts as $key => $value ) {
+			if (in_array($posts[$key]->ID, $args['selected_cats'])) {
+				$checked_posts[] = $posts[$key];
+				unset($posts[$key]);
 			}
 		}
-		return $this->post_type_objects;
+		
+		//Put checked posts on top
+		echo call_user_func_array(array(&$walker, 'walk'), array($checked_posts, 0, $args));
+		// Then the rest of them
+		echo call_user_func_array(array(&$walker, 'walk'), array($posts, 0, $args));
 	}
+
+	public function ajax_posts_search() {
+		
+		// Verify request
+		check_ajax_referer(basename('content-aware-sidebars.php'),'nonce');
+	
+		$suggestions = array();
+		if ( preg_match('/cas-autocomplete-'.$this->id.'-([a-zA-Z_-]*\b)/', $_REQUEST['type'], $matches) ) {
+			if(get_post_type_object( $matches[1] )) {
+				$posts = get_posts(array(
+					'posts_per_page' => 10,
+					'post_type' => $matches[2],
+					's' => $_REQUEST['term'],
+				));
+				foreach($posts as $post) {
+					$suggestions[] = array(
+						'label' => $post->post_title,
+						'value' => $post->post_title,
+						'id'	=> $post->ID,
+						'post_type' => $post->post_type
+					);
+				}
+			}
+		}
+
+		echo json_encode($suggestions);
+
+		die();
+	}
+
 	
 	/**
-	 * 
-	 * @param string $new_status
-	 * @param string $old_status
-	 * @param object $post
+	 * Automatically select child of selected parent
+	 * @param  string $new_status 
+	 * @param  string $old_status 
+	 * @param  object $post       
+	 * @return void 
 	 */
 	public function post_ancestry_check($new_status, $old_status, $post) {
 		
-		if($post->post_type != 'sidebar') {
+		if($post->post_type != ContentAwareSidebars::type_sidebar) {
 			
 			$status = array('publish','private','future');
 			// Only new posts are relevant
@@ -129,12 +223,12 @@ class CASModule_post_type extends CASModule {
 				
 					// Get sidebars with post ancestor wanting to auto-select post
 					$sidebars = new WP_Query(array(
-						'post_type'				=> 'sidebar',
+						'post_type'				=> ContentAwareSidebars::type_sidebar,
 						'meta_query'			=> array(
 							'relation'			=> 'AND',
 							array(
 								'key'			=> ContentAwareSidebars::prefix . $this->id,
-								'value'			=> '_cas_sub_' . $post->post_type,
+								'value'			=> ContentAwareSidebars::prefix.'sub_' . $post->post_type,
 								'compare'		=> '='
 							),
 							array(
@@ -150,12 +244,9 @@ class CASModule_post_type extends CASModule {
 							add_post_meta($sidebar->ID, ContentAwareSidebars::prefix.$this->id, $post->ID);
 						}
 					}
-
-			}
-		}
-			
-		}
-		
+				}
+			}	
+		}	
 	}
 
 }

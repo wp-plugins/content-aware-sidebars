@@ -3,7 +3,7 @@ Contributors: intoxstudio
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=KPZHE6A72LEN4&lc=US&item_name=WordPress%20Plugin%3a%20Content%20Aware%20Sidebars&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted
 Tags: sidebar, widget area, content aware, context aware, seo, dynamic, flexible, modular, bbpress, buddypress, qtranslate, polylang, transposh, wpml
 Requires at least: 3.1
-Tested up to: 3.5
+Tested up to: 3.5.1
 Stable tag: 1.2
 License: GPL2
 
@@ -52,6 +52,7 @@ No extra database tables or table columns will be added.
 * Danish (da_DK): [Joachim Jensen](http://www.intox.dk/)
 * Italian (it_IT): [Luciano Del Fico](http://www.myweb2.it/)
 * Lithuanian (lt_LT): [Vincent G](http://host1free.com/)
+* Slovak (sk_SK): [Branco](http://webhostinggeeks.com/)
 
 If you have translated the plugin into your language or updated an existing translation, please send the .po and .mo files to jv[at]intox.dk.
 Download the latest [.pot file](http://plugins.svn.wordpress.org/content-aware-sidebars/trunk/lang/content-aware-sidebars.pot) or the [.po file in your language](http://plugins.svn.wordpress.org/content-aware-sidebars/trunk/lang/).
@@ -106,6 +107,17 @@ The function accepts URL-style strings as parameters too, like the standard Word
 5. Viewing a Post that contains Very Categorized. `Very Categorized Posts` sidebar has replaced `Main Sidebar`
 
 == Changelog ==
+
+= 1.3 =
+
+* Added: post type posts and taxonomy terms now searchable on edit page TODO
+* Added: sidebar handle and host shown on widgets page
+* Added: slovak translation
+* Fixed: sidebar meta boxes more robust to external modifications
+* Fixed: admin column headers more robust to external modifications
+* Fixed: sidebar menu now always hidden for users without right cap
+* Fixed: code optimization and refactor for performance
+* Removed: support for sidebar excerpt
 
 = 1.2 =
 

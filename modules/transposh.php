@@ -14,22 +14,39 @@
  */
 class CASModule_transposh extends CASModule {
 	
+	/**
+	 * Constructor
+	 */
 	public function __construct() {
 		parent::__construct();
 		$this->id = 'language';
-		$this->name = __('Languages','content-aware-sidebars');
+		$this->name = __('Languages',ContentAwareSidebars::domain);
 	}
 	
+	/**
+	 * Determine if content is relevant
+	 * @return boolean 
+	 */
 	public function is_content() {
 		return true;
 	}
 	
+	/**
+	 * Where query
+	 * @global object $my_transposh_plugin
+	 * @return string 
+	 */
 	public function db_where() {
 		global $my_transposh_plugin;
 		return "(language.meta_value IS NULL OR language.meta_value IN('language','".$my_transposh_plugin->tgl."'))";
 		
 	}
 
+	/**
+	 * Get languages
+	 * @global object $my_transposh_plugin
+	 * @return array 
+	 */
 	protected function _get_content() {
 		global $my_transposh_plugin;
 		$langs = array();

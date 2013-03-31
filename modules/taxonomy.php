@@ -15,35 +15,54 @@
  */
 class CASModule_taxonomy extends CASModule {
 	
+	/**
+	 * Registered public taxonomies
+	 * @var array
+	 */
 	private $taxonomy_objects;
+
+	/**
+	 * Terms of a given singular
+	 * @var array
+	 */
 	private $post_terms;
 	
+	/**
+	 * Constructor
+	 */
 	public function __construct() {
 		parent::__construct();
 		$this->id = 'taxonomies';
-		$this->name = __('Taxonomies','content-aware-sidebars');
-		
+		$this->name = __('Taxonomies',ContentAwareSidebars::domain);
+
+		add_action('init', array(&$this,'add_taxonomies_to_sidebar'),100);
+		add_action('admin_menu',array(&$this,'clear_admin_menu'));
 		add_action('created_term', array(&$this,'term_ancestry_check'),10,3);
 		
 	}
 	
+	/**
+	 * Determine if content is relevant
+	 * @return boolean 
+	 */
 	public function is_content() {		
 		if(is_singular()) {
 			// Check if content has any taxonomies supported
 			$taxonomies = get_object_taxonomies(get_post_type());
 			if($taxonomies) {
-				$this->post_terms = wp_get_object_terms(get_the_ID(),$taxonomies);
 				// Check if content has any actual taxonomy terms
-				if($this->post_terms) {
-					return true;
-				}
+				$this->post_terms = wp_get_object_terms(get_the_ID(),$taxonomies);
+				return !empty($this->post_terms);
 			}
-		} else if(is_tax() || is_category() || is_tag()) {
-			return true;
+			return false;
 		}
-		return false;
+		return is_tax() || is_category() || is_tag();
 	}
 	
+	/**
+	 * Query join
+	 * @return string 
+	 */
 	public function db_join() {
 		global $wpdb;
 		
@@ -56,6 +75,10 @@ class CASModule_taxonomy extends CASModule {
 	
 	}
 	
+	/**
+	 * Query where
+	 * @return string 
+	 */
 	public function db_where() {
 		
 		if(is_singular()) {
@@ -82,18 +105,37 @@ class CASModule_taxonomy extends CASModule {
 		
 	}
 	
+	/**
+	 * Query where2
+	 * @return string 
+	 */
 	public function db_where2() {
 		return "terms.slug IS NOT NULL OR taxonomies.meta_value IS NOT NULL";
 	}
 
-	public function _get_content() {
-		
+	/**
+	 * Get registered taxonomies
+	 * @return array 
+	 */
+	protected function _get_content() {
+		// List public taxonomies
+		if (empty($this->taxonomy_objects)) {
+			foreach (get_taxonomies(array('public' => true), 'objects') as $tax) {
+				$this->taxonomy_objects[$tax->name] = $tax;
+			}
+		}
+		return $this->taxonomy_objects;
 	}
 
+	/**
+	 * Meta box content
+	 * @global object $post
+	 * @return void 
+	 */
 	public function meta_box_content() {
 		global $post;
 
-		foreach ($this->_get_taxonomies() as $taxonomy) {
+		foreach ($this->_get_content() as $taxonomy) {
 			echo '<h4><a href="#">' . $taxonomy->label . '</a></h4>'."\n";
 			echo '<div class="cas-rule-content" id="cas-' . $this->id . '-' . $taxonomy->name . '">';
 
@@ -104,11 +146,11 @@ class CASModule_taxonomy extends CASModule {
 
 			if($taxonomy->hierarchical) {
 				echo '<p>' . "\n";
-				echo '<label><input type="checkbox" name="taxonomies[]" value="_cas_sub_' . $taxonomy->name . '"' . checked(in_array("_cas_sub_" . $taxonomy->name, $current), true, false) . ' /> ' . __('Automatically select new children of a selected ancestor', 'content-aware-sidebars') . '</label>' . "\n";
+				echo '<label><input type="checkbox" name="taxonomies[]" value="'.ContentAwareSidebars::prefix.'sub_' . $taxonomy->name . '"' . checked(in_array(ContentAwareSidebars::prefix."_sub_" . $taxonomy->name, $current), true, false) . ' /> ' . __('Automatically select new children of a selected ancestor', ContentAwareSidebars::domain) . '</label>' . "\n";
 				echo '</p>' . "\n";
 			}
 			echo '<p>' . "\n";
-			echo '<label><input class="cas-chk-all" type="checkbox" name="taxonomies[]" value="' . $taxonomy->name . '"' . checked(in_array($taxonomy->name, $current), true, false) . ' /> ' . sprintf(__('Show with %s', 'content-aware-sidebars'), $taxonomy->labels->all_items) . '</label>' . "\n";
+			echo '<label><input class="cas-chk-all" type="checkbox" name="taxonomies[]" value="' . $taxonomy->name . '"' . checked(in_array($taxonomy->name, $current), true, false) . ' /> ' . sprintf(__('Show with %s', ContentAwareSidebars::domain), $taxonomy->labels->all_items) . '</label>' . "\n";
 			echo '</p>' . "\n";
 			
 			if (!$terms || is_wp_error($terms)) {
@@ -139,24 +181,41 @@ class CASModule_taxonomy extends CASModule {
 			echo '</div>'."\n";
 		}
 	}
-	
-	private function _get_taxonomies() {
-		// List public taxonomies
-		if (empty($this->taxonomy_objects)) {
-			foreach (get_taxonomies(array('public' => true), 'objects') as $tax) {
-				$this->taxonomy_objects[$tax->name] = $tax;
-			}
+
+	/**
+	 * Register taxonomies to sidebar post type
+	 * @return void 
+	 */
+	public function add_taxonomies_to_sidebar() {
+		foreach($this->_get_content() as $tax) {
+			register_taxonomy_for_object_type( $tax->name, ContentAwareSidebars::type_sidebar );
 		}
-		return $this->taxonomy_objects;
+	}
+
+
+	/**
+	 * Remove taxonomy shortcuts from menu and standard meta boxes.
+	 * @return void
+	 */
+	public function clear_admin_menu() {
+		if(current_user_can('edit_theme_options')) {
+			foreach($this->_get_content() as $tax) {
+				remove_submenu_page('edit.php?post_type='.ContentAwareSidebars::type_sidebar,'edit-tags.php?taxonomy='.$tax->name.'&amp;post_type='.ContentAwareSidebars::type_sidebar);
+			}
+		} else {
+			// Remove those taxonomies left in the menu when it should be hidden
+			foreach($this->_get_content as $tax) {
+				remove_menu_page('edit-tags.php?taxonomy='.$tax->name.'&amp;post_type='.ContentAwareSidebars::type_sidebar);
+			}	
+		}
 	}
 	
 	/**
-	 * 
 	 * Auto-select children of selected ancestor
-	 * 
-	 * @param int $term_id
-	 * @param int $tt_id
-	 * @param string $taxonomy
+	 * @param  int $term_id  
+	 * @param  int $tt_id    
+	 * @param  string $taxonomy 
+	 * @return void           
 	 */
 	public function term_ancestry_check($term_id, $tt_id, $taxonomy) {
 		
@@ -166,11 +225,11 @@ class CASModule_taxonomy extends CASModule {
 			if($term->parent != '0') {	
 				// Get sidebars with term ancestor wanting to auto-select term
 				$posts = new WP_Query(array(
-					'post_type'					=> 'sidebar',
+					'post_type'					=> ContentAwareSidebars::type_sidebar,
 					'meta_query'				=> array(
 						array(
 							'key'				=> ContentAwareSidebars::prefix . $this->id,
-							'value'				=> '_cas_sub_' . $taxonomy,
+							'value'				=> ContentAwareSidebars::prefix.'sub_' . $taxonomy,
 							'compare'			=> '='
 						)
 					),

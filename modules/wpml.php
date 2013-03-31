@@ -14,20 +14,35 @@
  */
 class CASModule_wpml extends CASModule {
 	
+	/**
+	 * Constructor
+	 */
 	public function __construct() {
 		parent::__construct();
 		$this->id = 'language';
-		$this->name = __('Languages','content-aware-sidebars');
+		$this->name = __('Languages',ContentAwareSidebars::domain);
 	}
 	
+	/**
+	 * Determine if content is relevant
+	 * @return boolean 
+	 */
 	public function is_content() {
 		return true;
 	}
 	
+	/**
+	 * Where query
+	 * @return string 
+	 */
 	public function db_where() {
 		return "(language.meta_value IS NULL OR language.meta_value IN('language','".ICL_LANGUAGE_CODE."'))";	
 	}
 
+	/**
+	 * Get languages
+	 * @return array 
+	 */
 	protected function _get_content() {
 		$langs = array();
 		

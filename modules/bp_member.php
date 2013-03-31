@@ -14,15 +14,23 @@
  */
 class CASModule_bp_member extends CASModule {
 	
+	/**
+	 * Constructor
+	 */
 	public function __construct() {
 		parent::__construct();
 		$this->id = 'bp_member';
-		$this->name = __('BuddyPress Members','content-aware-sidebars');
+		$this->name = __('BuddyPress Members',ContentAwareSidebars::domain);
 		
 		add_filter('cas-is-content-static', array(&$this,'static_is_content'));
 		
 	}
 	
+	/**
+	 * Get member pages
+	 * @global object $bp
+	 * @return array 
+	 */
 	protected function _get_content() {
 		global $bp;
 		
@@ -38,29 +46,44 @@ class CASModule_bp_member extends CASModule {
 		return $content;
 	}
 	
+	/**
+	 * Determine if content is relevant
+	 * @global object  $bp
+	 * @return boolean 
+	 */
 	public function is_content() {
 		global $bp;
 		return $bp->displayed_user->domain != null;
 	}
 	
+	/**
+	 * Query where
+	 * @global object $bp
+	 * @return string
+	 */
 	public function db_where() {
 		global $bp;
 		return "(bp_member.meta_value IS NULL OR bp_member.meta_value IN ('".$bp->current_component."','".$bp->current_component."-".$bp->current_action."'))";
 
 	}
 	
+	/**
+	 * Meta box content
+	 * @global object $post
+	 * @global object $bp
+	 * @return void 
+	 */
 	public function meta_box_content() {
 		global $post, $bp;
 		
 		echo '<h4><a href="#">'.$this->name.'</a></h4>'."\n";
-		echo '<div class="cas-rule-content" id="cas-' . $this->id . '">';
+		echo '<div class="cas-rule-content" id="cas-' . $this->id . '">'."\n";
 		$field = $this->id;
 		$meta = get_post_meta($post->ID, ContentAwareSidebars::prefix . $field, false);
 		$current = $meta != '' ? $meta : array();
-?>
-<div style="min-height:100%;">
-						<ul class="list:<?php echo $field; ?> categorychecklist form-no-clear">
-		<?php
+
+		echo '<div style="min-height:100%;">'."\n";
+		echo '<ul class="list:'.$field.' categorychecklist form-no-clear">'."\n";
 		foreach ($this->_get_content() as $id => $name) {
 			echo '<li><label class="selectit"><input type="checkbox" name="' . $field . '[]" value="' . $id . '"' . (in_array($id, $current) ? ' checked="checked"' : '') . ' /> ' . $name . '</label></li>' . "\n";
 			if(isset($bp->bp_options_nav[$id])) {
@@ -72,12 +95,18 @@ class CASModule_bp_member extends CASModule {
 			}
 			
 		}
-		?>
-						</ul></div>
-		<?php
-		echo '</div>';
+
+		echo '</ul>'."\n";
+		echo '</div>'."\n";
+		echo '</div>'."\n";
 	}
 	
+	/**
+	 * Avoid collision with content of static module
+	 * Somehow buddypress pages pass is_404()
+	 * @param  boolean $content 
+	 * @return boolean          
+	 */
 	public function static_is_content($content) {
 		return $content && !$this->is_content();
 	}
