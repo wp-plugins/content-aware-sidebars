@@ -11,7 +11,16 @@
  */
 abstract class CASModule {
 	
+	/**
+	 * Module idenfification
+	 * @var string
+	 */
 	protected $id;
+
+	/**
+	 * Module name
+	 * @var string
+	 */
 	protected $name;
 	
 	/**
@@ -23,6 +32,11 @@ abstract class CASModule {
 		$this->id = substr(get_class($this),strpos(get_class($this),'_')+1);
 	}
 	
+	/**
+	 * Default meta box content
+	 * @global object $post
+	 * @return void 
+	 */
 	public function meta_box_content() {
 		global $post;
 		
@@ -36,7 +50,7 @@ abstract class CASModule {
 		$current = $meta != '' ? $meta : array();
 		?>
 		<p>
-			<label><input type="checkbox" name="<?php echo $field; ?>[]" value="<?php echo $field; ?>" <?php checked(in_array($field, $current), true, true); ?> /> <?php printf(__('Show with All %s','content-aware-sidebars'),$this->name); ?></label>
+			<label><input class="cas-chk-all" type="checkbox" name="<?php echo $field; ?>[]" value="<?php echo $field; ?>" <?php checked(in_array($field, $current), true, true); ?> /> <?php printf(__('Show with All %s',ContentAwareSidebars::domain),$this->name); ?></label>
 		</p>
 		<div id="list-<?php echo $field; ?>" class="categorydiv" style="min-height:100%;">
 			<ul id="<?php echo $field; ?>-tabs" class="category-tabs">
@@ -46,7 +60,7 @@ abstract class CASModule {
 				<ul id="authorlistchecklist" class="list:<?php echo $field; ?> categorychecklist form-no-clear">
 					<?php
 					foreach($this->_get_content() as $id => $name) {
-						echo '<li><label><input type="checkbox" name="'.$field.'[]" value="'.$id.'"'.checked(in_array($id,$current), true, false).' /> '.$name.'</label></li>'."\n";
+						echo '<li><label><input class="cas-' . $this->id . '" type="checkbox" name="'.$field.'[]" value="'.$id.'"'.checked(in_array($id,$current), true, false).' /> '.$name.'</label></li>'."\n";
 					}
 					?>
 				</ul>
@@ -56,11 +70,23 @@ abstract class CASModule {
 		echo '</div>';
 	}
 	
+	/**
+	 * Default query join
+	 * @global object $wpdb
+	 * @return string 
+	 */
 	public function db_join() {
 		global $wpdb;
 		return "LEFT JOIN $wpdb->postmeta {$this->id} ON {$this->id}.post_id = posts.ID AND {$this->id}.meta_key = '".ContentAwareSidebars::prefix.$this->id."' ";
 	}
 	
+	/**
+	 * Exclude sidebar. TODO: revise
+	 * @param  boolean $continue 
+	 * @param  object $post     
+	 * @param  string $prefix   
+	 * @return boolean           
+	 */
 	public function exclude_sidebar($continue, $post, $prefix) {
 		if(!$continue) {
 			//print_r($this->id."<br />");
@@ -73,16 +99,38 @@ abstract class CASModule {
 		
 	}
 	
+	/**
+	 * Default where2 query
+	 * @return string 
+	 */
 	public function db_where2() {
 		return "{$this->id}.meta_value IS NOT NULL";
 	}
 	
+	/**
+	 * Idenficiation getter
+	 * @return string 
+	 */
 	public function get_id() {
 		return $this->id;
 	}
 	
+	/**
+	 * Get content for sidebar edit screen
+	 * @return array 
+	 */
 	abstract protected function _get_content();
+
+	/**
+	 * Determine if current content is relevant
+	 * @return boolean 
+	 */
 	abstract public function is_content();
+
+	/**
+	 * Where query
+	 * @return string 
+	 */
 	abstract public function db_where();
 	
 }

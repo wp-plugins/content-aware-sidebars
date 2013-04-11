@@ -1,6 +1,7 @@
 <?php
 /**
  * @package Content Aware Sidebars
+ * @author Joachim Jensen <jv@intox.dk>
  */
 
 if(!defined('WP_UNINSTALL_PLUGIN')) {
@@ -13,7 +14,7 @@ delete_option('cas_db_version');
 // Remove all sidebars
 $posts = get_posts(array(
 	'numberposts'	=> -1,
-	'post_type'	=> 'sidebar',
+	'post_type'		=> 'sidebar',
 	'post_status'	=> 'any'
 ));
 foreach($posts as $post) {
@@ -23,4 +24,3 @@ foreach($posts as $post) {
 // Remove user meta
 global $wpdb;
 $wpdb->query("DELETE FROM $wpdb->usermeta WHERE meta_key IN('metaboxhidden_sidebar','closedpostboxes_sidebar')");
-
