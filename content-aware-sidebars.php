@@ -7,7 +7,7 @@
 Plugin Name: Content Aware Sidebars
 Plugin URI: http://www.intox.dk/
 Description: Manage and show sidebars according to the content being viewed.
-Version: 1.2
+Version: 1.3
 Author: Joachim Jensen, Intox Studio
 Author URI: http://www.intox.dk/
 Text Domain: content-aware-sidebars
@@ -140,7 +140,7 @@ final class ContentAwareSidebars {
 			'author'		=> true,
 			'page_template'	=> true,
 			'taxonomy'		=> true,
-			'url'			=> true,
+			'url'			=> false,
 			'bbpress'		=> function_exists('bbp_get_version'),	// bbPress
 			'bp_member'		=> defined('BP_VERSION'),				// BuddyPress
 			'polylang'		=> defined('POLYLANG_VERSION'),			// Polylang
@@ -640,7 +640,8 @@ final class ContentAwareSidebars {
 
 		$screen = get_current_screen();		
 
-		if(!($screen->post_type == self::type_sidebar && $screen->base == 'post'))
+		// Post type not set on all pages in WP3.1
+		if(!(isset($screen->post_type) && $screen->post_type == self::type_sidebar && $screen->base == 'post'))
 			return;
 
 		// Names of whitelisted meta boxes
@@ -931,13 +932,15 @@ final class ContentAwareSidebars {
 	 */
 	public function load_admin_scripts($hook) {
 
-		wp_register_script('cas_admin_script', WP_PLUGIN_URL . '/' . $this->basename . '/js/cas_admin.js', array('jquery'), '0.1', true);
-		wp_register_style('cas_admin_style', WP_PLUGIN_URL . '/' . $this->basename . '/css/style.css', array(), '0.1');
+		wp_register_script('cas_admin_script', WP_PLUGIN_URL . '/' . $this->basename . '/js/cas_admin.js', array('jquery'), '1.2', true);
+		wp_register_style('cas_admin_style', WP_PLUGIN_URL . '/' . $this->basename . '/css/style.css', array(), '1.2');
 
 		if ($hook == 'post.php' || $hook == 'post-new.php') {
-			// WordPress < 3.3 does not have jQuery UI accordion
+			// WordPress < 3.3 does not have jQuery UI accordion and autocomplete
 			if (get_bloginfo('version') < 3.3) {
+				wp_register_script('cas-jquery-ui-autocomplete', WP_PLUGIN_URL . '/' . $this->basename . '/js/jquery.ui.autocomplete.js', array('jquery-ui-core', 'jquery-ui-widget', 'jquery-ui-position'), '1.8.9', true);
 				wp_register_script('cas-jquery-ui-accordion', WP_PLUGIN_URL . '/' . $this->basename . '/js/jquery.ui.accordion.js', array('jquery-ui-core', 'jquery-ui-widget'), '1.8.9', true);
+				wp_enqueue_script('cas-jquery-ui-autocomplete');
 				wp_enqueue_script('cas-jquery-ui-accordion');
 			} else {
 				wp_enqueue_script('jquery-ui-accordion');

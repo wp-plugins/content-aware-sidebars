@@ -82,14 +82,13 @@ class CASModule_bp_member extends CASModule {
 		$meta = get_post_meta($post->ID, ContentAwareSidebars::prefix . $field, false);
 		$current = $meta != '' ? $meta : array();
 
-		echo '<div style="min-height:100%;">'."\n";
-		echo '<ul class="list:'.$field.' categorychecklist form-no-clear">'."\n";
+		echo '<ul class="cas-contentlist categorychecklist form-no-clear">'."\n";
 		foreach ($this->_get_content() as $id => $name) {
 			echo '<li><label class="selectit"><input type="checkbox" name="' . $field . '[]" value="' . $id . '"' . (in_array($id, $current) ? ' checked="checked"' : '') . ' /> ' . $name . '</label></li>' . "\n";
 			if(isset($bp->bp_options_nav[$id])) {
 				echo '<ul class="children">';
 				foreach($bp->bp_options_nav[$id] as $child) {
-					echo '<li style="padding-left:20px;"><label class="selectit"><input type="checkbox" name="' . $field . '[]" value="' . $id . '-'. $child['slug'].'"' . (in_array($id . '-'. $child['slug'], $current) ? ' checked="checked"' : '') . ' /> ' . $child['name'] . '</label></li>' . "\n";
+					echo '<li><label class="selectit"><input type="checkbox" name="' . $field . '[]" value="' . $id . '-'. $child['slug'].'"' . (in_array($id . '-'. $child['slug'], $current) ? ' checked="checked"' : '') . ' /> ' . $child['name'] . '</label></li>' . "\n";
 				}
 				echo '</ul>';
 			}
@@ -97,7 +96,6 @@ class CASModule_bp_member extends CASModule {
 		}
 
 		echo '</ul>'."\n";
-		echo '</div>'."\n";
 		echo '</div>'."\n";
 	}
 	

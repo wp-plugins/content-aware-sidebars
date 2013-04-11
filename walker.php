@@ -76,9 +76,8 @@ class CAS_Walker_Checklist extends Walker {
 			
 			$name = ($taxonomy->name == 'category' ? 'post_category' : 'tax_input['.$taxonomy->name.']');                   
 			$value = ($taxonomy->hierarchical ? 'term_id' : 'slug');
-			$class = (in_array( $term->term_id, $popular_terms ) ? ' class="popular-category"' : '');
                 
-			$output .= "\n".'<li id="'.$taxonomy->name.'-'.$term->term_id.'"'.$class.'><label class="selectit"><input class="cas-taxonomies-'.$taxonomy->name.'" value="'.$term->$value.'" type="checkbox" name="'.$name.'[]" id="in-'.$taxonomy->name.'-'.$term->term_id.'"'.checked(in_array($term->term_id,$selected_terms),true,false).'/> '.esc_html( apply_filters('the_category', $term->name )) . '</label>';
+			$output .= "\n".'<li id="'.$taxonomy->name.'-'.$term->term_id.'"><label class="selectit"><input class="cas-taxonomies-'.$taxonomy->name.'" value="'.$term->$value.'" type="checkbox" name="'.$name.'[]"'.checked(in_array($term->term_id,$selected_terms),true,false).'/> '.esc_html( $term->name ) . '</label>';
 		
 		}
 	}
@@ -95,62 +94,6 @@ class CAS_Walker_Checklist extends Walker {
 		$output .= "</li>\n";
 	}
 	
-}
-
-/**
- * Show terms checklist
- * @param  int   $post_id 
- * @param  array $args 
- * @return void 
- */
-function cas_terms_checklist($post_id = 0, $args = array()) {
- 	$defaults = array(
-		'popular_terms' => false,
-		'taxonomy' => 'category',
-		'terms' => null,
-		'checked_ontop' => true
-	);
-	extract(wp_parse_args($args, $defaults), EXTR_SKIP);
-
-	$walker = new CAS_Walker_Checklist('category',array('parent' => 'parent', 'id' => 'term_id'));
-
-	if(!is_object($taxonomy))
-		$taxonomy = get_taxonomy($taxonomy);
-        
-        $args = array(
-		'taxonomy'	=> $taxonomy,
-		'disabled'	=> !current_user_can($taxonomy->cap->assign_terms)
-	);
-
-	if ($post_id)
-		$args['selected_terms'] = wp_get_object_terms($post_id, $taxonomy->name, array_merge($args, array('fields' => 'ids')));
-	else
-		$args['selected_terms'] = array();
-
-	if (is_array($popular_terms))
-		$args['popular_terms'] = $popular_terms;
-	else
-		$args['popular_terms'] = get_terms( $taxonomy->name, array( 'fields' => 'ids', 'orderby' => 'count', 'order' => 'DESC', 'number' => 10, 'hierarchical' => false ) );
-
-	if(!$terms)
-		$terms = (array) get_terms($taxonomy->name, array('get' => 'all'));
-
-	if ($checked_ontop) {
-		$checked_terms = array();
-		$keys = array_keys( $terms );
-
-		foreach($keys as $k) {
-			if (in_array($terms[$k]->term_id, $args['selected_terms'])) {
-				$checked_terms[] = $terms[$k];
-				unset($terms[$k]);
-			}
-		}
-
-		// Put checked terms on top
-		echo call_user_func_array(array(&$walker, 'walk'), array($checked_terms, 0, $args));
-	}
-	// Then the rest of them
-	echo call_user_func_array(array(&$walker, 'walk'), array($terms, 0, $args));
 }
 
 /**
@@ -191,40 +134,4 @@ function cas_popular_terms_checklist( $taxonomy, $default = 0, $number = 10, $ec
 		<?php
 	}
 	return $popular_ids;
-}
-
-/**
- * Show posts checklist
- * @param  int   $post_id 
- * @param  array $args 
- * @return void 
- */
-function cas_posts_checklist($post_id = 0, $args = array()) {
- 	$defaults = array(
-		'post_type' => null,
-		'posts' => null,
-		'checked_ontop' => false
-	);
-	extract(wp_parse_args($args, $defaults), EXTR_SKIP);
-
-	$walker = new CAS_Walker_Checklist('post',array ('parent' => 'post_parent', 'id' => 'ID'));
-
-	$args = array(
-		'post_type'	=> $post_type
-	);
-
-	if($post_id)
-		$args['selected_cats'] = get_post_meta($post_id, ContentAwareSidebars::prefix.'post_types', false);
-	else
-		$args['selected_cats'] = array();
-
-	if(!$posts)
-		$posts = get_posts(array(
-			'numberposts'	=> -1,
-			'post_type'		=> $post_type->name,
-			'post_status'	=> array('publish','private','future'),
-		));	
-	
-	// Then the rest of them
-	echo call_user_func_array(array(&$walker, 'walk'), array($posts, 0, $args));
 }

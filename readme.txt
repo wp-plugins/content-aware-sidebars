@@ -3,8 +3,8 @@ Contributors: intoxstudio
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=KPZHE6A72LEN4&lc=US&item_name=WordPress%20Plugin%3a%20Content%20Aware%20Sidebars&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted
 Tags: sidebar, widget area, content aware, context aware, seo, dynamic, flexible, modular, bbpress, buddypress, qtranslate, polylang, transposh, wpml
 Requires at least: 3.1
-Tested up to: 3.5.1
-Stable tag: 1.2
+Tested up to: 3.6
+Stable tag: 1.3
 License: GPL2
 
 Create and display sidebars according to the content being viewed.
@@ -110,7 +110,7 @@ The function accepts URL-style strings as parameters too, like the standard Word
 
 = 1.3 =
 
-* Added: post type posts and taxonomy terms now searchable on edit page TODO
+* Added: post type posts and taxonomy terms now searchable on edit page
 * Added: sidebar handle and host shown on widgets page
 * Added: slovak translation
 * Fixed: sidebar meta boxes more robust to external modifications

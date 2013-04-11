@@ -76,12 +76,11 @@ class CASModule_post_type extends CASModule {
 	/**
 	 * Meta box content
 	 * @global object $post
+	 * @global object $wpdb
 	 * @return void 
 	 */
 	public function meta_box_content() {
 		global $post, $wpdb;
-
-		wp_enqueue_script('jquery-ui-tabs');
 
 		foreach ($this->_get_content() as $post_type) {
 
@@ -120,27 +119,21 @@ class CASModule_post_type extends CASModule {
 					'posts_per_page'	=> 20,
 					'post_type'	=> $post_type->name,
 					'post_status'	=> 'publish,private,future',
-					'exclude'	=> array_merge($exclude,$current)
+					'exclude'	=> array_merge($exclude,$current),
 				));
 				if(!empty($current)) {
 					$selected = get_posts(array(
-				'include'	=> $current,
-				'post_type'	=> $post_type->name
-			
-			));
+						'include'	=> $current,
+						'post_type'	=> $post_type->name
+					));
 				} else {
 					$selected = array();
 				}
 
-
-			echo __('Search',ContentAwareSidebars::domain).' <input class="cas-autocomplete-' . $this->id . '-'. $post_type->name . ' cas-autocomplete" id="cas-autocomplete-' . $this->id . '" type="text" name="cas-autocomplete" value="" /> <input type="button" id="cas_add_url" class="button" value="'.__('Add',ContentAwareSidebars::domain).'"/>'."\n";
-
-
-			echo '<ul class="list:'.$field.' categorychecklist form-no-clear">'."\n";
-
-			$this->post_checklist($post->ID, $post_type, array_merge($selected,$posts), $current);
-
-			echo '</ul>'."\n";
+				echo __('Search',ContentAwareSidebars::domain).' <input class="cas-autocomplete-' . $this->id . ' cas-autocomplete" id="cas-autocomplete-' . $this->id . '-' . $post_type->name . '" type="text" name="cas-autocomplete" value="" /> <input type="button" id="cas-add-' . $this->id . '-' . $post_type->name . '" class="button" value="'.__('Add',ContentAwareSidebars::domain).'"/>'."\n";
+				echo '<ul id="cas-list-' . $this->id . '-' . $post_type->name . '" class="cas-contentlist categorychecklist form-no-clear">'."\n";
+				$this->post_checklist($post->ID, $post_type, array_merge($selected,$posts), $current);
+				echo '</ul>'."\n";
 				
 			}
 
@@ -149,6 +142,14 @@ class CASModule_post_type extends CASModule {
 		}
 	}
 
+	/**
+	 * Show posts from a specific post type
+	 * @param  int     $post_id      
+	 * @param  object  $post_type    
+	 * @param  array   $posts        
+	 * @param  array   $selected_ids 
+	 * @return void                
+	 */
 	private function post_checklist($post_id = 0, $post_type, $posts, $selected_ids) {
 
 		$walker = new CAS_Walker_Checklist('post',array ('parent' => 'post_parent', 'id' => 'ID'));
@@ -173,6 +174,10 @@ class CASModule_post_type extends CASModule {
 		echo call_user_func_array(array(&$walker, 'walk'), array($posts, 0, $args));
 	}
 
+	/**
+	 * Get posts with AJAX search
+	 * @return void
+	 */
 	public function ajax_posts_search() {
 		
 		// Verify request
@@ -181,24 +186,32 @@ class CASModule_post_type extends CASModule {
 		$suggestions = array();
 		if ( preg_match('/cas-autocomplete-'.$this->id.'-([a-zA-Z_-]*\b)/', $_REQUEST['type'], $matches) ) {
 			if(get_post_type_object( $matches[1] )) {
+				$exclude = array();
+				if ($matches[1] == 'page' && 'page' == get_option('show_on_front')) {
+					$exclude[] = get_option('page_on_front');
+					$exclude[] = get_option('page_for_posts');
+				}
 				$posts = get_posts(array(
 					'posts_per_page' => 10,
-					'post_type' => $matches[2],
+					'post_type' => $matches[1],
 					's' => $_REQUEST['term'],
+					'exclude' => $exclude
 				));
 				foreach($posts as $post) {
 					$suggestions[] = array(
 						'label' => $post->post_title,
 						'value' => $post->post_title,
 						'id'	=> $post->ID,
-						'post_type' => $post->post_type
+						'module' => $this->id,
+						'name' => $this->id,
+						'id2' => $this->id.'-'.$post->post_type,
+						'elem' => $post->post_type.'-'.$post->ID
 					);
 				}
 			}
 		}
 
 		echo json_encode($suggestions);
-
 		die();
 	}
 
