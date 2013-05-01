@@ -3,107 +3,107 @@
  * @author Joachim Jensen <jv@intox.dk>
  */
 
-jQuery( "#cas-accordion" ).accordion({
-	header: 'h4',
-	autoHeight: false,
-	collapsible: true
-});
+(function($) {
 
-jQuery(document).ready(function($) {
-        
-        handleAllCheckbox("post_types","posttype");
-        handleAllCheckbox("taxonomies","taxonomy");
-        handleAllCheckbox("authors","list");
-        handleAllCheckbox("page_templates","list");
-        
-        handleSidebarHandle();
-        
-	/**
-	 *
-	 * Set tickers
-	 *
-	 */
-	$('.cas-rule-content :input').each( function() {
-		$(this).parents('.cas-rule-content').prev().toggleClass('cas-tick',$('#'+$(this).parents('.cas-rule-content').attr('id')+' :input:checked').length > 0);	
+	$( "#cas-accordion" ).accordion({
+		header: 'h4',
+		autoHeight: false,
+		collapsible: true,
+		heightStyle: 'content'
 	});
-	$('.cas-rule-content :input').change( function() {
-		$(this).parents('.cas-rule-content').prev().toggleClass('cas-tick',$('#'+$(this).parents('.cas-rule-content').attr('id')+' :input:checked').length > 0);	
-	});
-        
-        /**
-         *
-         * Handle "Show with All" checkbox
-         *
-         */
-        function handleAllCheckbox(name,type) {
-                
-                var checkbox = "input[name='"+name+"[]']";
-                
-                // Execute on ready for each checkbox
-                $(checkbox).each(function() {
-                        disenableSingleCheckboxes($(this),type);
-                });
-                
-                // Execute on change
-                $(checkbox).change(function(){
-                        disenableSingleCheckboxes($(this),type);
-                });
-        }
-        
-        /**
-         *
-         * The state of a "Show with All" checkbox will control the
-         * accessibility of the respective checkboxes for specific entities
-         * If state is checked, they will be disabled
-         *
-         */
-        function disenableSingleCheckboxes(checkbox,type) {
-                var checkboxes = "#"+type+"-"+checkbox.val()+" :input";
 
-                if(checkbox.is(":checked")) {
-                        $(checkboxes).attr("disabled", true);   
-                } else {
-                        $(checkboxes).removeAttr("disabled");  
-                }
-        }
-        
-        /**
-         *
-         * Handle the Handle selection
-         *
-         */
-        function handleSidebarHandle() {
-                
-                var name = "select[name='handle']";
-                
-                // Execute on ready
-                $(name).each(function(){
-                        endisableHostSidebars($(this));
-                });
-                
-                // Execute on change
-                $(name).change(function(){
-                        endisableHostSidebars($(this));
-                });
-        }
-        
-        /**
-         *
-         * The value of Handle selection will control the
-         * accessibility of the host sidebar selection
-         * If Handling is manual, selection of host sidebar will be disabled
-         *
-         */
-        function endisableHostSidebars(select) {
-                var name = "select[name='host']";
-                if(select.val() == 2) {
-                        $(name).hide();
-                        $(name).attr("disabled", true);
-                        
-                } else {
-                        $(name).show();
-                        $(name).removeAttr("disabled");
-                }
-        }
-        
-});
+	var api = {
+
+		init: function() {
+			this.addCheckboxListener();
+			this.addHandleListener();
+			this.addSearchListener();
+		},
+
+		/**
+		 * Set tickers if at least one checkbox is checked
+		 */
+		addCheckboxListener: function() {
+			$('.cas-rule-content :input').change( function() {
+				var parent = $(this).parents('.cas-rule-content'); 
+				api.toggleTick(this, parent);
+				if($(this).attr('class') == 'cas-chk-all')
+					api.toggleSelectAll(this, parent);
+			}).change(); //fire change event on page load
+		},
+		toggleTick: function(checkbox, parent) {
+			//Toggle on any selected checkbox
+			parent.prev().toggleClass('cas-tick',parent.find('input:checked').length > 0);
+		},
+		/**
+		 * Toggle specific input depending on "show with all" checkbox
+		 */
+		toggleSelectAll: function(checkbox, parent) {
+			var checkboxes = parent.find("input").not(checkbox);
+			checkboxes.attr("disabled", $(checkbox).is(":checked"));
+		},
+		/**
+		 * The value of Handle selection will control the
+		 * accessibility of the host sidebar selection
+		 * If Handling is manual, selection of host sidebar will be disabled
+		 */
+		addHandleListener: function() {
+			$("select[name='handle']").change(function(){
+				api.toggleHostOption($(this));
+			}).change(); //fire change event on page load
+		},
+		toggleHostOption: function(handle) {
+			var name = "select[name='host']";
+			$(name).attr("disabled", handle.val() == 2);
+			if(handle.val() == 2)
+				$(name).hide();
+			else
+				$(name).show();	
+		},
+		/**
+		 * Use AJAX to search for content from a specific module
+		 */
+		addSearchListener: function() {
+			$('input.cas-autocomplete').each(function(i, el) {
+			    $(el).keypress(function(e){
+					//If Enter (13) is pressed, disregard
+					if( 13 == e.which ) {
+						return false;
+					}
+				}).autocomplete({
+			        source: ajaxurl+"?action="+$(el).attr('class').split(' ')[0]+"&nonce="+$('#_ca-sidebar-nonce').val()+"&type="+$(el).attr('id'),
+					minLength: 2,
+					delay: 500,
+					select: function(e,ui) {
+						api.clickToAddSearchResult(e,ui);
+					}
+			    });
+			});
+
+		},
+		clickToAddSearchResult: function(e, ui) {
+			// Check if an element is found
+			if(ui.item != null) {
+				$("input#cas-add-"+ui.item.id2).click( function() {
+					// Check if element already exists
+					if($("#"+ui.item.elem).length == 0) {
+
+						var elem = $('<li id="'+ui.item.elem+'"><label class="selectit"><input class="cas-'+ui.item.module+'-'+ui.item.id+' cas-'+ui.item.id2+'" value="'+ui.item.id+'" type="checkbox" name="'+ui.item.name+'[]" checked="checked" /> '+ui.item.label+'</label>').change( function() {
+							var parent = $(this).parents('.cas-rule-content'); 
+							api.toggleTick(this,parent);
+						});
+
+						//Add element and clean up
+						$("#cas-list-"+ui.item.id2).prepend(elem);
+						elem.change(); // fire change event
+						$( "input#cas-autocomplete-"+ui.item.id2 ).val('');
+						$(this).unbind('click');
+					}
+				});
+			}
+		}
+	}
+
+	$(document).ready(function(){ api.init(); });
+
+})(jQuery);
