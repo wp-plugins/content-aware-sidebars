@@ -15,8 +15,7 @@
 	var api = {
 
 		init: function() {
-			this.addTickListener();
-			this.addSelectAllListener();
+			this.addCheckboxListener();
 			this.addHandleListener();
 			this.addSearchListener();
 		},
@@ -24,36 +23,24 @@
 		/**
 		 * Set tickers if at least one checkbox is checked
 		 */
-		addTickListener: function() {
-			$('.cas-rule-content :input').each( function() {
-				api.toggleTick(this);
-			}).change( function() {
-				api.toggleTick(this);
-			});
+		addCheckboxListener: function() {
+			$('.cas-rule-content :input').change( function() {
+				var parent = $(this).parents('.cas-rule-content'); 
+				api.toggleTick(this, parent);
+				if($(this).attr('class') == 'cas-chk-all')
+					api.toggleSelectAll(this, parent);
+			}).change(); //fire change event on page load
 		},
-		toggleTick: function(checkbox) {
+		toggleTick: function(checkbox, parent) {
 			//Toggle on any selected checkbox
-			var parent = $(checkbox).parents('.cas-rule-content');
 			parent.prev().toggleClass('cas-tick',parent.find('input:checked').length > 0);
 		},
 		/**
-		 * Toggle specific checkboxes depending on "show with all" checkbox
+		 * Toggle specific input depending on "show with all" checkbox
 		 */
-		addSelectAllListener: function() {
-			$('.cas-rule-content .cas-chk-all').each( function() {
-				api.toggleSelectAll(this);
-			}).change( function() {
-				api.toggleSelectAll(this);
-			});
-		},
-		toggleSelectAll: function(checkbox) {
-			var parent = $(checkbox).parents('.cas-rule-content');
-			var checkboxes = $(".cas-rule-content ."+parent.attr("id"));
-			if($(checkbox).is(":checked")) {
-				$(checkboxes).attr("disabled", true);   
-			} else {
-				$(checkboxes).removeAttr("disabled");  
-			}
+		toggleSelectAll: function(checkbox, parent) {
+			var checkboxes = parent.find("input").not(checkbox);
+			checkboxes.attr("disabled", $(checkbox).is(":checked"));
 		},
 		/**
 		 * The value of Handle selection will control the
@@ -61,19 +48,17 @@
 		 * If Handling is manual, selection of host sidebar will be disabled
 		 */
 		addHandleListener: function() {
-			$("select[name='handle']").each(function(){
+			$("select[name='handle']").change(function(){
 				api.toggleHostOption($(this));
-			}).change(function(){
-				api.toggleHostOption($(this));
-			});
+			}).change(); //fire change event on page load
 		},
 		toggleHostOption: function(handle) {
 			var name = "select[name='host']";
-			if(handle.val() == 2) {
-				$(name).hide().attr("disabled", true);
-			} else {
-				$(name).show().removeAttr("disabled");
-			}
+			$(name).attr("disabled", handle.val() == 2);
+			if(handle.val() == 2)
+				$(name).hide();
+			else
+				$(name).show();	
 		},
 		/**
 		 * Use AJAX to search for content from a specific module
@@ -103,12 +88,14 @@
 					// Check if element already exists
 					if($("#"+ui.item.elem).length == 0) {
 
-						var elem = $('<li id="'+ui.item.elem+'"><label class="selectit"><input class="cas-'+ui.item.module+'-'+ui.item.id+' cas-'+ui.item.id2+'" value="'+ui.item.id+'" type="checkbox" name="'+ui.item.name+'[]" /> '+ui.item.label+'</label>').change( function() {
-							api.toggleTick(this);
+						var elem = $('<li id="'+ui.item.elem+'"><label class="selectit"><input class="cas-'+ui.item.module+'-'+ui.item.id+' cas-'+ui.item.id2+'" value="'+ui.item.id+'" type="checkbox" name="'+ui.item.name+'[]" checked="checked" /> '+ui.item.label+'</label>').change( function() {
+							var parent = $(this).parents('.cas-rule-content'); 
+							api.toggleTick(this,parent);
 						});
 
 						//Add element and clean up
-						$("#cas-list-"+ui.item.id2).append(elem);
+						$("#cas-list-"+ui.item.id2).prepend(elem);
+						elem.change(); // fire change event
 						$( "input#cas-autocomplete-"+ui.item.id2 ).val('');
 						$(this).unbind('click');
 					}

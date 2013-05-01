@@ -37,9 +37,9 @@ class CASModule_url extends CASModule {
 		echo '<div class="cas-rule-content" id="cas-'.$this->id.'">';
 		$field = $this->id;
 		$meta = get_post_meta($post->ID, ContentAwareSidebars::prefix.$field, false);
-		$current = $meta != '' ? $meta : array();
+		$current = $meta != '' ? $meta[0] : array();
 
-		echo __('Search',ContentAwareSidebars::domain).' <input class="cas-' . $field . '" type="text" name="'.$field.'[]" value="" /> <input type="button" id="cas_add_url" class="button" value="'.__('Add',ContentAwareSidebars::domain).'"/>'."\n";	
+		echo '<input class="cas-' . $field . '" type="text" name="'.$field.'[]" value="'.$current.'" /> <input type="button" id="cas_add_url" class="button" value="'.__('Add',ContentAwareSidebars::domain).'"/>'."\n";	
 		
 		echo '</div>';
 	}
@@ -49,7 +49,8 @@ class CASModule_url extends CASModule {
 	 * @return boolean 
 	 */
 	public function is_content() {
-		return true;
+		global $wp_query;
+		return $wp_query->query['pagename'] != null;
 	}
 	
 	/**
@@ -58,9 +59,14 @@ class CASModule_url extends CASModule {
 	 * @return string
 	 */
 	public function db_where() {
-		global $post;
-		$author = (string)(is_singular() ? $post->post_author : get_query_var('author'));
-		return "(authors.meta_value IS NULL OR authors.meta_value IN('authors','".$author."'))";
+		global $post, $wp_query;
+		//var_dump($wp_query);
+		var_dump($wp_query->query['pagename']);
+		var_dump($wp_query->query['name']);
+
+		$name = $wp_query->query['pagename'];
+
+		return "(url.meta_value IS NULL OR REPLACE(url.meta_value,'*','%') LIKE '".$name."')";
 		
 	}
 
@@ -70,12 +76,7 @@ class CASModule_url extends CASModule {
 	 * @return array 
 	 */
 	protected function _get_content() {
-		global $wpdb;
-		$author_list = array();
-		foreach($wpdb->get_results("SELECT ID, display_name FROM $wpdb->users ORDER BY ID ASC LIMIT 0,200") as $user) {
-			$author_list[$user->ID] = $user->display_name;
-		}
-		return $author_list;
+		return 0;
 	}
 	
 }

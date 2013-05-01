@@ -31,7 +31,7 @@ class CASModule_post_type extends CASModule {
 		
 		add_action('transition_post_status', array(&$this,'post_ancestry_check'),10,3);
 
-		add_action('wp_ajax_cas-autocomplete-'.$this->id, array(&$this,'ajax_posts_search'));
+		add_action('wp_ajax_cas-autocomplete-'.$this->id, array(&$this,'ajax_content_search'));
 
 	}
 	
@@ -64,13 +64,13 @@ class CASModule_post_type extends CASModule {
 	 */
 	public function db_where() {
 		if(is_singular()) {
-			return "(post_types.meta_value IS NULL OR post_types.meta_value IN('".get_post_type()."','".get_the_ID()."'))";
+			return "(".$this->id.".meta_value IS NULL OR ".$this->id.".meta_value IN('".get_post_type()."','".get_the_ID()."'))";
 		}
 		global $post_type;
 		
 		// Home has post as default post type
 		if(!$post_type) $post_type = 'post';
-		return "(post_types.meta_value IS NULL OR post_types.meta_value = '".$post_type."')";
+		return "(".$this->id.".meta_value IS NULL OR ".$this->id.".meta_value = '".$post_type."')";
 	}
 
 	/**
@@ -86,7 +86,7 @@ class CASModule_post_type extends CASModule {
 
 			echo '<h4><a href="#">' . $post_type->label . '</a></h4>'."\n";
 			echo '<div class="cas-rule-content" id="cas-' . $this->id . '-' . $post_type->name . '">'."\n";
-			$meta = get_post_meta($post->ID, ContentAwareSidebars::prefix . 'post_types', false);
+			$meta = get_post_meta($post->ID, ContentAwareSidebars::prefix . $this->id, false);
 			$current = $meta != '' ? $meta : array();
 
 			$exclude = array();
@@ -101,13 +101,13 @@ class CASModule_post_type extends CASModule {
 
 			if($post_type->hierarchical) {
 				echo '<p>' . "\n";
-				echo '<label><input type="checkbox" name="post_types[]" value="'.ContentAwareSidebars::prefix.'sub_' . $post_type->name . '"' . checked(in_array(ContentAwareSidebars::prefix."sub_" . $post_type->name, $current), true, false) . ' /> ' . __('Automatically select new children of a selected ancestor', ContentAwareSidebars::domain) . '</label>' . "\n";
+				echo '<label><input type="checkbox" name="'.$this->id.'[]" value="'.ContentAwareSidebars::prefix.'sub_' . $post_type->name . '"' . checked(in_array(ContentAwareSidebars::prefix."sub_" . $post_type->name, $current), true, false) . ' /> ' . __('Automatically select new children of a selected ancestor', ContentAwareSidebars::domain) . '</label>' . "\n";
 				echo '</p>' . "\n";
 			}
 			
 			//WP3.1.4 does not support $post_type->labels->all_items
 			echo '<p>' . "\n";
-			echo '<label><input class="cas-chk-all" type="checkbox" name="post_types[]" value="' . $post_type->name . '"' . checked(in_array($post_type->name, $current), true, false) . ' /> ' . sprintf(__('Show with All %s', ContentAwareSidebars::domain), $post_type->label) . '</label>' . "\n";
+			echo '<label><input class="cas-chk-all" type="checkbox" name="'.$this->id.'[]" value="' . $post_type->name . '"' . checked(in_array($post_type->name, $current), true, false) . ' /> ' . sprintf(__('Show with All %s', ContentAwareSidebars::domain), $post_type->label) . '</label>' . "\n";
 			echo '</p>' . "\n";
 
 			if (!$number_of_posts) {
@@ -130,7 +130,10 @@ class CASModule_post_type extends CASModule {
 					$selected = array();
 				}
 
-				echo __('Search',ContentAwareSidebars::domain).' <input class="cas-autocomplete-' . $this->id . ' cas-autocomplete" id="cas-autocomplete-' . $this->id . '-' . $post_type->name . '" type="text" name="cas-autocomplete" value="" /> <input type="button" id="cas-add-' . $this->id . '-' . $post_type->name . '" class="button" value="'.__('Add',ContentAwareSidebars::domain).'"/>'."\n";
+				if($number_of_posts > 20) {
+					echo _x('Search','verb',ContentAwareSidebars::domain).' <input class="cas-autocomplete-' . $this->id . ' cas-autocomplete" id="cas-autocomplete-' . $this->id . '-' . $post_type->name . '" type="text" name="cas-autocomplete" value="" /> <input type="button" id="cas-add-' . $this->id . '-' . $post_type->name . '" class="button" value="'.__('Add',ContentAwareSidebars::domain).'"/>'."\n";
+				}
+
 				echo '<ul id="cas-list-' . $this->id . '-' . $post_type->name . '" class="cas-contentlist categorychecklist form-no-clear">'."\n";
 				$this->post_checklist($post->ID, $post_type, array_merge($selected,$posts), $current);
 				echo '</ul>'."\n";
@@ -178,7 +181,7 @@ class CASModule_post_type extends CASModule {
 	 * Get posts with AJAX search
 	 * @return void
 	 */
-	public function ajax_posts_search() {
+	public function ajax_content_search() {
 		
 		// Verify request
 		check_ajax_referer(basename('content-aware-sidebars.php'),'nonce');

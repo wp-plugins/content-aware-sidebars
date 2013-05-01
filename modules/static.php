@@ -70,20 +70,16 @@ class CASModule_static extends CASModule {
 		global $post;
 		
 		echo '<h4><a href="#">'.$this->name.'</a></h4>'."\n";
-		echo '<div class="cas-rule-content" id="cas-' . $this->id . '">';
-		$field = $this->id;
-		$meta = get_post_meta($post->ID, ContentAwareSidebars::prefix . $field, false);
+		echo '<div class="cas-rule-content" id="cas-' . $this->id . '">'. "\n";
+		$meta = get_post_meta($post->ID, ContentAwareSidebars::prefix . $this->id, false);
 		$current = $meta != '' ? $meta : array();
-?>
-						<ul class="list:<?php echo $field; ?> categorychecklist form-no-clear">
-		<?php
+
+		echo '<ul id="cas-list-' . $this->id . '" class="cas-contentlist categorychecklist form-no-clear">'. "\n";
 		foreach ($this->_get_content() as $id => $name) {
-			echo '<li><label><input type="checkbox" name="' . $field . '[]" value="' . $id . '"' . (in_array($id, $current) ? ' checked="checked"' : '') . ' /> ' . $name . '</label></li>' . "\n";
+			echo '<li><label><input type="checkbox" name="' . $this->id . '[]" value="' . $id . '"' . (in_array($id, $current) ? ' checked="checked"' : '') . ' /> ' . $name . '</label></li>' . "\n";
 		}
-		?>
-						</ul>
-		<?php
-		echo '</div>';
+		echo '</ul>'. "\n";
+		echo '</div>'. "\n";
 	}
 	
 }

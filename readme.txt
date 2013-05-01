@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=KPZHE
 Tags: sidebar, widget area, content aware, context aware, seo, dynamic, flexible, modular, bbpress, buddypress, qtranslate, polylang, transposh, wpml
 Requires at least: 3.1
 Tested up to: 3.6
-Stable tag: 1.3
+Stable tag: 1.3.1
 License: GPL2
 
 Create and display sidebars according to the content being viewed.
@@ -107,6 +107,15 @@ The function accepts URL-style strings as parameters too, like the standard Word
 5. Viewing a Post that contains Very Categorized. `Very Categorized Posts` sidebar has replaced `Main Sidebar`
 
 == Changelog ==
+
+= 1.3.1 =
+
+* Added: authors and bbpress user profiles now searchable on edit page
+* Added: items found in search on edit page are prepended and checked by default
+* Added: updated edit page gui
+* Added: search field only visible when quantity is above 20
+* Fixed: select all checkbox will now disable all input in container
+* Fixed: host sidebar could sometimes not be found in sidebar list
 
 = 1.3 =
 

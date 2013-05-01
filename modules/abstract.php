@@ -22,6 +22,12 @@ abstract class CASModule {
 	 * @var string
 	 */
 	protected $name;
+
+	/**
+	 * Enable AJAX search in editor
+	 * @var boolean
+	 */
+	protected $searchable = false;
 	
 	/**
 	 *
@@ -45,28 +51,22 @@ abstract class CASModule {
 		
 		echo '<h4><a href="#">'.$this->name.'</a></h4>'."\n";
 		echo '<div class="cas-rule-content" id="cas-'.$this->id.'">';
-		$field = $this->id;
-		$meta = get_post_meta($post->ID, ContentAwareSidebars::prefix.$field, false);
+		$meta = get_post_meta($post->ID, ContentAwareSidebars::prefix.$this->id, false);
 		$current = $meta != '' ? $meta : array();
-		?>
-		<p>
-			<label><input class="cas-chk-all" type="checkbox" name="<?php echo $field; ?>[]" value="<?php echo $field; ?>" <?php checked(in_array($field, $current), true, true); ?> /> <?php printf(__('Show with All %s',ContentAwareSidebars::domain),$this->name); ?></label>
-		</p>
-		<div id="list-<?php echo $field; ?>" class="categorydiv" style="min-height:100%;">
-			<ul id="<?php echo $field; ?>-tabs" class="category-tabs">
-				<li class="tabs"><a href="#<?php echo $field; ?>-all" tabindex="3"><?php _e('View All'); ?></a></li>
-			</ul>		
-			<div id="<?php echo $field; ?>-all" class="tabs-panel"  style="min-height:100%;">
-				<ul id="authorlistchecklist" class="list:<?php echo $field; ?> categorychecklist form-no-clear">
-					<?php
-					foreach($this->_get_content() as $id => $name) {
-						echo '<li><label><input class="cas-' . $this->id . '" type="checkbox" name="'.$field.'[]" value="'.$id.'"'.checked(in_array($id,$current), true, false).' /> '.$name.'</label></li>'."\n";
-					}
-					?>
-				</ul>
-			</div>
-		</div>
-<?php	
+
+		echo '<p><label><input class="cas-chk-all" type="checkbox" name="'.$this->id.'[]" value="'.$this->id.'"'.checked(in_array($this->id, $current), true, false).' /> '.sprintf(__('Show with All %s',ContentAwareSidebars::domain),$this->name).'</label></p>'."\n";
+		
+		// Show search if enabled and there is too much content
+		if($this->searchable ) {
+			echo _x('Search','verb',ContentAwareSidebars::domain).' <input class="cas-autocomplete-' . $this->id . ' cas-autocomplete" id="cas-autocomplete-' . $this->id . '" type="text" name="cas-autocomplete" value="" /> <input type="button" id="cas-add-' . $this->id . '" class="button" value="'.__('Add',ContentAwareSidebars::domain).'"/>'."\n";
+		}
+
+		echo '<ul id="cas-list-' . $this->id . '" class="cas-contentlist categorychecklist form-no-clear">'."\n";
+		foreach($this->_get_content() as $id => $name) {
+			echo '<li id="'.$this->id.'-'.$id.'"><label><input class="cas-' . $this->id . '" type="checkbox" name="'.$this->id.'[]" value="'.$id.'"'.checked(in_array($id,$current), true, false).' /> '.$name.'</label></li>'."\n";
+		}	
+		echo '</ul>'."\n";
+
 		echo '</div>';
 	}
 	

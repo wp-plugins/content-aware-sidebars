@@ -44,7 +44,12 @@
 	border-style:solid;
 	border-color:#eee #eee #cfcfcf !important;
 	padding:10px !important;
-	background-color:#dfdfdf !important;
+	background-color:#dfdfdf !important;	
+}
+
+.cas-contentlist {
+	max-height:200px;
+	overflow-y:auto;
 }
 
 #cas-accordion .ui-state-default:last-of-type, .cas-rule-content:last-child {

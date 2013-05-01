@@ -7,7 +7,7 @@
 Plugin Name: Content Aware Sidebars
 Plugin URI: http://www.intox.dk/
 Description: Manage and show sidebars according to the content being viewed.
-Version: 1.3
+Version: 1.3.1
 Author: Joachim Jensen, Intox Studio
 Author URI: http://www.intox.dk/
 Text Domain: content-aware-sidebars
@@ -94,7 +94,7 @@ final class ContentAwareSidebars {
 		// On sitewide requests
 		add_action('plugins_loaded',										array(&$this,'deploy_modules'));
 		add_action('init',													array(&$this,'init_sidebar_type'),99);
-		add_action('widgets_init',											array(&$this,'create_sidebars'),99);
+		add_action('wp_loaded',												array(&$this,'create_sidebars'),99);
 		
 		// On admin requests	
 		add_action('admin_enqueue_scripts',									array(&$this,'load_admin_scripts'));
@@ -800,7 +800,7 @@ final class ContentAwareSidebars {
 				   target="_blank" title="PayPal - The safer, easier way to pay online!">
 					<img align="center" border="0" src="https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif" width="147" height="47" alt="PayPal - The safer, easier way to pay online!">	
 				</a></p>
-				<p><?php _e('Or you could:'); ?></p>
+				<p><?php _e('Or you could:',self::domain); ?></p>
 				<ul>
 					<li><a href="http://wordpress.org/support/view/plugin-reviews/content-aware-sidebars?rate=5#postform" target="_blank"><?php _e('Rate the plugin on WordPress.org',self::domain); ?></a></li>
 					<li><a href="http://wordpress.org/extend/plugins/content-aware-sidebars/" target="_blank"><?php _e('Link to the plugin page',self::domain); ?></a></li>

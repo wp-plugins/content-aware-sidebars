@@ -39,7 +39,7 @@ class CASModule_taxonomy extends CASModule {
 		add_action('admin_menu',array(&$this,'clear_admin_menu'));
 		add_action('created_term', array(&$this,'term_ancestry_check'),10,3);
 
-		add_action('wp_ajax_cas-autocomplete-'.$this->id, array(&$this,'ajax_terms_search'));
+		add_action('wp_ajax_cas-autocomplete-'.$this->id, array(&$this,'ajax_content_search'));
 		
 	}
 	
@@ -171,7 +171,10 @@ class CASModule_taxonomy extends CASModule {
 					'exclude' => $selected_ids
 				));
 
-				echo __('Search',ContentAwareSidebars::domain).' <input class="cas-autocomplete-' . $this->id . ' cas-autocomplete" id="cas-autocomplete-' . $this->id . '-' . $taxonomy->name . '" type="text" name="cas-autocomplete" value="" /> <input type="button" id="cas-add-' . $this->id . '-' . $taxonomy->name . '" class="button" value="'.__('Add',ContentAwareSidebars::domain).'"/>'."\n";
+				if($number_of_terms > 20) {
+					echo _x('Search','verb',ContentAwareSidebars::domain).' <input class="cas-autocomplete-' . $this->id . ' cas-autocomplete" id="cas-autocomplete-' . $this->id . '-' . $taxonomy->name . '" type="text" name="cas-autocomplete" value="" /> <input type="button" id="cas-add-' . $this->id . '-' . $taxonomy->name . '" class="button" value="'.__('Add',ContentAwareSidebars::domain).'"/>'."\n";
+				}
+
 				echo '<ul id="cas-list-' . $this->id . '-' . $taxonomy->name . '" class="cas-contentlist categorychecklist form-no-clear">'."\n";
 				echo '<input type="hidden" name="'.($taxonomy->name == "category" ? "post_category[]" : "tax_input[".$taxonomy->name."]").'" value="0" />';
 				$this->term_checklist($post->ID, $taxonomy, array_merge($selected,$terms), $selected_ids);
@@ -218,7 +221,7 @@ class CASModule_taxonomy extends CASModule {
 	 * Get terms with AJAX search
 	 * @return void 
 	 */
-	public function ajax_terms_search() {
+	public function ajax_content_search() {
 		
 		// Verify request
 		check_ajax_referer(basename('content-aware-sidebars.php'),'nonce');
