@@ -1,10 +1,10 @@
 === Plugin Name ===
 Contributors: intoxstudio
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=KPZHE6A72LEN4&lc=US&item_name=WordPress%20Plugin%3a%20Content%20Aware%20Sidebars&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted
-Tags: sidebar, widget, content aware, seo, dynamic, flexible, modular, bbpress, qtranslate, transposh, wpml
+Tags: sidebar, widget area, content aware, context aware, seo, dynamic, flexible, modular, bbpress, buddypress, qtranslate, polylang, transposh, wpml
 Requires at least: 3.1
-Tested up to: 3.4.2
-Stable tag: 1.1.1
+Tested up to: 3.6
+Stable tag: 1.3.2
 License: GPL2
 
 Create and display sidebars according to the content being viewed.
@@ -30,7 +30,8 @@ No extra database tables or table columns will be added.
 	* 404 Page
 	* Front Page
 	* bbPress User Profiles
-	* Languages (qTranslate, Transposh, WPML) 
+	* BuddyPress Member Pages
+	* Languages (qTranslate, Polylang, Transposh, WPML) 
 	* **Any combination of the above**
 * Merge new sidebars with others, replace others or simply add them to your theme manually with a template tag
 * Create complex content with nested sidebars
@@ -40,7 +41,9 @@ No extra database tables or table columns will be added.
 = Builtin Plugin Support =
 
 * bbPress (v2.0.2+)
+* BuddyPress (v1.6.2+)
 * qTranslate (v2.5.29+)
+* Polylang (v0.9.6+)
 * Transposh Translation Filter (v0.8.2+)
 * WPML Multilingual Blog/CMS (v2.4.3+)
 
@@ -49,6 +52,7 @@ No extra database tables or table columns will be added.
 * Danish (da_DK): [Joachim Jensen](http://www.intox.dk/)
 * Italian (it_IT): [Luciano Del Fico](http://www.myweb2.it/)
 * Lithuanian (lt_LT): [Vincent G](http://host1free.com/)
+* Slovak (sk_SK): [Branco](http://webhostinggeeks.com/)
 
 If you have translated the plugin into your language or updated an existing translation, please send the .po and .mo files to jv[at]intox.dk.
 Download the latest [.pot file](http://plugins.svn.wordpress.org/content-aware-sidebars/trunk/lang/content-aware-sidebars.pot) or the [.po file in your language](http://plugins.svn.wordpress.org/content-aware-sidebars/trunk/lang/).
@@ -67,6 +71,26 @@ www.intox.dk
 == Frequently Asked Questions ==
 
 If you have any questions not answered here, head to the [Support Forum](http://wordpress.org/tags/content-aware-sidebars?forum_id=10) or [contact me directly](http://www.intox.dk/kontakt/).
+
+= Will Content Aware Sidebars work with my theme? =
+
+Yes.
+
+If the theme supports dynamic widget areas/sidebars, new sidebars can be created to replace or merge with those.
+If not, it is still possible to create sidebars and then use the function `display_ca_sidebar()` in the theme.
+
+= Will Content Aware Sidebars work with my plugin? =
+
+Most likely.
+
+If the plugin uses public Custom Post Types or Custom Taxonomies, these will automatically be supported. Additionally, Content Aware Sidebars uses modules with WordPress Hooks that you can control and features builtin support for some of the most popular plugins in the WordPress Repository.
+
+= My new sidebar is not displayed where I expect it to? =
+
+All content rules are dependent of each other (when they collide), which makes it possible to create extremely focused rules for where to display a sidebar; e.g. with posts written by a given author and with a given category.
+However, this also means that it currently is not possible to create a single sidebar that should be displayed with posts by a given author or posts with a given category.
+
+Note the exposure setting as it determines whether the selected rules apply to archives, singulars or both.
 
 = How do I use display_ca_sidebar( $args )? =
 
@@ -91,6 +115,47 @@ The function accepts URL-style strings as parameters too, like the standard Word
 5. Viewing a Post that contains Very Categorized. `Very Categorized Posts` sidebar has replaced `Main Sidebar`
 
 == Changelog ==
+
+= 1.3.2 =
+
+* Added: items found in search now added to list directly on select
+* Fixed: some terms found by search could not be saved
+* Fixed: widget locations are saved again for each theme
+
+= 1.3.1 =
+
+* Added: authors and bbpress user profiles now searchable on edit page
+* Added: items found in search on edit page are prepended and checked by default
+* Added: updated edit page gui
+* Added: search field only visible when quantity is above 20
+* Fixed: select all checkbox will now disable all input in container
+* Fixed: host sidebar could sometimes not be found in sidebar list
+
+= 1.3 =
+
+* Added: post type posts and taxonomy terms now searchable on edit page
+* Added: sidebar handle and host shown on widgets page
+* Added: slovak translation
+* Fixed: sidebar meta boxes more robust to external modifications
+* Fixed: admin column headers more robust to external modifications
+* Fixed: sidebar menu now always hidden for users without right cap
+* Fixed: code optimization and refactor for performance
+* Removed: support for sidebar excerpt
+
+= 1.2 =
+
+* Added: polylang support
+* Added: buddypress support
+* Added: managing sidebars now requires edit_theme_options cap
+* Added: bbpress user profile has own rules instead of author rules
+* Added: filter for content recognition
+* Added: auto-select new children of selected taxonomy or post type ancestor
+
+= 1.1.2 =
+
+* Added: wordpress 3.5 compatibility 
+* Fixed: slight css changes on edit screen
+* Fixed: "show with all" checkbox toggles other checkboxes correctly
 
 = 1.1.1 =
 
