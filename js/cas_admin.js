@@ -82,24 +82,22 @@
 
 		},
 		clickToAddSearchResult: function(e, ui) {
-			// Check if an element is found
+			// Check if data is found
 			if(ui.item != null) {
-				$("input#cas-add-"+ui.item.id2).click( function() {
-					// Check if element already exists
-					if($("#"+ui.item.elem).length == 0) {
+				// Check if element already exists
+				if($("#"+ui.item.elem).length == 0) {
 
-						var elem = $('<li id="'+ui.item.elem+'"><label class="selectit"><input class="cas-'+ui.item.module+'-'+ui.item.id+' cas-'+ui.item.id2+'" value="'+ui.item.id+'" type="checkbox" name="'+ui.item.name+'[]" checked="checked" /> '+ui.item.label+'</label>').change( function() {
-							var parent = $(this).parents('.cas-rule-content'); 
-							api.toggleTick(this,parent);
-						});
+					var elem = $('<li id="'+ui.item.elem+'"><label class="selectit"><input class="cas-'+ui.item.module+'-'+ui.item.id+' cas-'+ui.item.id2+'" value="'+ui.item.id+'" type="checkbox" name="'+ui.item.name+'[]" checked="checked" /> '+ui.item.label+'</label></li>').change( function() {
+						var parent = $(this).parents('.cas-rule-content'); 
+						api.toggleTick(this,parent);
+					});
 
-						//Add element and clean up
-						$("#cas-list-"+ui.item.id2).prepend(elem);
-						elem.change(); // fire change event
-						$( "input#cas-autocomplete-"+ui.item.id2 ).val('');
-						$(this).unbind('click');
-					}
-				});
+					//Add element and clean up
+					$("#cas-list-"+ui.item.id2).prepend(elem);
+					elem.change(); // fire change event
+					$( "input#cas-autocomplete-"+ui.item.id2 ).val('');
+					e.preventDefault(); //clear field properly
+				}
 			}
 		}
 	}

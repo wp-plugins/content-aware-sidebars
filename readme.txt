@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=KPZHE
 Tags: sidebar, widget area, content aware, context aware, seo, dynamic, flexible, modular, bbpress, buddypress, qtranslate, polylang, transposh, wpml
 Requires at least: 3.1
 Tested up to: 3.6
-Stable tag: 1.3.1
+Stable tag: 1.3.2
 License: GPL2
 
 Create and display sidebars according to the content being viewed.
@@ -74,8 +74,16 @@ If you have any questions not answered here, head to the [Support Forum](http://
 
 = Will Content Aware Sidebars work with my theme? =
 
-Yes. If the theme supports dynamic widget areas/sidebars, new sidebars can be created to replace or merge with those.
+Yes.
+
+If the theme supports dynamic widget areas/sidebars, new sidebars can be created to replace or merge with those.
 If not, it is still possible to create sidebars and then use the function `display_ca_sidebar()` in the theme.
+
+= Will Content Aware Sidebars work with my plugin? =
+
+Most likely.
+
+If the plugin uses public Custom Post Types or Custom Taxonomies, these will automatically be supported. Additionally, Content Aware Sidebars uses modules with WordPress Hooks that you can control and features builtin support for some of the most popular plugins in the WordPress Repository.
 
 = My new sidebar is not displayed where I expect it to? =
 
@@ -107,6 +115,12 @@ The function accepts URL-style strings as parameters too, like the standard Word
 5. Viewing a Post that contains Very Categorized. `Very Categorized Posts` sidebar has replaced `Main Sidebar`
 
 == Changelog ==
+
+= 1.3.2 =
+
+* Added: items found in search now added to list directly on select
+* Fixed: some terms found by search could not be saved
+* Fixed: widget locations are saved again for each theme
 
 = 1.3.1 =
 

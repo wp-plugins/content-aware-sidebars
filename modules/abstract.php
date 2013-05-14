@@ -58,7 +58,7 @@ abstract class CASModule {
 		
 		// Show search if enabled and there is too much content
 		if($this->searchable ) {
-			echo _x('Search','verb',ContentAwareSidebars::domain).' <input class="cas-autocomplete-' . $this->id . ' cas-autocomplete" id="cas-autocomplete-' . $this->id . '" type="text" name="cas-autocomplete" value="" /> <input type="button" id="cas-add-' . $this->id . '" class="button" value="'.__('Add',ContentAwareSidebars::domain).'"/>'."\n";
+			echo _x('Search','verb',ContentAwareSidebars::domain).' <input class="cas-autocomplete-' . $this->id . ' cas-autocomplete" id="cas-autocomplete-' . $this->id . '" type="text" name="cas-autocomplete" value="" />'."\n";
 		}
 
 		echo '<ul id="cas-list-' . $this->id . '" class="cas-contentlist categorychecklist form-no-clear">'."\n";

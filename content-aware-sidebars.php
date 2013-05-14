@@ -7,7 +7,7 @@
 Plugin Name: Content Aware Sidebars
 Plugin URI: http://www.intox.dk/
 Description: Manage and show sidebars according to the content being viewed.
-Version: 1.3.1
+Version: 1.3.2
 Author: Joachim Jensen, Intox Studio
 Author URI: http://www.intox.dk/
 Text Domain: content-aware-sidebars
@@ -94,7 +94,8 @@ final class ContentAwareSidebars {
 		// On sitewide requests
 		add_action('plugins_loaded',										array(&$this,'deploy_modules'));
 		add_action('init',													array(&$this,'init_sidebar_type'),99);
-		add_action('wp_loaded',												array(&$this,'create_sidebars'),99);
+		add_action('widgets_init',											array(&$this,'create_sidebars'),99);
+		add_action('wp_loaded',												array(&$this,'update_sidebars'),99);
 		
 		// On admin requests	
 		add_action('admin_enqueue_scripts',									array(&$this,'load_admin_scripts'));
@@ -285,13 +286,13 @@ final class ContentAwareSidebars {
 		);
 		return $messages;
 	}
-	
+
 	/**
 	 * Add sidebars to widgets area
-	 * @return void 
+	 * Triggered in widgets_init to save location for each theme
+	 * @return void
 	 */
 	public function create_sidebars() {
-		
 		//WP3.1 does not support (array) as post_status
 		$posts = get_posts(array(
 			'numberposts'	=> -1,
@@ -306,6 +307,20 @@ final class ContentAwareSidebars {
 				'id'			=> 'ca-sidebar-'.$post->ID
 			));
 		}
+	}
+	
+	/**
+	 * Update the created sidebars with metadata
+	 * @return void 
+	 */
+	public function update_sidebars() {
+		
+		//WP3.1 does not support (array) as post_status
+		$posts = get_posts(array(
+			'numberposts'	=> -1,
+			'post_type'		=> self::type_sidebar,
+			'post_status'	=> 'publish,private,future'
+		));
 
 		//Init metadata
 		$this->_init_metadata();

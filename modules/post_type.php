@@ -131,7 +131,7 @@ class CASModule_post_type extends CASModule {
 				}
 
 				if($number_of_posts > 20) {
-					echo _x('Search','verb',ContentAwareSidebars::domain).' <input class="cas-autocomplete-' . $this->id . ' cas-autocomplete" id="cas-autocomplete-' . $this->id . '-' . $post_type->name . '" type="text" name="cas-autocomplete" value="" /> <input type="button" id="cas-add-' . $this->id . '-' . $post_type->name . '" class="button" value="'.__('Add',ContentAwareSidebars::domain).'"/>'."\n";
+					echo _x('Search','verb',ContentAwareSidebars::domain).' <input class="cas-autocomplete-' . $this->id . ' cas-autocomplete" id="cas-autocomplete-' . $this->id . '-' . $post_type->name . '" type="text" name="cas-autocomplete" value="" />'."\n";
 				}
 
 				echo '<ul id="cas-list-' . $this->id . '-' . $post_type->name . '" class="cas-contentlist categorychecklist form-no-clear">'."\n";
