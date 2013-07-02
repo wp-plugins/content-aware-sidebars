@@ -6,37 +6,46 @@
 
 /**
  *
- * bbPress Module
+ * qTranslate Module
  * 
  * Detects if current content is:
- * a) any or specific bbpress user profile
+ * a) in specific language
  *
  */
 class CASModule_qtranslate extends CASModule {
 	
+	/**
+	 * Constructor
+	 */
 	public function __construct() {
 		parent::__construct();
 		$this->id = 'language';
-		$this->name = __('Languages','content-aware-sidebars');
-		
-		add_filter('manage_edit-sidebar_columns',		array(&$this,'admin_column_headers'));
+		$this->name = __('Languages',ContentAwareSidebars::domain);
 		
 	}
 	
+	/**
+	 * Determine if content is relevant
+	 * @return boolean 
+	 */
 	public function is_content() {
 		return true;
 	}
 	
+	/**
+	 * Where query
+	 * @return string 
+	 */
 	public function db_where() {
 		return "(language.meta_value IS NULL OR language.meta_value IN('language','".qtrans_getLanguage()."'))";
 	}
 	
-	public function admin_column_headers($columns) {	
-		unset($columns['language']);	
-		return $columns;
-	}
-
-	public function _get_content() {
+	/**
+	 * Get languages
+	 * @global array $q_config
+	 * @return array 
+	 */
+	protected function _get_content() {
 		global $q_config;
 		$langs = array();
 			
