@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=KPZHE
 Tags: sidebar, widget area, content aware, context aware, seo, dynamic, flexible, modular, bbpress, buddypress, qtranslate, polylang, transposh, wpml
 Requires at least: 3.1
 Tested up to: 3.6
-Stable tag: 1.3.2
+Stable tag: 1.3.3
 License: GPL2
 
 Create and display sidebars according to the content being viewed.
@@ -70,7 +70,7 @@ www.intox.dk
 
 == Frequently Asked Questions ==
 
-If you have any questions not answered here, head to the [Support Forum](http://wordpress.org/tags/content-aware-sidebars?forum_id=10) or [contact me directly](http://www.intox.dk/kontakt/).
+If you have any questions not answered here, head to the [Support Forum](http://wordpress.org/tags/content-aware-sidebars?forum_id=10) or [contact me directly](http://www.intox.dk/en/contact/).
 
 = Will Content Aware Sidebars work with my theme? =
 
@@ -87,8 +87,8 @@ If the plugin uses public Custom Post Types or Custom Taxonomies, these will aut
 
 = My new sidebar is not displayed where I expect it to? =
 
-All content rules are dependent of each other (when they collide), which makes it possible to create extremely focused rules for where to display a sidebar; e.g. with posts written by a given author and with a given category.
-However, this also means that it currently is not possible to create a single sidebar that should be displayed with posts by a given author or posts with a given category.
+All content rules are dependent of each other (when they collide), which makes it possible to create extremely focused rules for where to display a sidebar; e.g. with posts written by a given author AND with a given category.
+However, this also means that it currently is not possible to create a single sidebar that should be displayed with posts by a given author OR posts with a given category. This has to be done with two or more sidebars.
 
 Note the exposure setting as it determines whether the selected rules apply to archives, singulars or both.
 
@@ -115,6 +115,13 @@ The function accepts URL-style strings as parameters too, like the standard Word
 5. Viewing a Post that contains Very Categorized. `Very Categorized Posts` sidebar has replaced `Main Sidebar`
 
 == Changelog ==
+
+= 1.3.3 =
+
+* Added: html placeholder in search field
+* Added: items already displayed in edit page moved to top and checked when found in search
+* Fixed: private and scheduled singulars included in search results
+* Fixed: search results displayed in ascending order
 
 = 1.3.2 =
 

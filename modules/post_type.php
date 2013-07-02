@@ -131,7 +131,7 @@ class CASModule_post_type extends CASModule {
 				}
 
 				if($number_of_posts > 20) {
-					echo _x('Search','verb',ContentAwareSidebars::domain).' <input class="cas-autocomplete-' . $this->id . ' cas-autocomplete" id="cas-autocomplete-' . $this->id . '-' . $post_type->name . '" type="text" name="cas-autocomplete" value="" />'."\n";
+					echo _x('Search','verb',ContentAwareSidebars::domain).' <input class="cas-autocomplete-' . $this->id . ' cas-autocomplete" id="cas-autocomplete-' . $this->id . '-' . $post_type->name . '" type="text" name="cas-autocomplete" value="" placeholder="'.$post_type->label.'" />'."\n";
 				}
 
 				echo '<ul id="cas-list-' . $this->id . '-' . $post_type->name . '" class="cas-contentlist categorychecklist form-no-clear">'."\n";
@@ -198,7 +198,10 @@ class CASModule_post_type extends CASModule {
 					'posts_per_page' => 10,
 					'post_type' => $matches[1],
 					's' => $_REQUEST['term'],
-					'exclude' => $exclude
+					'exclude' => $exclude,
+					'orderby' => 'title',
+					'order' => 'ASC',
+					'post_status'	=> 'publish,private,future'
 				));
 				foreach($posts as $post) {
 					$suggestions[] = array(

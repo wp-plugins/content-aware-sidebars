@@ -61,7 +61,6 @@ class CASModule_author extends CASModule {
 		return $author_list;
 	}
 
-
 	/**
 	 * Get authors with AJAX search
 	 * @return void

@@ -172,7 +172,7 @@ class CASModule_taxonomy extends CASModule {
 				));
 
 				if($number_of_terms > 20) {
-					echo _x('Search','verb',ContentAwareSidebars::domain).' <input class="cas-autocomplete-' . $this->id . ' cas-autocomplete" id="cas-autocomplete-' . $this->id . '-' . $taxonomy->name . '" type="text" name="cas-autocomplete" value="" />'."\n";
+					echo _x('Search','verb',ContentAwareSidebars::domain).' <input class="cas-autocomplete-' . $this->id . ' cas-autocomplete" id="cas-autocomplete-' . $this->id . '-' . $taxonomy->name . '" type="text" name="cas-autocomplete" value="" placeholder="' . $taxonomy->label . '" />'."\n";
 				}
 
 				echo '<input type="hidden" name="'.($taxonomy->name == "category" ? "post_category[]" : "tax_input[".$taxonomy->name."]").'" value="0" />';

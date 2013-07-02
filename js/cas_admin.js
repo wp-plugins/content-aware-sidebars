@@ -95,9 +95,14 @@
 					//Add element and clean up
 					$("#cas-list-"+ui.item.id2).prepend(elem);
 					elem.change(); // fire change event
-					$( "input#cas-autocomplete-"+ui.item.id2 ).val('');
-					e.preventDefault(); //clear field properly
+					
+				} else {
+					//Move to top and check it
+					$("#"+ui.item.elem).prependTo("#cas-list-"+ui.item.id2).find('input').attr("checked", true).change();
 				}
+
+				$( "input#cas-autocomplete-"+ui.item.id2 ).val('');
+				e.preventDefault(); //clear field properly
 			}
 		}
 	}

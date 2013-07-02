@@ -7,7 +7,7 @@
 Plugin Name: Content Aware Sidebars
 Plugin URI: http://www.intox.dk/
 Description: Manage and show sidebars according to the content being viewed.
-Version: 1.3.2
+Version: 1.3.3
 Author: Joachim Jensen, Intox Studio
 Author URI: http://www.intox.dk/
 Text Domain: content-aware-sidebars
@@ -908,27 +908,7 @@ final class ContentAwareSidebars {
 		}
 		// Update module data
 		foreach ($this->modules as $module) {
-			$new = isset($_POST[$module->get_id()]) ? $_POST[$module->get_id()] : '';
-			$old = array_flip(get_post_meta($post_id, self::prefix . $module->get_id(), false));
-
-			if (is_array($new)) {
-				//$new = array_unique($new);
-				// Skip existing data or insert new data
-				foreach ($new as $new_single) {
-					if (isset($old[$new_single])) {
-						unset($old[$new_single]);
-					} else {
-						add_post_meta($post_id, self::prefix . $module->get_id(), $new_single);
-					}
-				}
-				// Remove existing data that have not been skipped
-				foreach ($old as $old_key => $old_value) {
-					delete_post_meta($post_id, self::prefix . $module->get_id(), $old_key);
-				}
-			} elseif (!empty($old)) {
-				// Remove any old values when $new is empty
-				delete_post_meta($post_id, self::prefix . $module->get_id());
-			}
+			$module->save_data($post_id);
 		}
 	}
 

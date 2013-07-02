@@ -57,8 +57,8 @@ abstract class CASModule {
 		echo '<p><label><input class="cas-chk-all" type="checkbox" name="'.$this->id.'[]" value="'.$this->id.'"'.checked(in_array($this->id, $current), true, false).' /> '.sprintf(__('Show with All %s',ContentAwareSidebars::domain),$this->name).'</label></p>'."\n";
 		
 		// Show search if enabled and there is too much content
-		if($this->searchable ) {
-			echo _x('Search','verb',ContentAwareSidebars::domain).' <input class="cas-autocomplete-' . $this->id . ' cas-autocomplete" id="cas-autocomplete-' . $this->id . '" type="text" name="cas-autocomplete" value="" />'."\n";
+		if($this->searchable && count($this->_get_content()) > 20) {
+			echo _x('Search','verb',ContentAwareSidebars::domain).' <input class="cas-autocomplete-' . $this->id . ' cas-autocomplete" id="cas-autocomplete-' . $this->id . '" type="text" name="cas-autocomplete" value="" placeholder="'.$this->name.'" />'."\n";
 		}
 
 		echo '<ul id="cas-list-' . $this->id . '" class="cas-contentlist categorychecklist form-no-clear">'."\n";
@@ -113,6 +113,35 @@ abstract class CASModule {
 	 */
 	public function get_id() {
 		return $this->id;
+	}
+
+	/**
+	 * Save data on POST
+	 * @param  int  $post_id
+	 * @return void
+	 */
+	public function save_data($post_id) {
+		$new = isset($_POST[$this->id]) ? $_POST[$this->id] : '';
+		$old = array_flip(get_post_meta($post_id, ContentAwareSidebars::prefix . $this->id, false));
+
+		if (is_array($new)) {
+			//$new = array_unique($new);
+			// Skip existing data or insert new data
+			foreach ($new as $new_single) {
+				if (isset($old[$new_single])) {
+					unset($old[$new_single]);
+				} else {
+					add_post_meta($post_id, ContentAwareSidebars::prefix . $this->id, $new_single);
+				}
+			}
+			// Remove existing data that have not been skipped
+			foreach ($old as $old_key => $old_value) {
+				delete_post_meta($post_id, ContentAwareSidebars::prefix . $this->id, $old_key);
+			}
+		} elseif (!empty($old)) {
+			// Remove any old values when $new is empty
+			delete_post_meta($post_id, ContentAwareSidebars::prefix . $this->id);
+		}
 	}
 	
 	/**
