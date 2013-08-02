@@ -92,7 +92,7 @@ However, this also means that it currently is not possible to create a single si
 
 Note the exposure setting as it determines whether the selected rules apply to archives, singulars or both.
 
-= All content items are not listed in the sidebar editor?
+= All content items are not listed in the sidebar editor? =
 
 For the plugin to scale better such that sites with a lot of content can use it, only the 20 recent items are listed for each type of content in the sidebar editor (excluding items previously selected when updating a sidebar). To find and select the rest, simply use the search function above the list.
 
