@@ -21,7 +21,7 @@ class CASModule_page_template extends CASModule {
 	public function __construct() {
 		parent::__construct();
 		$this->id = 'page_templates';
-		$this->name = __('Page Templates',ContentAwareSidebars::domain);
+		$this->name = __('Page Templates',ContentAwareSidebars::DOMAIN);
 	}
 	
 	/**

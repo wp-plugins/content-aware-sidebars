@@ -22,7 +22,7 @@ class CASModule_static extends CASModule {
 	public function __construct() {
 		parent::__construct();
 		$this->id = 'static';
-		$this->name = __('Static Pages',ContentAwareSidebars::domain);
+		$this->name = __('Static Pages',ContentAwareSidebars::DOMAIN);
 	}
 	
 	/**
@@ -31,9 +31,9 @@ class CASModule_static extends CASModule {
 	 */
 	protected function _get_content() {
 		return array(
-				'front-page'	=> __('Front Page', ContentAwareSidebars::domain),
-				'search'		=> __('Search Results', ContentAwareSidebars::domain),
-				'404'			=> __('404 Page', ContentAwareSidebars::domain)
+				'front-page'	=> __('Front Page', ContentAwareSidebars::DOMAIN),
+				'search'		=> __('Search Results', ContentAwareSidebars::DOMAIN),
+				'404'			=> __('404 Page', ContentAwareSidebars::DOMAIN)
 			);
 	}
 	
@@ -71,7 +71,7 @@ class CASModule_static extends CASModule {
 		
 		echo '<h4><a href="#">'.$this->name.'</a></h4>'."\n";
 		echo '<div class="cas-rule-content" id="cas-' . $this->id . '">'. "\n";
-		$meta = get_post_meta($post->ID, ContentAwareSidebars::prefix . $this->id, false);
+		$meta = get_post_meta($post->ID, ContentAwareSidebars::PREFIX . $this->id, false);
 		$current = $meta != '' ? $meta : array();
 
 		echo '<ul id="cas-list-' . $this->id . '" class="cas-contentlist categorychecklist form-no-clear">'. "\n";

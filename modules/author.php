@@ -21,7 +21,7 @@ class CASModule_author extends CASModule {
 	public function __construct() {
 		parent::__construct();
 		$this->id = 'authors';
-		$this->name = __('Authors',ContentAwareSidebars::domain);
+		$this->name = __('Authors',ContentAwareSidebars::DOMAIN);
 		$this->searchable = true;
 
 		add_action('wp_ajax_cas-autocomplete-'.$this->id, array(&$this,'ajax_content_search'));

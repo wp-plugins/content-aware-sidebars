@@ -20,7 +20,7 @@ class CASModule_qtranslate extends CASModule {
 	public function __construct() {
 		parent::__construct();
 		$this->id = 'language';
-		$this->name = __('Languages',ContentAwareSidebars::domain);
+		$this->name = __('Languages',ContentAwareSidebars::DOMAIN);
 		
 	}
 	

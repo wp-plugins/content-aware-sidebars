@@ -36,6 +36,10 @@ abstract class CASModule {
 	 */
 	public function __construct() {
 		$this->id = substr(get_class($this),strpos(get_class($this),'_')+1);
+
+		add_action('cas-module-admin-box',array(&$this,'meta_box_content'));
+		add_action('cas-module-save-data',array(&$this,'save_data'));
+
 	}
 	
 	/**
@@ -51,14 +55,14 @@ abstract class CASModule {
 		
 		echo '<h4><a href="#">'.$this->name.'</a></h4>'."\n";
 		echo '<div class="cas-rule-content" id="cas-'.$this->id.'">';
-		$meta = get_post_meta($post->ID, ContentAwareSidebars::prefix.$this->id, false);
+		$meta = get_post_meta($post->ID, ContentAwareSidebars::PREFIX.$this->id, false);
 		$current = $meta != '' ? $meta : array();
 
-		echo '<p><label><input class="cas-chk-all" type="checkbox" name="'.$this->id.'[]" value="'.$this->id.'"'.checked(in_array($this->id, $current), true, false).' /> '.sprintf(__('Show with All %s',ContentAwareSidebars::domain),$this->name).'</label></p>'."\n";
+		echo '<p><label><input class="cas-chk-all" type="checkbox" name="'.$this->id.'[]" value="'.$this->id.'"'.checked(in_array($this->id, $current), true, false).' /> '.sprintf(__('Show with All %s',ContentAwareSidebars::DOMAIN),$this->name).'</label></p>'."\n";
 		
 		// Show search if enabled and there is too much content
 		if($this->searchable && count($this->_get_content()) > 20) {
-			echo _x('Search','verb',ContentAwareSidebars::domain).' <input class="cas-autocomplete-' . $this->id . ' cas-autocomplete" id="cas-autocomplete-' . $this->id . '" type="text" name="cas-autocomplete" value="" placeholder="'.$this->name.'" />'."\n";
+			echo _x('Search','verb',ContentAwareSidebars::DOMAIN).' <input class="cas-autocomplete-' . $this->id . ' cas-autocomplete" id="cas-autocomplete-' . $this->id . '" type="text" name="cas-autocomplete" value="" placeholder="'.$this->name.'" />'."\n";
 		}
 
 		echo '<ul id="cas-list-' . $this->id . '" class="cas-contentlist categorychecklist form-no-clear">'."\n";
@@ -77,7 +81,7 @@ abstract class CASModule {
 	 */
 	public function db_join() {
 		global $wpdb;
-		return "LEFT JOIN $wpdb->postmeta {$this->id} ON {$this->id}.post_id = posts.ID AND {$this->id}.meta_key = '".ContentAwareSidebars::prefix.$this->id."' ";
+		return "LEFT JOIN $wpdb->postmeta {$this->id} ON {$this->id}.post_id = posts.ID AND {$this->id}.meta_key = '".ContentAwareSidebars::PREFIX.$this->id."' ";
 	}
 	
 	/**
@@ -122,7 +126,7 @@ abstract class CASModule {
 	 */
 	public function save_data($post_id) {
 		$new = isset($_POST[$this->id]) ? $_POST[$this->id] : '';
-		$old = array_flip(get_post_meta($post_id, ContentAwareSidebars::prefix . $this->id, false));
+		$old = array_flip(get_post_meta($post_id, ContentAwareSidebars::PREFIX . $this->id, false));
 
 		if (is_array($new)) {
 			//$new = array_unique($new);
@@ -131,16 +135,16 @@ abstract class CASModule {
 				if (isset($old[$new_single])) {
 					unset($old[$new_single]);
 				} else {
-					add_post_meta($post_id, ContentAwareSidebars::prefix . $this->id, $new_single);
+					add_post_meta($post_id, ContentAwareSidebars::PREFIX . $this->id, $new_single);
 				}
 			}
 			// Remove existing data that have not been skipped
 			foreach ($old as $old_key => $old_value) {
-				delete_post_meta($post_id, ContentAwareSidebars::prefix . $this->id, $old_key);
+				delete_post_meta($post_id, ContentAwareSidebars::PREFIX . $this->id, $old_key);
 			}
 		} elseif (!empty($old)) {
 			// Remove any old values when $new is empty
-			delete_post_meta($post_id, ContentAwareSidebars::prefix . $this->id);
+			delete_post_meta($post_id, ContentAwareSidebars::PREFIX . $this->id);
 		}
 	}
 	

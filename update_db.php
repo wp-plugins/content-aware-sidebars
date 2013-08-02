@@ -64,7 +64,7 @@ function cas_update_to_11() {
 	// Get all sidebars
 	$posts = get_posts(array(
 		'numberposts'     => -1,
-		'post_type'       => ContentAwareSidebars::type_sidebar,
+		'post_type'       => ContentAwareSidebars::TYPE_SIDEBAR,
 		'post_status'     => 'publish,pending,draft,future,private,trash'
 	));
 	
@@ -72,11 +72,11 @@ function cas_update_to_11() {
 		foreach($posts as $post) {
 			foreach($moduledata as $field) {
 				// Remove old serialized data and insert it again properly
-				$old = get_post_meta($post->ID, ContentAwareSidebars::prefix.$field, true);
+				$old = get_post_meta($post->ID, ContentAwareSidebars::PREFIX.$field, true);
 				if($old != '') {
-					delete_post_meta($post->ID, ContentAwareSidebars::prefix.$field, $old);
+					delete_post_meta($post->ID, ContentAwareSidebars::PREFIX.$field, $old);
 					foreach((array)$old as $new_single) {
-						add_post_meta($post->ID, ContentAwareSidebars::prefix.$field, $new_single);
+						add_post_meta($post->ID, ContentAwareSidebars::PREFIX.$field, $new_single);
 					}
 				}
 			}
@@ -112,7 +112,7 @@ function cas_update_to_08() {
 		SELECT ID 
 		FROM $wpdb->posts 
 		WHERE post_type = %s
-	",ContentAwareSidebars::type_sidebar));
+	",ContentAwareSidebars::TYPE_SIDEBAR));
 
 	//Check if there is any
 	if(!empty($posts)) {
@@ -120,7 +120,7 @@ function cas_update_to_08() {
 		foreach($metadata as $meta) {
 			$wpdb->query("
 				UPDATE $wpdb->postmeta 
-				SET meta_key = '".ContentAwareSidebars::prefix.$meta."' 
+				SET meta_key = '".ContentAwareSidebars::PREFIX.$meta."' 
 				WHERE meta_key = '".$meta."' 
 				AND post_id IN(".implode(',',$posts).")
 			");

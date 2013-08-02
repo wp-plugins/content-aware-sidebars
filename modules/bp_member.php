@@ -20,7 +20,7 @@ class CASModule_bp_member extends CASModule {
 	public function __construct() {
 		parent::__construct();
 		$this->id = 'bp_member';
-		$this->name = __('BuddyPress Members',ContentAwareSidebars::domain);
+		$this->name = __('BuddyPress Members',ContentAwareSidebars::DOMAIN);
 		
 		add_filter('cas-is-content-static', array(&$this,'static_is_content'));
 		
@@ -79,7 +79,7 @@ class CASModule_bp_member extends CASModule {
 		echo '<h4><a href="#">'.$this->name.'</a></h4>'."\n";
 		echo '<div class="cas-rule-content" id="cas-' . $this->id . '">'."\n";
 		$field = $this->id;
-		$meta = get_post_meta($post->ID, ContentAwareSidebars::prefix . $field, false);
+		$meta = get_post_meta($post->ID, ContentAwareSidebars::PREFIX . $field, false);
 		$current = $meta != '' ? $meta : array();
 
 		echo '<ul class="cas-contentlist categorychecklist form-no-clear">'."\n";

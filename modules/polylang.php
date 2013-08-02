@@ -20,7 +20,7 @@ class CASModule_polylang extends CASModule {
 	public function __construct() {
 		parent::__construct();
 		$this->id = 'language';
-		$this->name = __('Languages',ContentAwareSidebars::domain);
+		$this->name = __('Languages',ContentAwareSidebars::DOMAIN);
 		
 		add_filter('pll_get_post_types', array(&$this,'remove_sidebar_multilingual'));
 		
@@ -63,7 +63,7 @@ class CASModule_polylang extends CASModule {
 	 * @return array             
 	 */
 	public function remove_sidebar_multilingual($post_types) {
-		unset($post_types[ContentAwareSidebars::type_sidebar]);
+		unset($post_types[ContentAwareSidebars::TYPE_SIDEBAR]);
 		return $post_types;
 	}
 	

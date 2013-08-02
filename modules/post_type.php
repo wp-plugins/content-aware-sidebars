@@ -27,7 +27,7 @@ class CASModule_post_type extends CASModule {
 	public function __construct() {
 		parent::__construct();
 		$this->id = 'post_types';
-		$this->name = __('Post Types',ContentAwareSidebars::domain);
+		$this->name = __('Post Types',ContentAwareSidebars::DOMAIN);
 		
 		add_action('transition_post_status', array(&$this,'post_ancestry_check'),10,3);
 
@@ -86,7 +86,7 @@ class CASModule_post_type extends CASModule {
 
 			echo '<h4><a href="#">' . $post_type->label . '</a></h4>'."\n";
 			echo '<div class="cas-rule-content" id="cas-' . $this->id . '-' . $post_type->name . '">'."\n";
-			$meta = get_post_meta($post->ID, ContentAwareSidebars::prefix . $this->id, false);
+			$meta = get_post_meta($post->ID, ContentAwareSidebars::PREFIX . $this->id, false);
 			$current = $meta != '' ? $meta : array();
 
 			$exclude = array();
@@ -101,13 +101,13 @@ class CASModule_post_type extends CASModule {
 
 			if($post_type->hierarchical) {
 				echo '<p>' . "\n";
-				echo '<label><input type="checkbox" name="'.$this->id.'[]" value="'.ContentAwareSidebars::prefix.'sub_' . $post_type->name . '"' . checked(in_array(ContentAwareSidebars::prefix."sub_" . $post_type->name, $current), true, false) . ' /> ' . __('Automatically select new children of a selected ancestor', ContentAwareSidebars::domain) . '</label>' . "\n";
+				echo '<label><input type="checkbox" name="'.$this->id.'[]" value="'.ContentAwareSidebars::PREFIX.'sub_' . $post_type->name . '"' . checked(in_array(ContentAwareSidebars::PREFIX."sub_" . $post_type->name, $current), true, false) . ' /> ' . __('Automatically select new children of a selected ancestor', ContentAwareSidebars::DOMAIN) . '</label>' . "\n";
 				echo '</p>' . "\n";
 			}
 			
 			//WP3.1.4 does not support $post_type->labels->all_items
 			echo '<p>' . "\n";
-			echo '<label><input class="cas-chk-all" type="checkbox" name="'.$this->id.'[]" value="' . $post_type->name . '"' . checked(in_array($post_type->name, $current), true, false) . ' /> ' . sprintf(__('Show with All %s', ContentAwareSidebars::domain), $post_type->label) . '</label>' . "\n";
+			echo '<label><input class="cas-chk-all" type="checkbox" name="'.$this->id.'[]" value="' . $post_type->name . '"' . checked(in_array($post_type->name, $current), true, false) . ' /> ' . sprintf(__('Show with All %s', ContentAwareSidebars::DOMAIN), $post_type->label) . '</label>' . "\n";
 			echo '</p>' . "\n";
 
 			if (!$number_of_posts) {
@@ -131,7 +131,7 @@ class CASModule_post_type extends CASModule {
 				}
 
 				if($number_of_posts > 20) {
-					echo _x('Search','verb',ContentAwareSidebars::domain).' <input class="cas-autocomplete-' . $this->id . ' cas-autocomplete" id="cas-autocomplete-' . $this->id . '-' . $post_type->name . '" type="text" name="cas-autocomplete" value="" placeholder="'.$post_type->label.'" />'."\n";
+					echo _x('Search','verb',ContentAwareSidebars::DOMAIN).' <input class="cas-autocomplete-' . $this->id . ' cas-autocomplete" id="cas-autocomplete-' . $this->id . '-' . $post_type->name . '" type="text" name="cas-autocomplete" value="" placeholder="'.$post_type->label.'" />'."\n";
 				}
 
 				echo '<ul id="cas-list-' . $this->id . '-' . $post_type->name . '" class="cas-contentlist categorychecklist form-no-clear">'."\n";
@@ -231,7 +231,7 @@ class CASModule_post_type extends CASModule {
 	 */
 	public function post_ancestry_check($new_status, $old_status, $post) {
 		
-		if($post->post_type != ContentAwareSidebars::type_sidebar) {
+		if($post->post_type != ContentAwareSidebars::TYPE_SIDEBAR) {
 			
 			$status = array('publish','private','future');
 			// Only new posts are relevant
@@ -242,16 +242,16 @@ class CASModule_post_type extends CASModule {
 				
 					// Get sidebars with post ancestor wanting to auto-select post
 					$sidebars = new WP_Query(array(
-						'post_type'				=> ContentAwareSidebars::type_sidebar,
+						'post_type'				=> ContentAwareSidebars::TYPE_SIDEBAR,
 						'meta_query'			=> array(
 							'relation'			=> 'AND',
 							array(
-								'key'			=> ContentAwareSidebars::prefix . $this->id,
-								'value'			=> ContentAwareSidebars::prefix.'sub_' . $post->post_type,
+								'key'			=> ContentAwareSidebars::PREFIX . $this->id,
+								'value'			=> ContentAwareSidebars::PREFIX.'sub_' . $post->post_type,
 								'compare'		=> '='
 							),
 							array(
-								'key'			=> ContentAwareSidebars::prefix . $this->id,
+								'key'			=> ContentAwareSidebars::PREFIX . $this->id,
 								'value'			=> get_ancestors($post->ID,$post->post_type),
 								'type'			=> 'numeric',
 								'compare'		=> 'IN'
@@ -260,7 +260,7 @@ class CASModule_post_type extends CASModule {
 					));
 					if($sidebars) {
 						foreach($sidebars as $sidebar) {
-							add_post_meta($sidebar->ID, ContentAwareSidebars::prefix.$this->id, $post->ID);
+							add_post_meta($sidebar->ID, ContentAwareSidebars::PREFIX.$this->id, $post->ID);
 						}
 					}
 				}

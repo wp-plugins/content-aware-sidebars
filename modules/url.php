@@ -21,7 +21,7 @@ class CASModule_url extends CASModule {
 	public function __construct() {
 		parent::__construct();
 		$this->id = 'url';
-		$this->name = __('URLs',ContentAwareSidebars::domain);
+		$this->name = __('URLs',ContentAwareSidebars::DOMAIN);
 	}
 
 
@@ -36,10 +36,10 @@ class CASModule_url extends CASModule {
 		echo '<h4><a href="#">'.$this->name.'</a></h4>'."\n";
 		echo '<div class="cas-rule-content" id="cas-'.$this->id.'">';
 		$field = $this->id;
-		$meta = get_post_meta($post->ID, ContentAwareSidebars::prefix.$field, false);
+		$meta = get_post_meta($post->ID, ContentAwareSidebars::PREFIX.$field, false);
 		$current = $meta != '' ? $meta[0] : array();
 
-		echo '<input class="cas-' . $field . '" type="text" name="'.$field.'[]" value="'.$current.'" /> <input type="button" id="cas_add_url" class="button" value="'.__('Add',ContentAwareSidebars::domain).'"/>'."\n";	
+		echo '<input class="cas-' . $field . '" type="text" name="'.$field.'[]" value="'.$current.'" /> <input type="button" id="cas_add_url" class="button" value="'.__('Add',ContentAwareSidebars::DOMAIN).'"/>'."\n";	
 		
 		echo '</div>';
 	}

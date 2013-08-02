@@ -13,7 +13,7 @@
 	});
 
 	var api = {
-
+		
 		init: function() {
 			this.addCheckboxListener();
 			this.addHandleListener();
@@ -26,12 +26,12 @@
 		addCheckboxListener: function() {
 			$('.cas-rule-content :input').change( function() {
 				var parent = $(this).parents('.cas-rule-content'); 
-				api.toggleTick(this, parent);
+				api.toggleTick(parent);
 				if($(this).attr('class') == 'cas-chk-all')
 					api.toggleSelectAll(this, parent);
 			}).change(); //fire change event on page load
 		},
-		toggleTick: function(checkbox, parent) {
+		toggleTick: function(parent) {
 			//Toggle on any selected checkbox
 			parent.prev().toggleClass('cas-tick',parent.find('input:checked').length > 0);
 		},
@@ -89,7 +89,7 @@
 
 					var elem = $('<li id="'+ui.item.elem+'"><label class="selectit"><input class="cas-'+ui.item.module+'-'+ui.item.id+' cas-'+ui.item.id2+'" value="'+ui.item.id+'" type="checkbox" name="'+ui.item.name+'[]" checked="checked" /> '+ui.item.label+'</label></li>').change( function() {
 						var parent = $(this).parents('.cas-rule-content'); 
-						api.toggleTick(this,parent);
+						api.toggleTick(parent);
 					});
 
 					//Add element and clean up

@@ -30,7 +30,7 @@ class CAS_Walker_Checklist extends Walker {
 	 * @param array  $args 
 	 * @return void 
 	 */
-	public function start_lvl(&$output, $depth, $args) {
+	public function start_lvl(&$output, $depth = 0, $args = array()) {
 		$indent = str_repeat("\t", $depth);
 		$output .= "$indent<ul class='children'>\n";
 	}
@@ -42,7 +42,7 @@ class CAS_Walker_Checklist extends Walker {
 	 * @param array  $args 
 	 * @return void 
 	 */
-	public function end_lvl(&$output, $depth, $args) {
+	public function end_lvl(&$output, $depth = 0, $args = array()) {
 		$indent = str_repeat("\t", $depth);
 		$output .= "$indent</ul>\n";
 	}
@@ -55,7 +55,7 @@ class CAS_Walker_Checklist extends Walker {
 	 * @param  array  $args 
 	 * @return void
 	 */
-	public function start_el(&$output, $term, $depth, $args) {
+	public function start_el(&$output, $term, $depth = 0, $args = array(), $current_object_id = 0 ) {
 		extract($args);
 		
 		if(isset($post_type)) {
@@ -90,7 +90,7 @@ class CAS_Walker_Checklist extends Walker {
 	 * @param  array  $args   
 	 * @return void         
 	 */
-	public function end_el(&$output, $term, $depth, $args) {
+	public function end_el(&$output, $object, $depth = 0, $args = array() ) {
 		$output .= "</li>\n";
 	}
 	

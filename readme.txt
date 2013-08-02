@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=KPZHE
 Tags: sidebar, widget area, content aware, context aware, seo, dynamic, flexible, modular, bbpress, buddypress, qtranslate, polylang, transposh, wpml
 Requires at least: 3.1
 Tested up to: 3.6
-Stable tag: 1.3.3
+Stable tag: 1.3.4
 License: GPL2
 
 Create and display sidebars according to the content being viewed.
@@ -92,6 +92,12 @@ However, this also means that it currently is not possible to create a single si
 
 Note the exposure setting as it determines whether the selected rules apply to archives, singulars or both.
 
+= All content items are not listed in the sidebar editor?
+
+For the plugin to scale better such that sites with a lot of content can use it, only the 20 recent items are listed for each type of content in the sidebar editor (excluding items previously selected when updating a sidebar). To find and select the rest, simply use the search function above the list.
+
+Note that only public, private and scheduled items are displayed.
+
 = How do I use display_ca_sidebar( $args )? =
 
 This function is optional and handles all sidebars that are set to be handled manually. It can be inserted anywhere on your site in any quantity, either as it is, or with the following parameters:
@@ -115,6 +121,15 @@ The function accepts URL-style strings as parameters too, like the standard Word
 5. Viewing a Post that contains Very Categorized. `Very Categorized Posts` sidebar has replaced `Main Sidebar`
 
 == Changelog ==
+
+= 1.3.4 =
+
+* Fixed: cas_walker_checklist now follows walker declaration for wp3.6
+* Fixed: content list in accordion now not scrollable
+* Fixed: only terms from public taxonomies are included for content recognition.
+* Fixed: polylang fully supported again
+* Fixed: consistent css across wp versions
+* Removed: flushing rewrite rules on activation/deactivation is needless
 
 = 1.3.3 =
 
