@@ -3,8 +3,8 @@ Contributors: intoxstudio
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=KPZHE6A72LEN4&lc=US&item_name=WordPress%20Plugin%3a%20Content%20Aware%20Sidebars&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted
 Tags: sidebar, widget area, content aware, context aware, seo, dynamic, flexible, modular, bbpress, buddypress, qtranslate, polylang, transposh, wpml
 Requires at least: 3.1
-Tested up to: 3.6
-Stable tag: 1.3.4
+Tested up to: 3.7
+Stable tag: 1.3.5
 License: GPL2
 
 Create and display sidebars according to the content being viewed.
@@ -70,7 +70,7 @@ www.intox.dk
 
 == Frequently Asked Questions ==
 
-If you have any questions not answered here, head to the [Support Forum](http://wordpress.org/tags/content-aware-sidebars?forum_id=10) or [contact me directly](http://www.intox.dk/en/contact/).
+If you have any questions not answered here, head over to the [Support Forum](http://wordpress.org/tags/content-aware-sidebars?forum_id=10).
 
 = Will Content Aware Sidebars work with my theme? =
 
@@ -79,7 +79,7 @@ Yes.
 If the theme supports dynamic widget areas/sidebars, new sidebars can be created to replace or merge with those.
 If not, it is still possible to create sidebars and then use the function `display_ca_sidebar()` in the theme.
 
-= Will Content Aware Sidebars work with my plugin? =
+= Will Content Aware Sidebars work with/support my plugin? =
 
 Most likely.
 
@@ -88,7 +88,7 @@ If the plugin uses public Custom Post Types or Custom Taxonomies, these will aut
 = My new sidebar is not displayed where I expect it to? =
 
 All content rules are dependent of each other (when they collide), which makes it possible to create extremely focused rules for where to display a sidebar; e.g. with posts written by a given author AND with a given category.
-However, this also means that it currently is not possible to create a single sidebar that should be displayed with posts by a given author OR posts with a given category. This has to be done with two or more sidebars.
+However, this also means that it currently is not possible to create a single sidebar that should be displayed with posts by a given author OR with a given category. This has to be done with two or more sidebars.
 
 Note the exposure setting as it determines whether the selected rules apply to archives, singulars or both.
 
@@ -121,6 +121,12 @@ The function accepts URL-style strings as parameters too, like the standard Word
 5. Viewing a Post that contains Very Categorized. `Very Categorized Posts` sidebar has replaced `Main Sidebar`
 
 == Changelog ==
+
+= 1.3.5 =
+
+* Fixed: menu would disappear in rare cases. Props grezvany13
+* Fixed: search function now searches in title and slug (not content) for post types
+* Added: search function displays at most 20 results instead of 10
 
 = 1.3.4 =
 

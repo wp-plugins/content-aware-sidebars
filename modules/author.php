@@ -79,7 +79,7 @@ class CASModule_author extends CASModule {
 			WHERE display_name 
 			LIKE '%s' 
 			ORDER BY display_name ASC 
-			LIMIT 0,10
+			LIMIT 0,20
 		", 
         '%'.$_REQUEST['term'].'%'));
 

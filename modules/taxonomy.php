@@ -236,7 +236,7 @@ class CASModule_taxonomy extends CASModule {
 		if ( preg_match('/cas-autocomplete-'.$this->id.'-([a-zA-Z_-]*\b)/', $_REQUEST['type'], $matches) ) {
 			if(($taxonomy = get_taxonomy( $matches[1] ))) {
 				$terms = get_terms($taxonomy->name, array(
-					'number' => 10,
+					'number' => 20,
 					'hide_empty' => false,
 					'search' => $_REQUEST['term']
 				));

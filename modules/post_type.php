@@ -182,6 +182,7 @@ class CASModule_post_type extends CASModule {
 	 * @return void
 	 */
 	public function ajax_content_search() {
+		global $wpdb;
 		
 		// Verify request
 		check_ajax_referer(basename('content-aware-sidebars.php'),'nonce');
@@ -190,19 +191,39 @@ class CASModule_post_type extends CASModule {
 		if ( preg_match('/cas-autocomplete-'.$this->id.'-([a-zA-Z_-]*\b)/', $_REQUEST['type'], $matches) ) {
 			if(get_post_type_object( $matches[1] )) {
 				$exclude = array();
+				$exclude_query = "";
 				if ($matches[1] == 'page' && 'page' == get_option('show_on_front')) {
 					$exclude[] = get_option('page_on_front');
 					$exclude[] = get_option('page_for_posts');
+					$exclude_query = " AND ID NOT IN (".implode(",", $exclude).")";
 				}
-				$posts = get_posts(array(
-					'posts_per_page' => 10,
-					'post_type' => $matches[1],
-					's' => $_REQUEST['term'],
-					'exclude' => $exclude,
-					'orderby' => 'title',
-					'order' => 'ASC',
-					'post_status'	=> 'publish,private,future'
+
+				//WordPress searches in title and content by default
+				//We want to search in title and slug
+				//Using unprepared (safe) exclude because WP is not good at parsing arrays
+				$posts = $wpdb->get_results($wpdb->prepare("
+					SELECT ID, post_title, post_type
+					FROM $wpdb->posts
+					WHERE post_type = '%s' AND (post_title LIKE '%s' OR post_name LIKE '%s') AND post_status IN('publish','private','future')
+					".$exclude_query."
+					ORDER BY post_title ASC
+					LIMIT 0,20
+					",
+					$matches[1],
+					"%".$_REQUEST['term']."%",
+					"%".$_REQUEST['term']."%"
 				));
+
+				// $posts = get_posts(array(
+				// 	'posts_per_page' => 10,
+				// 	'post_type' => $matches[1],
+				// 	's' => $_REQUEST['term'],
+				// 	'exclude' => $exclude,
+				// 	'orderby' => 'title',
+				// 	'order' => 'ASC',
+				// 	'post_status'	=> 'publish,private,future'
+				// ));
+				
 				foreach($posts as $post) {
 					$suggestions[] = array(
 						'label' => $post->post_title,
