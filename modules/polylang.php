@@ -18,7 +18,9 @@ class CASModule_polylang extends CASModule {
 	 * Constructor
 	 */
 	public function __construct() {
-		parent::__construct('language',__('Languages',ContentAwareSidebars::DOMAIN));
+		parent::__construct();
+		$this->id = 'language';
+		$this->name = __('Languages',ContentAwareSidebars::DOMAIN);
 		
 		add_filter('pll_get_post_types', array(&$this,'remove_sidebar_multilingual'));
 		
@@ -31,18 +33,13 @@ class CASModule_polylang extends CASModule {
 	public function is_content() {
 		return true;
 	}
-
+	
 	/**
-	 * Get data from context
-	 * @author Joachim Jensen <jv@intox.dk>
-	 * @since  2.0
-	 * @return array
+	 * Query where
+	 * @return string 
 	 */
-	public function get_context_data() {
-		return array(
-			$this->id,
-			pll_current_language()
-		);
+	public function db_where() {
+		return "(language.meta_value IS NULL OR language.meta_value IN('language','".pll_current_language()."'))";	
 	}
 
 	/**
@@ -50,7 +47,7 @@ class CASModule_polylang extends CASModule {
 	 * @global object $polylang
 	 * @return array 
 	 */
-	protected function _get_content($args = array()) {
+	protected function _get_content() {
 		global $polylang;
 		$langs = array();
 

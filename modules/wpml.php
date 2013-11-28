@@ -18,7 +18,9 @@ class CASModule_wpml extends CASModule {
 	 * Constructor
 	 */
 	public function __construct() {
-		parent::__construct('language',__('Languages',ContentAwareSidebars::DOMAIN));
+		parent::__construct();
+		$this->id = 'language';
+		$this->name = __('Languages',ContentAwareSidebars::DOMAIN);
 	}
 	
 	/**
@@ -28,25 +30,20 @@ class CASModule_wpml extends CASModule {
 	public function is_content() {
 		return true;
 	}
-
+	
 	/**
-	 * Get data from context
-	 * @author Joachim Jensen <jv@intox.dk>
-	 * @since  2.0
-	 * @return array
+	 * Where query
+	 * @return string 
 	 */
-	public function get_context_data() {
-		return array(
-			$this->id,
-			ICL_LANGUAGE_CODE
-		);
+	public function db_where() {
+		return "(language.meta_value IS NULL OR language.meta_value IN('language','".ICL_LANGUAGE_CODE."'))";	
 	}
 
 	/**
 	 * Get languages
 	 * @return array 
 	 */
-	protected function _get_content($args = array()) {
+	protected function _get_content() {
 		$langs = array();
 		
 		foreach(icl_get_languages('skip_missing=N') as $lng) {

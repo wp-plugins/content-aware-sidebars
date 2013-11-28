@@ -18,7 +18,10 @@ class CASModule_qtranslate extends CASModule {
 	 * Constructor
 	 */
 	public function __construct() {
-		parent::__construct('language',__('Languages',ContentAwareSidebars::DOMAIN));
+		parent::__construct();
+		$this->id = 'language';
+		$this->name = __('Languages',ContentAwareSidebars::DOMAIN);
+		
 	}
 	
 	/**
@@ -28,18 +31,13 @@ class CASModule_qtranslate extends CASModule {
 	public function is_content() {
 		return true;
 	}
-
+	
 	/**
-	 * Get data from context
-	 * @author Joachim Jensen <jv@intox.dk>
-	 * @since  2.0
-	 * @return array
+	 * Where query
+	 * @return string 
 	 */
-	public function get_context_data() {
-		return array(
-			$this->id,
-			qtrans_getLanguage()
-		);
+	public function db_where() {
+		return "(language.meta_value IS NULL OR language.meta_value IN('language','".qtrans_getLanguage()."'))";
 	}
 	
 	/**
@@ -47,7 +45,7 @@ class CASModule_qtranslate extends CASModule {
 	 * @global array $q_config
 	 * @return array 
 	 */
-	protected function _get_content($args = array()) {
+	protected function _get_content() {
 		global $q_config;
 		$langs = array();
 			

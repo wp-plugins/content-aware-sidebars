@@ -33,18 +33,13 @@ class CASModule_bbpress extends CASModule_author {
 	public function is_content() {
 		return bbp_is_single_user();
 	}
-
+	
 	/**
-	 * Get data from context
-	 * @author Joachim Jensen <jv@intox.dk>
-	 * @since  2.0
-	 * @return array
+	 * Query where
+	 * @return string 
 	 */
-	public function get_context_data() {
-		return array(
-			$this->id,
-			bbp_get_displayed_user_id()			
-		}
+	public function db_where() {
+		return "(bb_profile.meta_value = 'bb_profile' OR bb_profile.meta_value = '".bbp_get_displayed_user_id()."')";	
 	}
 	
 	/**

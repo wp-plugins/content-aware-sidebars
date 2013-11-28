@@ -18,7 +18,9 @@ class CASModule_bp_member extends CASModule {
 	 * Constructor
 	 */
 	public function __construct() {
-		parent::__construct('bp_member',__('BuddyPress Members',ContentAwareSidebars::DOMAIN));
+		parent::__construct();
+		$this->id = 'bp_member';
+		$this->name = __('BuddyPress Members',ContentAwareSidebars::DOMAIN);
 		
 		add_filter('cas-is-content-static', array(&$this,'static_is_content'));
 		
@@ -29,7 +31,7 @@ class CASModule_bp_member extends CASModule {
 	 * @global object $bp
 	 * @return array 
 	 */
-	protected function _get_content($args = array()) {
+	protected function _get_content() {
 		global $bp;
 		
 		$components = $bp->loaded_components;
@@ -53,19 +55,16 @@ class CASModule_bp_member extends CASModule {
 		global $bp;
 		return $bp->displayed_user->domain != null;
 	}
-
+	
 	/**
-	 * Get data from context
-	 * @author Joachim Jensen <jv@intox.dk>
-	 * @since  2.0
-	 * @return array
+	 * Query where
+	 * @global object $bp
+	 * @return string
 	 */
-	public function get_context_data() {
+	public function db_where() {
 		global $bp;
-		return array(
-			$bp->current_component,
-			$bp->current_component."-".$bp->current_action
-		);
+		return "(bp_member.meta_value IS NULL OR bp_member.meta_value IN ('".$bp->current_component."','".$bp->current_component."-".$bp->current_action."'))";
+
 	}
 	
 	/**

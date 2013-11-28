@@ -32,7 +32,7 @@ class CAS_Walker_Checklist extends Walker {
 	 */
 	public function start_lvl(&$output, $depth = 0, $args = array()) {
 		$indent = str_repeat("\t", $depth);
-		$output .= "</li>$indent<li><ul class='children'>\n";
+		$output .= "$indent<ul class='children'>\n";
 	}
 	
 	/**
@@ -44,7 +44,7 @@ class CAS_Walker_Checklist extends Walker {
 	 */
 	public function end_lvl(&$output, $depth = 0, $args = array()) {
 		$indent = str_repeat("\t", $depth);
-		$output .= "$indent</ul></li>\n";
+		$output .= "$indent</ul>\n";
 	}
 	
 	/**
@@ -53,52 +53,39 @@ class CAS_Walker_Checklist extends Walker {
 	 * @param  object $term   
 	 * @param  int    $depth  
 	 * @param  array  $args 
-	 * @param  int 	  $current_object_id
 	 * @return void
 	 */
 	public function start_el(&$output, $term, $depth = 0, $args = array(), $current_object_id = 0 ) {
-		extract($args);		
+		extract($args);
 		
 		if(isset($post_type)) {
-
-			if (empty($post_type)) {
+			
+			if ( empty($post_type) ) {
 				$output .= "\n<li>";
 				return;
 			}
-
-			$css_id = $post_type->name.'-'.$term->ID;
-			$css_class = 'cas-post_types-'.$term->ID.' cas-post_types-'.$post_type->name;
-			$value = $term->ID;
-			$title = $term->post_title;
-			$name = 'post_types[]';
+			
+			$output .= "\n".'<li id="'.$post_type->name.'-'.$term->ID.'"><label class="selectit"><input class="cas-post_types-'.$term->ID.' cas-post_types-'.$post_type->name.'" value="'.$term->ID.'" type="checkbox" name="post_types[]"'.checked(in_array($term->ID,$selected_cats),true,false).'/> '.esc_html( $term->post_title ).'</label>';
 			
 		} else {
-
-			if (empty($taxonomy)) {
+			
+			if ( empty($taxonomy) ) {
 				$output .= "\n<li>";
 				return;
 			}
-
-			//Hierarchical taxonomies use ids instead of slugs
-			//see http://codex.wordpress.org/Function_Reference/wp_set_post_terms
-			$value_var = ($taxonomy->hierarchical ? 'term_id' : 'slug');
-
-			$css_id = $taxonomy->name.'-'.$term->term_id;
-			$css_class = 'cas-taxonomies-'.$taxonomy->name;
-			$value = $term->$value_var;
-			$title = $term->name;
-			$name = 'tax_input['.$taxonomy->name.'][]';
-
+			
+			$name = ($taxonomy->name == 'category' ? 'post_category' : 'tax_input['.$taxonomy->name.']');                   
+			$value = ($taxonomy->hierarchical ? 'term_id' : 'slug');
+                
+			$output .= "\n".'<li id="'.$taxonomy->name.'-'.$term->term_id.'"><label class="selectit"><input class="cas-taxonomies-'.$taxonomy->name.'" value="'.$term->$value.'" type="checkbox" name="'.$name.'[]"'.checked(in_array($term->term_id,$selected_terms),true,false).'/> '.esc_html( $term->name ) . '</label>';
+		
 		}
-
-		$output .= "\n".'<li id="'.$css_id.'"><label class="selectit"><input class="'.$css_class.'" value="'.$value.'" type="checkbox" title="'.esc_attr( $title ).'" name="'.$name.'"'.checked(in_array($value,$selected_terms),true,false).'/> '.esc_html( $title ).'</label>';
-
 	}
 
 	/**
 	 * End outputting element
 	 * @param  string $output 
-	 * @param  object $object   
+	 * @param  object $term   
 	 * @param  int    $depth  
 	 * @param  array  $args   
 	 * @return void         
@@ -109,4 +96,42 @@ class CAS_Walker_Checklist extends Walker {
 	
 }
 
-//eol
+/**
+ * Show checklist for popular terms
+ * @global int     $post_ID
+ * @param  object  $taxonomy 
+ * @param  int     $default  
+ * @param  int     $number   
+ * @param  boolean $echo 
+ * @return array            
+ */	
+function cas_popular_terms_checklist( $taxonomy, $default = 0, $number = 10, $echo = true ) {
+	global $post_ID;
+
+	if ( $post_ID )
+		$checked_terms = wp_get_object_terms($post_ID, $taxonomy->name, array('fields'=>'ids'));
+	else
+		$checked_terms = array();
+
+	$terms = get_terms( $taxonomy->name, array( 'orderby' => 'count', 'order' => 'DESC', 'number' => $number, 'hierarchical' => false ) );
+	$disabled = current_user_can($taxonomy->cap->assign_terms) ? '' : ' disabled="disabled"';
+	$popular_ids = array();
+
+	foreach ( (array) $terms as $term ) {
+		$popular_ids[] = $term->term_id;
+		if ( !$echo ) // hack for AJAX use
+			continue;
+		$id = "popular-$taxonomy->name-$term->term_id";      
+               ?>
+
+		<li id="<?php echo $id; ?>" class="popular-category">
+			<label class="selectit">
+			<input class="cas-taxonomies-<?php echo $taxonomy->name; ?>" id="in-<?php echo $id; ?>" type="checkbox"<?php echo in_array( $term->term_id, $checked_terms ) ? ' checked="checked"' : ''; ?> value="<?php echo $term->term_id; ?>"<?php echo $disabled ?>/>
+				<?php echo esc_html( apply_filters( 'the_category', $term->name ) ); ?>
+			</label>
+		</li>
+
+		<?php
+	}
+	return $popular_ids;
+}

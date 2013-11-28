@@ -31,11 +31,12 @@ class CASModule_taxonomy extends CASModule {
 	 * Constructor
 	 */
 	public function __construct() {
-		parent::__construct('taxonomies',__('Taxonomies',ContentAwareSidebars::DOMAIN),true);
-		$this->type_display = true;
-		$this->searchable = true;
+		parent::__construct();
+		$this->id = 'taxonomies';
+		$this->name = __('Taxonomies',ContentAwareSidebars::DOMAIN);
 
-		//add_action('init', array(&$this,'add_taxonomies_to_sidebar'),100);
+		add_action('init', array(&$this,'add_taxonomies_to_sidebar'),100);
+		add_action('admin_menu',array(&$this,'clear_admin_menu'));
 		add_action('created_term', array(&$this,'term_ancestry_check'),10,3);
 
 		add_action('wp_ajax_cas-autocomplete-'.$this->id, array(&$this,'ajax_content_search'));
@@ -81,19 +82,13 @@ class CASModule_taxonomy extends CASModule {
 		return $joins;
 	
 	}
-
+	
 	/**
-	 * Get data from context
-	 * @author Joachim Jensen <jv@intox.dk>
-	 * @since  2.0
-	 * @return array
+	 * Query where
+	 * @return string 
 	 */
-	public function get_context_data() {
-		// for($i = 0; $i < 5000; $i++) {
-		// 	add_post_meta(rand(1,5000),'_bogus_key','bogus-'.rand(10000,99999),true);
-		// }
+	public function db_where() {
 		
-
 		if(is_singular()) {
 			$terms = array();
 
@@ -115,6 +110,7 @@ class CASModule_taxonomy extends CASModule {
 		$term = get_queried_object();
 		
 		return "((taxonomy.taxonomy = '".$term->taxonomy."' AND terms.slug = '".$term->slug."') OR taxonomies.meta_value = '".$term->taxonomy."')";
+		
 	}
 	
 	/**
@@ -129,70 +125,14 @@ class CASModule_taxonomy extends CASModule {
 	 * Get registered taxonomies
 	 * @return array 
 	 */
-	protected function _get_content($args = array()) {
-		$args = wp_parse_args($args, array(
-			'include' => '',
-			'taxonomy' => 'category',
-			'number' => 20,
-			'orderby' => 'name',
-			'order' => 'ASC',
-			'offset' => 0
-		));
-		extract($args);
-
-		$terms = get_terms($taxonomy, array(
-			'number' => $number,
-			'hide_empty' => false,
-			'include' => $include,
-			'offset' => $offset,
-			'orderby' => $orderby,
-			'order' => $order
-		));
-		$total_items = wp_count_terms($taxonomy,array('hide_empty'=>false));
-		$per_page = $number;
-		$this->pagination = array(
-			'paged' => $offset+1,
-			'per_page' => $per_page,
-			'total_pages' => $total_items/$per_page,
-			'total_items' => $total_items
-		);
-
-		
-		return $terms;
-	}
-
-	protected function _get_taxonomies() {
+	protected function _get_content() {
 		// List public taxonomies
 		if (empty($this->taxonomy_objects)) {
 			foreach (get_taxonomies(array('public' => true), 'objects') as $tax) {
 				$this->taxonomy_objects[$tax->name] = $tax;
 			}
 		}
-		return $this->taxonomy_objects;		
-	}
-
-	public function print_group_data($post_id) {
-		$ids = array_flip((array)get_post_custom_values(ContentAwareSidebars::PREFIX . $this->id, $post_id));
-
-		foreach($this->_get_taxonomies() as $taxonomy) {
-
-			$posts = wp_get_object_terms( $post_id, $taxonomy->name);
-			if($posts || isset($ids[$taxonomy->name])) {
-				echo '<div class="cas-conditions-'.$this->id.'-'.$taxonomy->name.'">';
-				echo '<strong>'.$taxonomy->label.'</strong>';
-				echo '<ul>';
-				if(isset($ids[$taxonomy->name])) {
-					echo '<label><input type="checkbox" name="taxonomies[]" value="'.$taxonomy->name.'" checked="checked" /> '.$taxonomy->labels->all_items.'</label>' . "\n";
-				}
-				if($posts) {
-					$selected = wp_get_object_terms($post_id, $taxonomy->name, array('fields' => ($taxonomy->hierarchical ? 'ids' : 'slugs')));
-					echo $this->term_checklist($taxonomy, $posts, $selected);
-				}
-				echo '</ul>';
-				echo '</div>';	
-			}
-		}
-
+		return $this->taxonomy_objects;
 	}
 
 	/**
@@ -203,60 +143,51 @@ class CASModule_taxonomy extends CASModule {
 	public function meta_box_content() {
 		global $post;
 
-		foreach ($this->_get_taxonomies() as $taxonomy) {
+		foreach ($this->_get_content() as $taxonomy) {
+			echo '<h4><a href="#">' . $taxonomy->label . '</a></h4>'."\n";
+			echo '<div class="cas-rule-content" id="cas-' . $this->id . '-' . $taxonomy->name . '">';
 
-			echo '<li class="control-section accordion-section">';		
-			echo '<h3 class="accordion-section-title" title="'.$taxonomy->label.'" tabindex="0">'.$taxonomy->label.'</h3>'."\n";
-			echo '<div class="accordion-section-content cas-rule-content" data-cas-module="'.$this->id.'" id="cas-' . $this->id . '-' . $taxonomy->name . '">';
+			$meta = get_post_meta($post->ID, ContentAwareSidebars::PREFIX . 'taxonomies', false);
+			$current = $meta != '' ? $meta : array();
 
-			$terms = $this->_get_content(array('taxonomy' => $taxonomy->name));
-			$popular_terms = $this->_get_content(array('taxonomy' => $taxonomy->name, 'orderby' => 'count', 'order' => 'DESC'));
+			$number_of_terms = wp_count_terms($taxonomy->name,array('hide_empty'=>false));
 
 			if($taxonomy->hierarchical) {
 				echo '<p>' . "\n";
-				echo '<label><input type="checkbox" name="taxonomies[]" value="'.ContentAwareSidebars::PREFIX.'sub_' . $taxonomy->name . '" /> ' . __('Automatically select new children of a selected ancestor', ContentAwareSidebars::DOMAIN) . '</label>' . "\n";
+				echo '<label><input type="checkbox" name="taxonomies[]" value="'.ContentAwareSidebars::PREFIX.'sub_' . $taxonomy->name . '"' . checked(in_array(ContentAwareSidebars::PREFIX."_sub_" . $taxonomy->name, $current), true, false) . ' /> ' . __('Automatically select new children of a selected ancestor', ContentAwareSidebars::DOMAIN) . '</label>' . "\n";
 				echo '</p>' . "\n";
 			}
 			echo '<p>' . "\n";
-			echo '<label><input class="cas-chk-all" type="checkbox" name="taxonomies[]" value="' . $taxonomy->name . '" /> ' . sprintf(__('Display with %s', ContentAwareSidebars::DOMAIN), $taxonomy->labels->all_items) . '</label>' . "\n";
+			echo '<label><input class="cas-chk-all" type="checkbox" name="taxonomies[]" value="' . $taxonomy->name . '"' . checked(in_array($taxonomy->name, $current), true, false) . ' /> ' . sprintf(__('Show with %s', ContentAwareSidebars::DOMAIN), $taxonomy->labels->all_items) . '</label>' . "\n";
 			echo '</p>' . "\n";
-	
-			if (!$terms) {
+			
+			if (!$number_of_terms) {
 				echo '<p>' . __('No items.') . '</p>';
 			} else {
+		
+				$selected_ids = array();
+				if(($selected = wp_get_object_terms($post->ID, $taxonomy->name))) {
+					$selected_ids = wp_get_object_terms($post->ID, $taxonomy->name,  array('fields' => 'ids'));
+				} else {
+					$selected = array();
+				}
+				$terms = get_terms($taxonomy->name, array(
+					'number' => 20,
+					'hide_empty' => false,
+					'exclude' => $selected_ids
+				));
 
-				$tabs = array();
-				$tabs['popular'] = array(
-					'title' => __('Most Used'),
-					'status' => true,
-					'content' => $this->term_checklist($taxonomy, $popular_terms, array(), false)
-				);
-				$tabs['all'] = array(
-					'title' => __('View All'),
-					'status' => false,
-					'content' => $this->term_checklist($taxonomy, $terms, array(), true)
-				);
-				if($this->searchable) {
-					$tabs['search'] = array(
-						'title' => __('Search'),
-						'status' => false,
-						'content' => '',
-						'content_before' => '<p><input class="cas-autocomplete-' . $this->id . ' cas-autocomplete quick-search" id="cas-autocomplete-' . $this->id . '-' . $taxonomy->name . '" type="search" name="cas-autocomplete" value="" placeholder="'.__('Search').'" autocomplete="off" /><span class="spinner"></span></p>'
-					);
+				if($number_of_terms > 20) {
+					echo _x('Search','verb',ContentAwareSidebars::DOMAIN).' <input class="cas-autocomplete-' . $this->id . ' cas-autocomplete" id="cas-autocomplete-' . $this->id . '-' . $taxonomy->name . '" type="text" name="cas-autocomplete" value="" placeholder="' . $taxonomy->label . '" />'."\n";
 				}
 
-				echo $this->create_tab_panels($this->id . '-' . $taxonomy->name,$tabs);
-				
+				echo '<input type="hidden" name="'.($taxonomy->name == "category" ? "post_category[]" : "tax_input[".$taxonomy->name."]").'" value="0" />';
+				echo '<ul id="cas-list-' . $this->id . '-' . $taxonomy->name . '" class="cas-contentlist categorychecklist form-no-clear">'."\n";
+				$this->term_checklist($post->ID, $taxonomy, array_merge($selected,$terms), $selected_ids);
+				echo '</ul>'."\n";
+
 			}
-
-			echo '<p class="button-controls">';
-
-			echo '<span class="add-to-group"><input type="button" name="" id="cas-' . $this->id . '-' . $taxonomy->name . '-add" class="js-cas-condition-add button" value="Add to Group"><span class="spinner"></span></span>';
-
-			echo '</p>';
-
 			echo '</div>'."\n";
-			echo '</li>';
 		}
 	}
 
@@ -268,49 +199,28 @@ class CASModule_taxonomy extends CASModule {
 	 * @param  array   $selected_ids 
 	 * @return void 
 	 */
-	private function term_checklist($taxonomy, $terms, $selected_terms = array(), $pagination = false) {
+	private function term_checklist($post_id = 0, $taxonomy, $terms, $selected_ids) {
 
-		$walker = new CAS_Walker_Checklist('category',array('parent' => 'parent', 'id' => 'term_id'));
+		$walker = new CAS_Walker_Checklist('category',array ('parent' => 'parent', 'id' => 'term_id'));
 
 		$args = array(
 			'taxonomy'	=> $taxonomy,
-			'selected_terms' => $selected_terms
+			'selected_terms' => $post_id ? $selected_ids : array()
 		);
-
-		$return = call_user_func_array(array(&$walker, 'walk'), array($terms, 0, $args));
-
-		if($pagination) {
-			$paginate = paginate_links(array(
-				'base'         => admin_url( 'admin-ajax.php').'%_%',
-				'format'       => '?paged=%#%',
-				'total'        => $this->pagination['total_pages'],
-				'current'      => $this->pagination['paged'],
-				'mid_size'     => 2,
-				'end_size'     => 1,
-				'prev_next'    => true,
-				'prev_text'    => 'prev',
-				'next_text'    => 'next',
-				'add_args'     => array('item_object'=>$taxonomy->name),
-			));
-			$return = $paginate.$return.$paginate;
+		
+		$checked_terms = array();
+		
+		foreach( $terms as $key => $value ) {
+			if (in_array($terms[$key]->term_id, $args['selected_terms'])) {
+				$checked_terms[] = $terms[$key];
+				unset($terms[$key]);
+			}
 		}
-
-		return $return;
-
-	}
-
-	public function ajax_get_content() {
-
-		//validation
-		$paged = (isset($_POST['paged']) ? $_POST['paged'] : 1)-1;
-		$search = isset($_POST['search']) ? $_POST['search'] : false;
-		$taxonomy = get_taxonomy($_POST['item_object']);
-
-		$posts = $this->_get_content(array('taxonomy' => $_POST['item_object'], 'orderby' => 'name', 'order' => 'ASC', 'offset' => $paged));
-		$response = $this->term_checklist($taxonomy, $posts, array(), true);
-		//$response = $_POST['paged'];
-		echo json_encode($response);
-		die();
+		
+		//Put checked posts on top
+		echo call_user_func_array(array(&$walker, 'walk'), array($checked_terms, 0, $args));
+		// Then the rest of them
+		echo call_user_func_array(array(&$walker, 'walk'), array($terms, 0, $args));
 	}
 
 	/**
@@ -319,18 +229,14 @@ class CASModule_taxonomy extends CASModule {
 	 */
 	public function ajax_content_search() {
 		
-		if(!isset($_POST['sidebar_id'])) {
-			die(-1);
-		}
-		
 		// Verify request
-		check_ajax_referer(ContentAwareSidebars::SIDEBAR_PREFIX.$_POST['sidebar_id'],'nonce');
+		check_ajax_referer(basename('content-aware-sidebars.php'),'nonce');
 	
 		$suggestions = array();
 		if ( preg_match('/cas-autocomplete-'.$this->id.'-([a-zA-Z_-]*\b)/', $_REQUEST['type'], $matches) ) {
 			if(($taxonomy = get_taxonomy( $matches[1] ))) {
 				$terms = get_terms($taxonomy->name, array(
-					'number' => 10,
+					'number' => 20,
 					'hide_empty' => false,
 					'search' => $_REQUEST['term']
 				));
@@ -354,44 +260,31 @@ class CASModule_taxonomy extends CASModule {
 		die();
 	}
 
-	public function save_data($post_id) {
-		parent::save_data($post_id);
-
-		$tax_input = isset($_POST['tax_input']) ? $_POST['tax_input'] : array();
-
-		//Save terms
-		//Loop through each public taxonomy
-		foreach($this->_get_taxonomies() as $taxonomy) {
-
-			if (current_user_can($taxonomy->cap->assign_terms) ) {
-
-				//If no terms, maybe delete old ones
-				if(!isset($tax_input[$taxonomy->name])) {
-					$terms = null;
-				} else {
-					$terms = $tax_input[$taxonomy->name];
-
-					//Hierarchical taxonomies use ids instead of slugs
-					//see http://codex.wordpress.org/Function_Reference/wp_set_post_terms
-					if($taxonomy->hierarchical) {
-						$terms = array_unique(array_map('intval', $terms));
-					}						
-				}
-
-				wp_set_object_terms( $post_id, $terms, $taxonomy->name );					
-			}			
-
-		}
-
-	}
-
 	/**
 	 * Register taxonomies to sidebar post type
 	 * @return void 
 	 */
 	public function add_taxonomies_to_sidebar() {
-		foreach($this->_get_taxonomies() as $tax) {
+		foreach($this->_get_content() as $tax) {
 			register_taxonomy_for_object_type( $tax->name, ContentAwareSidebars::TYPE_SIDEBAR );
+		}
+	}
+
+
+	/**
+	 * Remove taxonomy shortcuts from menu and standard meta boxes.
+	 * @return void
+	 */
+	public function clear_admin_menu() {
+		if(current_user_can('edit_theme_options')) {
+			foreach($this->_get_content() as $tax) {
+				remove_submenu_page('edit.php?post_type='.ContentAwareSidebars::TYPE_SIDEBAR,'edit-tags.php?taxonomy='.$tax->name.'&amp;post_type='.ContentAwareSidebars::TYPE_SIDEBAR);
+			}
+		} else {
+			// Remove those taxonomies left in the menu when it should be hidden
+			foreach($this->_get_content() as $tax) {
+				remove_menu_page('edit-tags.php?taxonomy='.$tax->name.'&amp;post_type='.ContentAwareSidebars::TYPE_SIDEBAR);
+			}	
 		}
 	}
 	

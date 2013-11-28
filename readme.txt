@@ -2,23 +2,17 @@
 Contributors: intoxstudio
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=KPZHE6A72LEN4&lc=US&item_name=WordPress%20Plugin%3a%20Content%20Aware%20Sidebars&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted
 Tags: sidebar, widget area, content aware, context aware, seo, dynamic, flexible, modular, bbpress, buddypress, qtranslate, polylang, transposh, wpml
-Requires at least: 3.2
-Tested up to: 3.8
-Stable tag: 2.0
+Requires at least: 3.1
+Tested up to: 3.7
+Stable tag: 1.3.5
 License: GPL2
 
 Create and display sidebars according to the content being viewed.
 
 == Description ==
 
-Manage an infinite number of sidebars. Make your WordPress site even more dynamic and boost SEO by controlling what content your sidebars should be displayed with. Creating flexible, dynamic sidebars has never been easier, and no code is needed at all as everything is easily done in the administration panel.
+Manage an infinite number of sidebars. Make your WordPress site even more dynamic and boost SEO by controlling what content the sidebars should be displayed with. Creating flexible, dynamic sidebars has never been easier, and no code is needed at all as everything is easily done in the administration panel.
 No extra database tables or table columns will be added.
-
-= New in version 2 =
-
-* Condition groups let you display a sidebar with distinct content.
-* Improved GUI lets you find and select **any** supported content on your site.
-* Improved API for developers
 
 = Features =
 
@@ -37,8 +31,7 @@ No extra database tables or table columns will be added.
 	* Front Page
 	* bbPress User Profiles
 	* BuddyPress Member Pages
-	* Languages (qTranslate, Polylang, Transposh, WPML)
-	* Pods
+	* Languages (qTranslate, Polylang, Transposh, WPML) 
 	* **Any combination of the above**
 * Merge new sidebars with others, replace others or simply add them to your theme manually with a template tag
 * Create complex content with nested sidebars
@@ -51,7 +44,6 @@ No extra database tables or table columns will be added.
 * BuddyPress (v1.6.2+)
 * qTranslate (v2.5.29+)
 * Polylang (v0.9.6+)
-* Pods (2.0+)
 * Transposh Translation Filter (v0.8.2+)
 * WPML Multilingual Blog/CMS (v2.4.3+)
 
@@ -61,7 +53,6 @@ No extra database tables or table columns will be added.
 * Italian (it_IT): [Luciano Del Fico](http://www.myweb2.it/)
 * Lithuanian (lt_LT): [Vincent G](http://host1free.com/)
 * Slovak (sk_SK): [Branco](http://webhostinggeeks.com/)
-* Spanish (es_ES): [Analia Jensen](http://www.linkedin.com/in/analiajensen)
 
 If you have translated the plugin into your language or updated an existing translation, please send the .po and .mo files to jv[at]intox.dk.
 Download the latest [.pot file](http://plugins.svn.wordpress.org/content-aware-sidebars/trunk/lang/content-aware-sidebars.pot) or the [.po file in your language](http://plugins.svn.wordpress.org/content-aware-sidebars/trunk/lang/).
@@ -130,24 +121,6 @@ The function accepts URL-style strings as parameters too, like the standard Word
 5. Viewing a Post that contains Very Categorized. `Very Categorized Posts` sidebar has replaced `Main Sidebar`
 
 == Changelog ==
-
-= 2.0 =
-
-* Added: condition groups
-* Added: gui overhaul for sidebar editor
-* Added: pagination for tags and post types in sidebar editor
-* Added: mysql 5.6+ compatibility
-* Added: more efficient uninstall process
-* Added: easier for developers to extend and manipulate content support
-* Added: wp 3.8 and mp6 compatibility
-* Added: spanish translation
-* Fixed: all conditions follow a strict logical "and" operator per group
-* Fixed: scripts and styles only loaded on sidebar administrative pages
-* Removed: jquery autocomplete on search
-//REMEMBER TO DELETE GROUPS ON SIDEBAR DELETION
-//display names when adding things to group
-//combine autocomplete and pagination
-//automatically add children
 
 = 1.3.5 =
 
@@ -346,11 +319,6 @@ The function accepts URL-style strings as parameters too, like the standard Word
 * First stable release
 
 == Upgrade Notice ==
-
-= 2.0 = 
-
-* Content Aware Sidebar data in your database will be updated automatically. It is highly recommended to backup this data before updating the plugin.
-* Minimum WordPress version compatibility is now 3.3.
 
 = 1.1 =
 
