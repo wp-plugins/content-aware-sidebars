@@ -18,9 +18,7 @@ class CASModule_transposh extends CASModule {
 	 * Constructor
 	 */
 	public function __construct() {
-		parent::__construct();
-		$this->id = 'language';
-		$this->name = __('Languages',ContentAwareSidebars::DOMAIN);
+		parent::__construct('language',__('Languages',ContentAwareSidebars::DOMAIN));
 	}
 	
 	/**
@@ -30,16 +28,19 @@ class CASModule_transposh extends CASModule {
 	public function is_content() {
 		return true;
 	}
-	
+
 	/**
-	 * Where query
-	 * @global object $my_transposh_plugin
-	 * @return string 
+	 * Get data from context
+	 * @author Joachim Jensen <jv@intox.dk>
+	 * @since  2.0
+	 * @return array
 	 */
-	public function db_where() {
+	public function get_context_data() {
 		global $my_transposh_plugin;
-		return "(language.meta_value IS NULL OR language.meta_value IN('language','".$my_transposh_plugin->tgl."'))";
-		
+		return array(
+			$this->id,
+			$my_transposh_plugin->tgl
+		);
 	}
 
 	/**
@@ -47,7 +48,7 @@ class CASModule_transposh extends CASModule {
 	 * @global object $my_transposh_plugin
 	 * @return array 
 	 */
-	protected function _get_content() {
+	protected function _get_content($args = array()) {
 		global $my_transposh_plugin;
 		$langs = array();
 		foreach(explode(',',$my_transposh_plugin->options->get_viewable_langs()) as $lng) {

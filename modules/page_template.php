@@ -19,9 +19,9 @@ class CASModule_page_template extends CASModule {
 	 * Constructor
 	 */
 	public function __construct() {
-		parent::__construct();
-		$this->id = 'page_templates';
-		$this->name = __('Page Templates',ContentAwareSidebars::DOMAIN);
+		parent::__construct('page_templates',__('Page Templates',ContentAwareSidebars::DOMAIN));
+
+		$this->type_display = true;
 	}
 	
 	/**
@@ -35,21 +35,25 @@ class CASModule_page_template extends CASModule {
 		}
 		return false;
 	}
-	
+
 	/**
-	 * Query where
-	 * @return string 
+	 * Get data from context
+	 * @author Joachim Jensen <jv@intox.dk>
+	 * @since  2.0
+	 * @return array
 	 */
-	public function db_where() {
-		$template = get_post_meta(get_the_ID(),'_wp_page_template',true);
-		return "(page_templates.meta_value IS NULL OR page_templates.meta_value IN('page_templates','".$template."'))";
+	public function get_context_data() {
+		return array(
+			$this->id,
+			get_post_meta(get_the_ID(),'_wp_page_template',true)
+		);
 	}
 
 	/**
 	 * Get page templates
 	 * @return array 
 	 */
-	protected function _get_content() {
+	protected function _get_content($args = array()) {
 		return array_flip(get_page_templates());
 	}
 	
