@@ -13,16 +13,13 @@ function cas_run_db_update($current_version) {
 
 	if(current_user_can('update_plugins')) {
 		// Get current plugin db version
-		$installed_version = get_option('cas_db_version');
-
-		if($installed_version === false)
-			$installed_version = 0;
+		$installed_version = get_option('cas_db_version',0);
 
 		// Database is up to date
 		if($installed_version == $current_version)
 			return true;
 
-		$versions = array(0.8,1.1);
+		$versions = array('0.8','1.1','2.0');
 
 		//Launch updates
 		foreach($versions as $version) {
@@ -43,6 +40,70 @@ function cas_run_db_update($current_version) {
 		return $return;
 	}
 	return false;
+}
+
+/**
+ * Version 1.1 -> 2.0
+ * Moves module data for each sidebar to a condition group
+ * @author Joachim Jensen <jv@intox.dk>
+ * @since  2.0
+ * @return boolean
+ */
+function cas_update_to_20() {
+	global $wpdb;
+
+	$module_keys = array(
+		'static',
+		'post_types',
+		'authors',
+		'page_templates',
+		'taxonomies',
+		'language',
+		'bb_profile',
+		'bp_member'
+	);
+
+	// Get all sidebars
+	$posts = get_posts(array(
+		'numberposts'     => -1,
+		'post_type'       => ContentAwareSidebars::TYPE_SIDEBAR,
+		'post_status'     => 'publish,pending,draft,future,private,trash'
+	));
+	if(!empty($posts)) {
+		foreach($posts as $post) {
+
+			//Create new condition group
+			$group_id = wp_insert_post(array(
+				'post_status'           => $post->post_status, 
+				'post_type'             => ContentAwareSidebars::TYPE_CONDITION_GROUP,
+				'post_author'           => $post->post_author,
+				'post_parent'           => $post->ID,
+			));
+
+			if($group_id) {
+
+				//Move module data to condition group
+				$wpdb->query("
+					UPDATE $wpdb->postmeta 
+					SET post_id = '".$group_id."' 
+					WHERE meta_key IN ('".ContentAwareSidebars::PREFIX.implode("','".ContentAwareSidebars::PREFIX,$module_keys)."')
+					AND post_id = '".$post->ID."'
+				");
+
+				//Move term data to condition group
+				$wpdb->query("
+					UPDATE $wpdb->term_relationships 
+					SET object_id = '".$group_id."' 
+					WHERE object_id = '".$post->ID."'
+				");
+
+			}
+
+		}		
+	}
+
+	return true;
+
 }
 
 /**
@@ -131,3 +192,5 @@ function cas_update_to_08() {
 
 	return true;    
 }     
+
+//eol

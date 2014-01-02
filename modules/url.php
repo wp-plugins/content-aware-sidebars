@@ -19,9 +19,7 @@ class CASModule_url extends CASModule {
 	 * Constructor
 	 */
 	public function __construct() {
-		parent::__construct();
-		$this->id = 'url';
-		$this->name = __('URLs',ContentAwareSidebars::DOMAIN);
+		parent::__construct('url',__('URLs',ContentAwareSidebars::DOMAIN));
 	}
 
 
@@ -48,7 +46,7 @@ class CASModule_url extends CASModule {
 	 * Determine if content is relevant
 	 * @return boolean 
 	 */
-	public function is_content() {
+	public function in_context() {
 		global $wp_query;
 		return $wp_query->query['pagename'] != null;
 	}
@@ -71,11 +69,21 @@ class CASModule_url extends CASModule {
 	}
 
 	/**
+	 * Get data from context
+	 * @author Joachim Jensen <jv@intox.dk>
+	 * @since  2.0
+	 * @return array
+	 */
+	public function get_context_data() {
+		return array();
+	}
+
+	/**
 	 * Get authors
 	 * @global object $wpdb
 	 * @return array 
 	 */
-	protected function _get_content() {
+	protected function _get_content($args = array()) {
 		return 0;
 	}
 	

@@ -18,9 +18,7 @@ class CASModule_bp_member extends CASModule {
 	 * Constructor
 	 */
 	public function __construct() {
-		parent::__construct();
-		$this->id = 'bp_member';
-		$this->name = __('BuddyPress Members',ContentAwareSidebars::DOMAIN);
+		parent::__construct('bp_member',__('BuddyPress Members',ContentAwareSidebars::DOMAIN));
 		
 		add_filter('cas-is-content-static', array(&$this,'static_is_content'));
 		
@@ -31,7 +29,7 @@ class CASModule_bp_member extends CASModule {
 	 * @global object $bp
 	 * @return array 
 	 */
-	protected function _get_content() {
+	protected function _get_content($args = array()) {
 		global $bp;
 		
 		$components = $bp->loaded_components;
@@ -42,6 +40,9 @@ class CASModule_bp_member extends CASModule {
 		foreach((array)$components as $name) {
 			$content[$name] = ucfirst($name);
 		}
+		if(isset($args['include'])) {
+			$content = array_intersect_key($content,array_flip($args['include']));
+		}
 		
 		return $content;
 	}
@@ -51,20 +52,23 @@ class CASModule_bp_member extends CASModule {
 	 * @global object  $bp
 	 * @return boolean 
 	 */
-	public function is_content() {
+	public function in_context() {
 		global $bp;
 		return $bp->displayed_user->domain != null;
 	}
-	
-	/**
-	 * Query where
-	 * @global object $bp
-	 * @return string
-	 */
-	public function db_where() {
-		global $bp;
-		return "(bp_member.meta_value IS NULL OR bp_member.meta_value IN ('".$bp->current_component."','".$bp->current_component."-".$bp->current_action."'))";
 
+	/**
+	 * Get data from context
+	 * @author Joachim Jensen <jv@intox.dk>
+	 * @since  2.0
+	 * @return array
+	 */
+	public function get_context_data() {
+		global $bp;
+		return array(
+			$bp->current_component,
+			$bp->current_component."-".$bp->current_action
+		);
 	}
 	
 	/**
@@ -76,27 +80,42 @@ class CASModule_bp_member extends CASModule {
 	public function meta_box_content() {
 		global $post, $bp;
 		
-		echo '<h4><a href="#">'.$this->name.'</a></h4>'."\n";
-		echo '<div class="cas-rule-content" id="cas-' . $this->id . '">'."\n";
-		$field = $this->id;
-		$meta = get_post_meta($post->ID, ContentAwareSidebars::PREFIX . $field, false);
-		$current = $meta != '' ? $meta : array();
+		echo '<li class="control-section accordion-section">';		
+		echo '<h3 class="accordion-section-title" title="'.$this->name.'" tabindex="0">'.$this->name.'</h3>'."\n";
+		echo '<div class="accordion-section-content cas-rule-content" data-cas-module="'.$this->id.'" id="cas-'.$this->id.'">';
 
-		echo '<ul class="cas-contentlist categorychecklist form-no-clear">'."\n";
+		$field = $this->id;
+
+		$tab_content = "";
+
 		foreach ($this->_get_content() as $id => $name) {
-			echo '<li><label class="selectit"><input type="checkbox" name="' . $field . '[]" value="' . $id . '"' . (in_array($id, $current) ? ' checked="checked"' : '') . ' /> ' . $name . '</label></li>' . "\n";
+			$tab_content .= '<li class="cas-'.$this->id.'-'.$id.'"><label class="selectit"><input type="checkbox" name="' . $field . '[]" value="' . $id . '" /> ' . $name . '</label></li>' . "\n";
 			if(isset($bp->bp_options_nav[$id])) {
-				echo '<ul class="children">';
+				$tab_content .= '<li><ul class="children">';
 				foreach($bp->bp_options_nav[$id] as $child) {
-					echo '<li><label class="selectit"><input type="checkbox" name="' . $field . '[]" value="' . $id . '-'. $child['slug'].'"' . (in_array($id . '-'. $child['slug'], $current) ? ' checked="checked"' : '') . ' /> ' . $child['name'] . '</label></li>' . "\n";
+					$tab_content .= '<li class="cas-'.$this->id.'-'.$id.'-'.$child['slug'].'"><label class="selectit"><input type="checkbox" name="' . $field . '[]" value="' . $id . '-'. $child['slug'].'" /> ' . $child['name'] . '</label></li>' . "\n";
 				}
-				echo '</ul>';
+				$tab_content .= '</ul></li>';
 			}
 			
 		}
 
-		echo '</ul>'."\n";
+		$tabs['all'] = array(
+			'title' => __('View All'),
+			'status' => true,
+			'content' => $tab_content
+		);
+
+		echo $this->create_tab_panels($this->id,$tabs);
+
+		echo '<p class="button-controls">';
+
+		echo '<span class="add-to-group"><input data-cas-condition="'.$this->id.'" data-cas-module="'.$this->id.'" type="button" name="cas-condition-add" class="js-cas-condition-add button" value="'.__('Add to Group',ContentAwareSidebars::DOMAIN).'"></span>';
+
+		echo '</p>';
+
 		echo '</div>'."\n";
+		echo '</li>';
 	}
 	
 	/**
@@ -106,7 +125,7 @@ class CASModule_bp_member extends CASModule {
 	 * @return boolean          
 	 */
 	public function static_is_content($content) {
-		return $content && !$this->is_content();
+		return $content && !$this->in_context();
 	}
 	
 }
