@@ -15,29 +15,50 @@
  */
 class CASModule_page_template extends CASModule {
 	
+	/**
+	 * Constructor
+	 */
 	public function __construct() {
-		parent::__construct();
-		$this->id = 'page_templates';
-		$this->name = __('Page Templates','content-aware-sidebars');
+		parent::__construct('page_templates',__('Page Templates',ContentAwareSidebars::DOMAIN));
+
+		$this->type_display = true;
 	}
 	
-	public function is_content() {		
+	/**
+	 * Determine if content is relevant
+	 * @return boolean 
+	 */
+	public function in_context() {		
 		if(is_singular() && !('page' == get_option( 'show_on_front') && get_option('page_on_front') == get_the_ID())) {
 			$template = get_post_meta(get_the_ID(),'_wp_page_template',true);
-			if($template && $template != 'default') {
-				return true;
-			}
+			return ($template && $template != 'default');
 		}
 		return false;
 	}
-	
-	public function db_where() {
-		$template = get_post_meta(get_the_ID(),'_wp_page_template',true);
-		return "(page_templates.meta_value IS NULL OR page_templates.meta_value IN('page_templates','".$template."'))";
+
+	/**
+	 * Get data from context
+	 * @author Joachim Jensen <jv@intox.dk>
+	 * @since  2.0
+	 * @return array
+	 */
+	public function get_context_data() {
+		return array(
+			$this->id,
+			get_post_meta(get_the_ID(),'_wp_page_template',true)
+		);
 	}
 
-	public function _get_content() {
-		return array_flip(get_page_templates());
+	/**
+	 * Get page templates
+	 * @return array 
+	 */
+	protected function _get_content($args = array()) {
+		$templates = array_flip(get_page_templates());
+		if(isset($args['include'])) {
+			$templates = array_intersect_key($templates,array_flip($args['include']));
+		}
+		return $templates;
 	}
 	
 }
