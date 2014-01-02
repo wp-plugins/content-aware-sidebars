@@ -7,7 +7,7 @@
 Plugin Name: Content Aware Sidebars
 Plugin URI: http://www.intox.dk/
 Description: Manage and show sidebars according to the content being viewed.
-Version: 2.0
+Version: 2.0.1
 Author: Joachim Jensen, Intox Studio
 Author URI: http://www.intox.dk/
 Text Domain: content-aware-sidebars
@@ -310,7 +310,7 @@ final class ContentAwareSidebars {
 			'show_in_menu'				=> true, //current_user_can(self::CAPABILITY),
 			'query_var'					=> false,
 			'rewrite'					=> false,
-			'menu_position'				=> 25,
+			'menu_position'				=> 25.099, //less probable to be overwritten
 			'supports'					=> array('title','page-attributes'),
 			'menu_icon'					=> plugins_url('/img/icon-16.png', __FILE__ )
 		));
