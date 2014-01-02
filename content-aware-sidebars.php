@@ -7,7 +7,7 @@
 Plugin Name: Content Aware Sidebars
 Plugin URI: http://www.intox.dk/
 Description: Manage and show sidebars according to the content being viewed.
-Version: 2.0.1
+Version: 2.0.2
 Author: Joachim Jensen, Intox Studio
 Author URI: http://www.intox.dk/
 Text Domain: content-aware-sidebars
@@ -718,7 +718,15 @@ final class ContentAwareSidebars {
 		//Exclude sidebars that have unrelated content in same group
 		foreach($sidebars_in_context as $key => $sidebar) {
 			$valid[$sidebar->ID] = $sidebar->post_parent;
+			//TODO: move to modules
 			foreach($context_data['EXCLUDE'] as $exclude) {
+				//quick fix to check for taxonomies terms
+				if($exclude == 'taxonomies') {
+					if($wpdb->get_var("SELECT COUNT(*) FROM $wpdb->term_relationships WHERE object_id = '{$sidebar->ID}'") > 0) {
+						unset($valid[$sidebar->ID]);
+						break;						
+					}
+				}
 				if(get_post_custom_values(self::PREFIX . $exclude, $sidebar->ID) !== null) {
 					unset($valid[$sidebar->ID]);
 					break;

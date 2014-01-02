@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=KPZHE
 Tags: sidebar, widget area, content aware, context aware, seo, dynamic, flexible, modular, bbpress, buddypress, qtranslate, polylang, transposh, wpml
 Requires at least: 3.3
 Tested up to: 3.8
-Stable tag: 2.0.1
+Stable tag: 2.0.2
 License: GPL2
 
 Create and display sidebars according to the content being viewed.
@@ -148,6 +148,10 @@ The function accepts URL-style strings as parameters too, like the standard Word
 5. Viewing a Post that contains Very Categorized. `Very Categorized Posts` sidebar has replaced `Primary Sidebar`
 
 == Changelog ==
+
+= 2.0.2 =
+
+* Fixed: terms caused a sidebar to be displayed on all pages
 
 = 2.0.1 =
 
