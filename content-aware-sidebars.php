@@ -7,164 +7,253 @@
 Plugin Name: Content Aware Sidebars
 Plugin URI: http://www.intox.dk/
 Description: Manage and show sidebars according to the content being viewed.
-Version: 1.1.1
-Author: Joachim Jensen
+Version: 2.0.3
+Author: Joachim Jensen, Intox Studio
 Author URI: http://www.intox.dk/
 Text Domain: content-aware-sidebars
 Domain Path: /lang/
 License: GPL2
 
-    Copyright 2011-2012  Joachim Jensen  (email : jv@intox.dk)
+	Copyright 2011-2013  Joachim Jensen  (email : jv@intox.dk)
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License, version 2, as 
-    published by the Free Software Foundation.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License, version 2, as 
+	published by the Free Software Foundation.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 */
 
 final class ContentAwareSidebars {
 	
-	const db_version		= 1.1;
-	const prefix			= '_cas_';
-	
+	/**
+	 * Database version for update module
+	 */
+	const DB_VERSION		= '2.0';
+
+	/**
+	 * Plugin version
+	 */
+	const PLUGIN_VERSION    = '2.0.3';
+
+	/**
+	 * Prefix for data (keys) stored in database
+	 */
+	const PREFIX			= '_cas_';
+
+	/**
+	 * Prefix for sidebar id
+	 */
+	const SIDEBAR_PREFIX	= 'ca-sidebar-';
+
+	/**
+	 * Post Type for sidebars
+	 */
+	const TYPE_SIDEBAR		= 'sidebar';
+
+	/**
+	 * Post Type for sidebar groups
+	 */
+	const TYPE_CONDITION_GROUP = 'sidebar_group';
+
+	/**
+	 * Language domain
+	 */
+	const DOMAIN 			= 'content-aware-sidebars';
+
+	/**
+	 * Capability to manage sidebars
+	 */
+	const CAPABILITY		= 'edit_theme_options';
+
+	/**
+	 * Sidebar metadata
+	 * @var array
+	 */
 	private $metadata		= array();
-	private $taxonomies		= array();
-	private $sidebar_cache		= array();
-	
+
+	/**
+	 * Store all sidebars here
+	 * @var array
+	 */
+	private $sidebars 		= array();
+
+	/**
+	 * Sidebars retrieved from database
+	 * @var array
+	 */
+	private $sidebar_cache	= array();
+
+	/**
+	 * Modules for specific content or cases
+	 * @var array
+	 */
 	private $modules		= array();
 
 	/**
-	 *
+	 * Instance of class
+	 * @var ContentAwareSidebars
+	 */
+	private static $_instance;
+
+	/**
 	 * Constructor
-	 *
 	 */
 	public function __construct() {
-		
-		register_activation_hook(__FILE__,			array(&$this,'plugin_activation'));
-		register_deactivation_hook(__FILE__,			array(&$this,'plugin_deactivation'));
+
+		//__('Manage and show sidebars according to the content being viewed.',self::DOMAIN);
+		//__('Content Aware Sidebars',self::DOMAIN);
 		
 		$this->_load_dependencies();
-		
+
 		// WordPress Hooks. Somewhat ordered by execution
 		
-		// On sitewide requests
-		add_action('plugins_loaded',				array(&$this,'deploy_modules'));
-		add_action('init',					array(&$this,'init_sidebar_type'),99);
-		add_action('widgets_init',				array(&$this,'create_sidebars'));
-		
-		// On admin requests
-		add_action('admin_menu',				array(&$this,'clear_admin_menu'));	
-		add_action('admin_enqueue_scripts',			array(&$this,'load_admin_scripts'));
-		
-		// On post type and taxonomy requests
-		add_action('delete_post',				array(&$this,'remove_sidebar_widgets'));
-		add_action('save_post', 				array(&$this,'save_post'));
-		
-		// Order not known yet
-		add_action('add_meta_boxes_sidebar',			array(&$this,'create_meta_boxes'));
-		
-		add_filter('default_hidden_meta_boxes',			array(&$this,'change_default_hidden'),10,2);	
-		add_filter('manage_edit-sidebar_columns',		array(&$this,'admin_column_headers'));
-		add_filter('manage_edit-sidebar_sortable_columns',	array(&$this,'admin_column_sortable_headers'));
-		add_filter('manage_posts_custom_column',		array(&$this,'admin_column_rows'),10,3);
-		add_filter('post_row_actions',				array(&$this,'sidebar_row_actions'),10,2);
-		add_filter('post_updated_messages', 			array(&$this,'sidebar_updated_messages'));
-		
-		
-		// Sitewide hooks that should not be loaded sitewide here
+		//For administration
 		if(is_admin()) {
-			add_filter('request',				array(&$this,'admin_column_orderby'));
 			
-			add_action('wp_loaded',				array(&$this,'db_update'));	
+			add_action('wp_loaded',                                          array(&$this,'db_update'));
+			add_action('admin_enqueue_scripts',                              array(&$this,'load_admin_scripts'));
+			add_action('delete_post',                                        array(&$this,'remove_sidebar_widgets'));
+			add_action('delete_post',                                        array(&$this,'cascade_sidebar_delete'));
+			add_action('save_post',                                          array(&$this,'save_post'));
+			add_action('add_meta_boxes_'.self::TYPE_SIDEBAR,                 array(&$this,'create_meta_boxes'));
+			add_action('in_admin_header',                                    array(&$this,'clear_admin_menu'),99);
+
+			add_action('transition_post_status',                             array(&$this,'cascade_sidebar_status'),10,3);
+
+			add_filter('request',                                            array(&$this,'admin_column_orderby'));
+			add_filter('default_hidden_meta_boxes',                          array(&$this,'change_default_hidden'),10,2);
+			add_filter('manage_edit-'.self::TYPE_SIDEBAR.'_columns',         array(&$this,'admin_column_headers'),99);
+			add_filter('manage_edit-'.self::TYPE_SIDEBAR.'_sortable_columns',array(&$this,'admin_column_sortable_headers'));
+			add_filter('manage_posts_custom_column',                         array(&$this,'admin_column_rows'),10,3);
+			add_filter('post_row_actions',                                   array(&$this,'sidebar_row_actions'),10,2);
+			add_filter('post_updated_messages',                              array(&$this,'sidebar_updated_messages'));
+
+			add_action('wp_ajax_cas_add_group',                              array(&$this,'add_sidebar_group_ajax'));
+			add_action('wp_ajax_cas_add_rule',                               array(&$this,'add_sidebar_rule_ajax'));
+			add_action('wp_ajax_cas_remove_group',                           array(&$this,'remove_sidebar_group_ajax'));
+
+		//For frontend
 		} else {
-			add_filter('wp',				array(&$this,'replace_sidebar'));
+
+			add_filter('wp',                                                 array(&$this,'replace_sidebar'));
+
 		}
+
+		//For both	
+		add_action('init',                                                   array(&$this,'deploy_modules'));
+		add_action('init',                                                   array(&$this,'init_sidebar_type'),99);
+		add_action('widgets_init',                                           array(&$this,'create_sidebars'),99);
+		add_action('wp_loaded',                                              array(&$this,'update_sidebars'),99);
 		
+	}
+
+	/**
+	 * Instantiates and returns class singleton
+	 * @return ContentAwareSidebars 
+	 */
+	public static function instance() {
+		if(!self::$_instance) {
+			self::$_instance = new self();
+		}
+		return self::$_instance;
 	}
 	
 	/**
-	 *
 	 * Deploy modules
-	 *
+	 * @return void 
 	 */
 	public function deploy_modules() {
+
+		load_plugin_textdomain(self::DOMAIN, false, dirname(plugin_basename(__FILE__)).'/lang/');
 		
-		// List modules
+		// List builtin modules
 		$modules = array(
-			'static'		=> true,
-			'post_type'		=> true,
-			'author'		=> true,
-			'page_template'		=> true,
-			'taxonomy'		=> true,
-			'bbpress'		=> function_exists('bbp_get_version'),	// bbPress
-			'qtranslate'		=> defined('QT_SUPPORTED_WP_VERSION'),	// qTranslate
-			'transposh'		=> defined('TRANSPOSH_PLUGIN_VER'),	// Transposh Translation Filter
-			'wpml'			=> defined('ICL_LANGUAGE_CODE')		// WPML Multilingual Blog/CMS
+			'static'        => true,
+			'post_type'     => true,
+			'author'        => true,
+			'page_template' => true,
+			'taxonomy'      => true,
+			'url'           => false,
+			'bbpress'       => function_exists('bbp_get_version'),	// bbPress
+			'bp_member'     => defined('BP_VERSION'),				// BuddyPress
+			'polylang'      => defined('POLYLANG_VERSION'),			// Polylang
+			'qtranslate'    => defined('QT_SUPPORTED_WP_VERSION'),	// qTranslate
+			'transposh'     => defined('TRANSPOSH_PLUGIN_VER'),		// Transposh Translation Filter
+			'wpml'          => class_exists('SitePress')			// WPML Multilingual Blog/CMS
 		);
+		//Let developers remove builtin modules or add their own
+		$modules = apply_filters('cas-module-pre-deploy',$modules);
 		
-		load_plugin_textdomain('content-aware-sidebars', false, dirname( plugin_basename(__FILE__)).'/lang/');
-		
-		// Fire!
+		// Forge modules
 		foreach($modules as $name => $enabled) {
-			if($enabled)
-				$this->modules[$name] = $this->_forge_module($name);
+			if($enabled) {
+				if(is_bool($enabled) && include('modules/'.$name .'.php')) {
+					$class = 'CASModule_'.$name;
+					$obj = new $class;
+				} else if(class_exists((string)$enabled)) {
+					$obj = new $enabled;
+					if(!($obj instanceof CASModule)) {
+						continue;
+					}
+				} else {
+					continue;
+				}
+				
+				$this->modules[$obj->get_id()] = $obj; 
+			}
 		}
 		
 	}
 	
 	/**
-	 *
 	 * Create post meta fields
-	 *
-	 * @global int $post
 	 * @global array $wp_registered_sidebars 
+	 * @return void 
 	 */
 	private function _init_metadata() {
-		global $post, $wp_registered_sidebars;
-		
+		global $wp_registered_sidebars;
+
 		// List of sidebars
 		$sidebar_list = array();
 		foreach($wp_registered_sidebars as $sidebar) {
-			if(isset($post) && $sidebar['id'] != 'ca-sidebar-'.$post->ID)
-				$sidebar_list[$sidebar['id']] = $sidebar['name'];
+			$sidebar_list[$sidebar['id']] = $sidebar['name'];
 		}
-		
+
 		// Meta fields
 		$this->metadata['exposure'] = array(
-			'name'	=> __('Exposure', 'content-aware-sidebars'),
+			'name'	=> __('Exposure', self::DOMAIN),
 			'id'	=> 'exposure',
 			'desc'	=> '',
 			'val'	=> 1,
 			'type'	=> 'select',
 			'list'	=> array(
-				 __('Singular', 'content-aware-sidebars'),
-				 __('Singular & Archive', 'content-aware-sidebars'),
-				 __('Archive', 'content-aware-sidebars')
+				 __('Singular', self::DOMAIN),
+				 __('Singular & Archive', self::DOMAIN),
+				 __('Archive', self::DOMAIN)
 			)
 		);
 		$this->metadata['handle'] = array(
-			'name'	=> _x('Handle','option', 'content-aware-sidebars'),
+			'name'	=> _x('Handle','option', self::DOMAIN),
 			'id'	=> 'handle',
-			'desc'	=> __('Replace host sidebar, merge with it or add sidebar manually.', 'content-aware-sidebars'),
+			'desc'	=> __('Replace host sidebar, merge with it or add sidebar manually.', self::DOMAIN),
 			'val'	=> 0,
 			'type'	=> 'select',
 			'list'	=> array(
-				__('Replace', 'content-aware-sidebars'),
-				__('Merge', 'content-aware-sidebars'),
-				__('Manual', 'content-aware-sidebars')
+				__('Replace', self::DOMAIN),
+				__('Merge', self::DOMAIN),
+				__('Manual', self::DOMAIN)
 			)
 		);
 		$this->metadata['host']	= array(
-			'name'	=> __('Host Sidebar', 'content-aware-sidebars'),
+			'name'	=> __('Host Sidebar', self::DOMAIN),
 			'id'	=> 'host',
 			'desc'	=> '',
 			'val'	=> 'sidebar-1',
@@ -172,151 +261,185 @@ final class ContentAwareSidebars {
 			'list'	=> $sidebar_list
 		);
 		$this->metadata['merge-pos'] = array(
-			'name'	=> __('Merge position', 'content-aware-sidebars'),
+			'name'	=> __('Merge position', self::DOMAIN),
 			'id'	=> 'merge-pos',
-			'desc'	=> __('Place sidebar on top or bottom of host when merging.', 'content-aware-sidebars'),
+			'desc'	=> __('Place sidebar on top or bottom of host when merging.', self::DOMAIN),
 			'val'	=> 1,
 			'type'	=> 'select',
 			'list'	=> array(
-				__('Top', 'content-aware-sidebars'),
-				__('Bottom', 'content-aware-sidebars')
+				__('Top', self::DOMAIN),
+				__('Bottom', self::DOMAIN)
 			)
 		);
 		
 	}
 	
 	/**
-	 *
-	 * Custom Post Type: Sidebar
-	 *
+	 * Create sidebar post type and filter group post type
+	 * @return void 
 	 */
 	public function init_sidebar_type() {
-		
-		// List public taxonomies
-		foreach(get_taxonomies(array('public'=>true),'names') as $tax) {
-			$this->taxonomies[] = $tax;
-		}
+
+		$capabilities = array(
+				'edit_post'				=> self::CAPABILITY,
+				'read_post'				=> self::CAPABILITY,
+				'delete_post'			=> self::CAPABILITY,
+				'edit_posts'			=> self::CAPABILITY,
+				'edit_others_posts'		=> self::CAPABILITY,
+				'publish_posts'			=> self::CAPABILITY,
+				'read_private_posts'	=> self::CAPABILITY
+		);
 		
 		// Register the sidebar type
-		register_post_type('sidebar',array(
+		register_post_type(self::TYPE_SIDEBAR,array(
 			'labels'	=> array(
-				'name'			=> __('Sidebars', 'content-aware-sidebars'),
-				'singular_name'		=> __('Sidebar', 'content-aware-sidebars'),
-				'add_new'		=> _x('Add New', 'sidebar', 'content-aware-sidebars'),
-				'add_new_item'		=> __('Add New Sidebar', 'content-aware-sidebars'),
-				'edit_item'		=> __('Edit Sidebar', 'content-aware-sidebars'),
-				'new_item'		=> __('New Sidebar', 'content-aware-sidebars'),
-				'all_items'		=> __('All Sidebars', 'content-aware-sidebars'),
-				'view_item'		=> __('View Sidebar', 'content-aware-sidebars'),
-				'search_items'		=> __('Search Sidebars', 'content-aware-sidebars'),
-				'not_found'		=> __('No sidebars found', 'content-aware-sidebars'),
-				'not_found_in_trash'	=> __('No sidebars found in Trash', 'content-aware-sidebars')
+				'name'					=> __('Sidebars', self::DOMAIN),
+				'singular_name'			=> __('Sidebar', self::DOMAIN),
+				'add_new'				=> _x('Add New', 'sidebar', self::DOMAIN),
+				'add_new_item'			=> __('Add New Sidebar', self::DOMAIN),
+				'edit_item'				=> __('Edit Sidebar', self::DOMAIN),
+				'new_item'				=> __('New Sidebar', self::DOMAIN),
+				'all_items'				=> __('All Sidebars', self::DOMAIN),
+				'view_item'				=> __('View Sidebar', self::DOMAIN),
+				'search_items'			=> __('Search Sidebars', self::DOMAIN),
+				'not_found'				=> __('No sidebars found', self::DOMAIN),
+				'not_found_in_trash'	=> __('No sidebars found in Trash', self::DOMAIN)
 			),
-			'show_ui'	=> true, 
-			'query_var'	=> false,
-			'rewrite'	=> false,
-			'menu_position' => null,
-			'supports'	=> array('title','page-attributes','excerpt'),
-			'taxonomies'	=> $this->taxonomies,
-			'menu_icon'	=> WP_PLUGIN_URL.'/'.plugin_basename(dirname(__FILE__)).'/img/icon-16.png'
+			'capabilities'				=> $capabilities,
+			'show_ui'					=> true,
+			'show_in_menu'				=> true, //current_user_can(self::CAPABILITY),
+			'query_var'					=> false,
+			'rewrite'					=> false,
+			'menu_position'				=> 25.099, //less probable to be overwritten
+			'supports'					=> array('title','page-attributes'),
+			'menu_icon'					=> plugins_url('/img/icon-16.png', __FILE__ )
+		));
+		
+		// Register the condition group type
+		register_post_type(self::TYPE_CONDITION_GROUP,array(
+			'labels'	=> array(
+				'name'					=> __('Condition Groups', self::DOMAIN),
+				'singular_name'			=> __('Condition Group', self::DOMAIN),
+				'add_new'				=> _x('Add New', 'group', self::DOMAIN),
+				'add_new_item'			=> __('Add New Group', self::DOMAIN),
+				'edit_item'				=> _x('Edit', 'group', self::DOMAIN),
+				'new_item'				=> '',
+				'all_items'				=> '',
+				'view_item'				=> '',
+				'search_items'			=> '',
+				'not_found'				=> '',
+				'not_found_in_trash'	=> ''
+			),
+			'capabilities'				=> $capabilities,
+			'show_ui'					=> false,
+			'show_in_menu'				=> false,
+			'query_var'					=> false,
+			'rewrite'					=> false,
+			'supports'					=> array('author'), //prevents fallback
 		));
 	}
 	
 	/**
-	 *
 	 * Create update messages
-	 *
-	 * @global type $post
-	 * @param array $messages
-	 * @return array 
+	 * @global object $post
+	 * @param  array $messages 
+	 * @return array           
 	 */
 	public function sidebar_updated_messages( $messages ) {
-		global $post;
-		$messages['sidebar'] = array(
+		$messages[self::TYPE_SIDEBAR] = array(
 			0 => '',
-			1 => sprintf(__('Sidebar updated. <a href="%s">Manage widgets</a>','content-aware-sidebars'),'widgets.php'),
+			1 => __('Sidebar updated.',self::DOMAIN).sprintf(' <a href="%1$s">%2$s</a>','widgets.php',__('Manage widgets',self::DOMAIN)),
 			2 => '',
 			3 => '',
-			4 => __('Sidebar updated.','content-aware-sidebars'),
+			4 => __('Sidebar updated.',self::DOMAIN),
 			5 => '',
-			6 => sprintf(__('Sidebar published. <a href="%s">Manage widgets</a>','content-aware-sidebars'), 'widgets.php'),
-			7 => __('Sidebar saved.','content-aware-sidebars'),
-			8 => sprintf(__('Sidebar submitted. <a href="%s">Manage widgets</a>','content-aware-sidebars'),'widgets.php'),
-			9 => sprintf(__('Sidebar scheduled for: <strong>%1$s</strong>. <a href="%2$s">Manage widgets</a>','content-aware-sidebars'),
-			// translators: Publish box date format, see http://php.net/date
-			date_i18n(__('M j, Y @ G:i'),strtotime($post->post_date)),'widgets.php'),
-			10 => __('Sidebar draft updated.','content-aware-sidebars'),
+			6 => __('Sidebar published.',self::DOMAIN).sprintf(' <a href="%1$s">%2$s</a>','widgets.php',__('Manage widgets',self::DOMAIN)),
+			7 => __('Sidebar saved.',self::DOMAIN),
+			8 => __('Sidebar submitted.',self::DOMAIN).sprintf(' <a href="%1$s">%2$s</a>','widgets.php',__('Manage widgets',self::DOMAIN)),
+			9 => sprintf(__('Sidebar scheduled for: <strong>%1$s</strong>.',self::DOMAIN).' <a href="%2$s">%3$s</a>',
+				// translators: Publish box date format, see http://php.net/date
+				date_i18n(__('M j, Y @ G:i'),strtotime(get_the_ID())),
+				'widgets.php',
+				__('Manage widgets',self::DOMAIN)),
+			10 => __('Sidebar draft updated.',self::DOMAIN),
 		);
 		return $messages;
 	}
 
 	/**
-	 *
-	 * Remove taxonomy shortcuts from menu and standard meta boxes.
-	 *
+	 * Add sidebars to widgets area
+	 * Triggered in widgets_init to save location for each theme
+	 * @return void
 	 */
-	public function clear_admin_menu() {
-		foreach($this->taxonomies as $name) {
-			remove_submenu_page('edit.php?post_type=sidebar','edit-tags.php?taxonomy='.$name.'&amp;post_type=sidebar');
-			remove_meta_box('tagsdiv-'.$name, 'sidebar', 'side');
-			remove_meta_box($name.'div', 'sidebar', 'side');
+	public function create_sidebars() {
+		$this->sidebars = get_posts(array(
+			'numberposts'	=> -1,
+			'post_type'		=> self::TYPE_SIDEBAR,
+			'post_status'	=> array('publish','private','future')
+		));
+
+		//Register sidebars to add them to the list
+		foreach($this->sidebars as $post) {
+			register_sidebar( array(
+				'name'			=> $post->post_title,
+				'id'			=> self::SIDEBAR_PREFIX.$post->ID
+			));
 		}
 	}
 	
 	/**
-	 *
-	 * Add sidebars to widgets area
-	 *
+	 * Update the created sidebars with metadata
+	 * @return void 
 	 */
-	public function create_sidebars() {
+	public function update_sidebars() {
 
-		//WP3.1 does not support (array) as post_status
-		$posts = get_posts(array(
-			'numberposts'	=> -1,
-			'post_type'	=> 'sidebar',
-			'post_status'	=> 'publish,private,future'
-		));
-		foreach($posts as $post) {
+		//Init metadata
+		$this->_init_metadata();
+
+		//Now reregister sidebars with proper content
+		foreach($this->sidebars as $post) {
+			
+			$handle = get_post_meta($post->ID,self::PREFIX . 'handle', true);
+			//$handle = $post->{self::PREFIX . 'handle'};
+			$desc = $this->metadata['handle']['list'][$handle];
+
+			if ($handle < 2) {
+				$host = get_post_meta($post->ID, self::PREFIX . 'host', true);
+				$desc .= ": " . (isset($this->metadata['host']['list'][$host]) ? $this->metadata['host']['list'][$host] :  __('Please update Host Sidebar', self::DOMAIN) );
+			}
 			register_sidebar( array(
-				'name'		=> $post->post_title,
-				'description'	=> $post->post_excerpt,
-				'id'		=> 'ca-sidebar-'.$post->ID,
+				'name'			=> $post->post_title,
+				'description'	=> $desc,
+				'id'			=> self::SIDEBAR_PREFIX.$post->ID,
 				'before_widget'	=> '<li id="%1$s" class="widget-container %2$s">',
 				'after_widget'	=> '</li>',
 				'before_title'	=> '<h3 class="widget-title">',
 				'after_title'	=> '</h3>',
 			));
-		}		
+		}
 	}
 	
 	/**
-	 *
 	 * Add admin column headers
-	 * 
-	 * @param array $columns
-	 * @return array 
+	 * @param  array $columns 
+	 * @return array          
 	 */
 	public function admin_column_headers($columns) {
-		
-		unset($columns['categories'],$columns['tags']);
-		
-		return array_merge(
-			array_slice($columns, 0, 2, true),
-			array(
-				'exposure'	=> __('Exposure', 'content-aware-sidebars'),
-				'handle'	=> _x('Handle','option', 'content-aware-sidebars'),
-				'merge-pos'	=> __('Merge position', 'content-aware-sidebars')
-			),
-			$columns
+		// Totally discard current columns and rebuild
+		return array(
+			'cb'		=> $columns['cb'],
+			'title'		=> $columns['title'],
+			'exposure'	=> __('Exposure', self::DOMAIN),
+			'handle'	=> _x('Handle','option', self::DOMAIN),
+			'merge-pos'	=> __('Merge position', self::DOMAIN),
+			'date'		=> $columns['date']
 		);
 	}
 		
 	/**
-	 *
 	 * Make some columns sortable
-	 *
-	 * @param array $columns
-	 * @return array 
+	 * @param  array $columns 
+	 * @return array
 	 */
 	public function admin_column_sortable_headers($columns) {
 		return array_merge(
@@ -324,173 +447,230 @@ final class ContentAwareSidebars {
 				'exposure'	=> 'exposure',
 				'handle'	=> 'handle',
 				'merge-pos'	=> 'merge-pos'
-			),
-			$columns
+			), $columns
 		);
 	}
 	
 	/**
-	 *
 	 * Manage custom column sorting
-	 * 
-	 * @param array $vars
+	 * @param  array $vars 
 	 * @return array 
 	 */
 	public function admin_column_orderby($vars) {
-		if (isset($vars['orderby']) && in_array($vars['orderby'],array('exposure','handle','merge-pos'))) {
-			$vars = array_merge( $vars, array(
-				'meta_key'	=> self::prefix.$vars['orderby'],
-				'orderby'	=> 'meta_value'
-			) );
+		if (isset($vars['orderby']) && in_array($vars['orderby'], array('exposure', 'handle', 'merge-pos'))) {
+			$vars = array_merge($vars, array(
+				'meta_key' => self::PREFIX . $vars['orderby'],
+				'orderby' => 'meta_value'
+			));
 		}
 		return $vars;
 	}
 	
 	/**
-	 *
 	 * Add admin column rows
-	 *
-	 * @param string $column_name
-	 * @param int $post_id
-	 * @return type 
+	 * @param  string $column_name 
+	 * @param  int $post_id
+	 * @return void
 	 */
-	public function admin_column_rows($column_name,$post_id) {
-		
-		if(get_post_type($post_id) != 'sidebar')
+	public function admin_column_rows($column_name, $post_id) {
+
+		if (get_post_type($post_id) != self::TYPE_SIDEBAR)
 			return;
-		
+
 		// Load metadata
-		if(!$this->metadata) $this->_init_metadata();
+		if (!$this->metadata)
+			$this->_init_metadata();
+
+		$current = get_post_meta($post_id, self::PREFIX . $column_name, true);
+		$current_from_list = "";
+
+		if(isset($this->metadata[$column_name]['list'][$current])) {
+
+			$current_from_list = $this->metadata[$column_name]['list'][$current];
+			
+			if ($column_name == 'handle' && $current < 2) {
+				$host = get_post_meta($post_id, self::PREFIX . 'host', true);
+				$current_from_list .= ": " . (isset($this->metadata['host']['list'][$host]) ? $this->metadata['host']['list'][$host] : '<span style="color:red;">' . __('Please update Host Sidebar', self::DOMAIN) . '</span>');
+			}
+
+		}
 		
-		$current = get_post_meta($post_id,self::prefix.$column_name,true);
-		$current_from_list = $this->metadata[$column_name]['list'][$current];
-		
-		if($column_name == 'handle' && $current < 2) {		
-			$host = get_post_meta($post_id,self::prefix.'host',true);			
-			$current_from_list .= ": ".(isset($this->metadata['host']['list'][$host]) ? $this->metadata['host']['list'][$host] : '<span style="color:red;">'.__('Please update Host Sidebar','content-aware-sidebars').'</span>');		
-		}		
 		echo $current_from_list;
 	}
 	
 	/**
-	 *
 	 * Remove widget when its sidebar is removed
-	 *
-	 * @param int $post_id
-	 * @return type 
+	 * @param  int $post_id 
+	 * @return void
 	 */
 	public function remove_sidebar_widgets($post_id) {
-		
+
 		// Authenticate and only continue on sidebar post type
-		if(!current_user_can('delete_posts') || get_post_type($post_id) != 'sidebar')
+		if (!current_user_can(self::CAPABILITY) || get_post_type($post_id) != self::TYPE_SIDEBAR)
 			return;
-		
-		$id = 'ca-sidebar-'.$post_id;		
-		
+
+		$id = self::SIDEBAR_PREFIX . $post_id;
+
 		//Get widgets
 		$sidebars_widgets = wp_get_sidebars_widgets();
-		
+
 		// Check if sidebar exists in database
-		if(!isset($sidebars_widgets[$id]))
+		if (!isset($sidebars_widgets[$id]))
 			return;
-		
+
 		// Remove widgets settings from sidebar
-		foreach($sidebars_widgets[$id] as $widget_id) {
-			$widget_type = preg_replace( '/-[0-9]+$/', '', $widget_id );
-			$widget_settings = get_option('widget_'.$widget_type);
-			$widget_id = substr($widget_id,strpos($widget_id,'-')+1);
-			if($widget_settings && isset($widget_settings[$widget_id])) {
+		foreach ($sidebars_widgets[$id] as $widget_id) {
+			$widget_type = preg_replace('/-[0-9]+$/', '', $widget_id);
+			$widget_settings = get_option('widget_' . $widget_type);
+			$widget_id = substr($widget_id, strpos($widget_id, '-') + 1);
+			if ($widget_settings && isset($widget_settings[$widget_id])) {
 				unset($widget_settings[$widget_id]);
-				update_option('widget_'.$widget_type,$widget_settings);
+				update_option('widget_' . $widget_type, $widget_settings);
 			}
 		}
-		
+
 		// Remove sidebar
 		unset($sidebars_widgets[$id]);
 		wp_set_sidebars_widgets($sidebars_widgets);
-		
-		
+	}
+
+	/**
+	 * Delete condition groups for
+	 * a sidebar that is deleted
+	 * @author Joachim Jensen <jv@intox.dk>
+	 * @since  2.0
+	 * @param  int    $post_id
+	 * @return void
+	 */
+	public function cascade_sidebar_delete($post_id) {
+
+		// Authenticate and only continue on sidebar post type
+		if (!current_user_can(self::CAPABILITY) || get_post_type($post_id) != self::TYPE_SIDEBAR)
+			return;
+
+		global $wpdb;
+		$groups = (array)$wpdb->get_col($wpdb->prepare("SELECT ID FROM $wpdb->posts WHERE post_parent = '%d'", $post_id));
+		foreach($groups as $group_id) {
+			//Takes care of metadata and terms too
+			wp_delete_post($group_id,true);
+		}
+
 	}
 	
 	/**
-	 *
 	 * Add admin rows actions
-	 *
-	 * @param array $actions
-	 * @param object $post
-	 * @return array 
+	 * @param  array   $actions
+	 * @param  WP_Post $post
+	 * @return array
 	 */
 	public function sidebar_row_actions($actions, $post) {
-		if($post->post_type == 'sidebar' && $post->post_status != 'trash') {
-			
-			//View link is still there in WP3.1
-			if(isset($actions['view']))
-				unset($actions['view']);
-				
-			return array_merge(
-				array_slice($actions, 0, 2, true),
-				array(
-				      'mng_widgets' => 	'<a href="widgets.php" title="'.esc_html(__( 'Manage Widgets','content-aware-sidebars')).'">'.__( 'Manage Widgets','content-aware-sidebars').'</a>'
-				),
-				$actions
-			);
+		if ($post->post_type == self::TYPE_SIDEBAR && $post->post_status != 'trash') {
+			$new_actions['mng_widgets'] = '<a href="widgets.php" title="' . esc_attr__('Manage Widgets', self::DOMAIN) . '">' . __('Manage Widgets', self::DOMAIN) . '</a>';
+			//Append new actions just before trash action
+			array_splice($actions, -1, 0, $new_actions);
 		}
 		return $actions;
 	}
 
 	/**
-	 *
-	 * Replace or merge a sidebar with content aware sidebars
-	 * Handles content aware sidebars with hosts
-	 *
+	 * Replace or merge a sidebar with content aware sidebars.
+	 * Handles sidebars with hosts
 	 * @global array $_wp_sidebars_widgets
-	 * @return type 
+	 * @return void 
 	 */
 	public function replace_sidebar() {
 		global $_wp_sidebars_widgets;
-		
+
 		$posts = $this->get_sidebars();
-		if(!$posts)
+		if (!$posts)
 			return;
-		
-		foreach($posts as $post) {
-			
-//			// Filter out sidebars with dependent content rules not present. Archives not yet decided.
-//			if(!(is_archive() || (is_home() && !is_front_page()))) {
-//				$continue = false;
-//				$continue = apply_filters('cas_exclude_sidebar', $continue, $post, self::prefix);
-//				if($continue)
-//					continue;
-//			}
-//			
-			$id = 'ca-sidebar-'.$post->ID;	
-			$host = get_post_meta($post->ID, self::prefix.'host', true);
-			
+
+		foreach ($posts as $post) {
+
+			$id = self::SIDEBAR_PREFIX . $post->ID;
+			$host = get_post_meta($post->ID, self::PREFIX . 'host', true);
+
 			// Check for correct handling and if host exist
 			if ($post->handle == 2 || !isset($_wp_sidebars_widgets[$host]))
 				continue;
-			
+
 			// Sidebar might not have any widgets. Get it anyway!
-			if(!isset($_wp_sidebars_widgets[$id]))
+			if (!isset($_wp_sidebars_widgets[$id]))
 				$_wp_sidebars_widgets[$id] = array();
-			
+
 			// If host has already been replaced, merge with it instead. Might change in future.
-			if($post->handle || isset($handled_already[$host])) {
-				if(get_post_meta($post->ID, self::prefix.'merge-pos', true))
-					$_wp_sidebars_widgets[$host] = array_merge($_wp_sidebars_widgets[$host],$_wp_sidebars_widgets[$id]);
+			if ($post->handle || isset($handled_already[$host])) {
+				if (get_post_meta($post->ID, self::PREFIX . 'merge-pos', true))
+					$_wp_sidebars_widgets[$host] = array_merge($_wp_sidebars_widgets[$host], $_wp_sidebars_widgets[$id]);
 				else
-					$_wp_sidebars_widgets[$host] = array_merge($_wp_sidebars_widgets[$id],$_wp_sidebars_widgets[$host]);
+					$_wp_sidebars_widgets[$host] = array_merge($_wp_sidebars_widgets[$id], $_wp_sidebars_widgets[$host]);
 			} else {
 				$_wp_sidebars_widgets[$host] = $_wp_sidebars_widgets[$id];
 				$handled_already[$host] = 1;
-			}		
+			}
 		}
 	}
 	
 	/**
-	 *
+	 * Show manually handled content aware sidebars
+	 * @global array $_wp_sidebars_widgets
+	 * @param  string|array $args 
+	 * @return void 
+	 */
+	public function manual_sidebar($args) {
+		global $_wp_sidebars_widgets;
+
+		// Grab args or defaults
+		$args = wp_parse_args($args, array(
+			'include' => '',
+			'before' => '<div id="sidebar" class="widget-area"><ul class="xoxo">',
+			'after' => '</ul></div>'
+		));
+		extract($args, EXTR_SKIP);
+
+		// Get sidebars
+		$posts = $this->get_sidebars();
+		if (!$posts)
+			return;
+
+		// Handle include argument
+		if (!empty($include)) {
+			if (!is_array($include))
+				$include = explode(',', $include);
+			// Fast lookup
+			$include = array_flip($include);
+		}
+
+		$i = $host = 0;
+		foreach ($posts as $post) {
+
+			$id = self::SIDEBAR_PREFIX . $post->ID;
+
+			// Check for manual handling, if sidebar exists and if id should be included
+			if ($post->handle != 2 || !isset($_wp_sidebars_widgets[$id]) || (!empty($include) && !isset($include[$post->ID])))
+				continue;
+
+			// Merge if more than one. First one is host.
+			if ($i > 0) {
+				if (get_post_meta($post->ID, self::PREFIX . 'merge-pos', true))
+					$_wp_sidebars_widgets[$host] = array_merge($_wp_sidebars_widgets[$host], $_wp_sidebars_widgets[$id]);
+				else
+					$_wp_sidebars_widgets[$host] = array_merge($_wp_sidebars_widgets[$id], $_wp_sidebars_widgets[$host]);
+			} else {
+				$host = $id;
+			}
+			$i++;
+		}
+
+		if ($host) {
+			echo $before;
+			dynamic_sidebar($host);
+			echo $after;
+		}
+	}
+
+	/**
 	 * Query sidebars according to content
-	 * 
 	 * @global type $wpdb
 	 * @return array|boolean 
 	 */
@@ -507,441 +687,634 @@ final class ContentAwareSidebars {
 			else
 				return $this->sidebar_cache;
 		}
-		
-		$joins = array();
-		$where = array();
-		$where2 = array();
-		
-		// Get rules
-		foreach($this->modules as $module) {
-			if($module->is_content()) {
-				$joins[] = apply_filters("cas-db-join-".$module->get_id(), $module->db_join());
-				$where[] = apply_filters("cas-db-where-".$module->get_id(), $module->db_where());
-				$where2[] = $module->db_where2();
-			}
-		}
+
+		$context_data['WHERE'] = $context_data['JOIN'] = $context_data['EXCLUDE'] = array();
+		$context_data = apply_filters('cas-context-data',$context_data);
 		
 		// Check if there are any rules for this type of content
-		if(empty($where))
+		if(empty($context_data['WHERE']))
 			return false;
 
-		// Do query and cache it
-		$wpdb->query('SET OPTION SQL_BIG_SELECTS = 1');
-		$this->sidebar_cache = $wpdb->get_results("
+		$context_data['WHERE'][] = "posts.post_type = '".self::TYPE_CONDITION_GROUP."'";
+		$context_data['WHERE'][] = "posts.post_status ".(current_user_can('read_private_posts') ? "IN('publish','private')" : "= 'publish'")."";
+
+		//Syntax changed in MySQL 5.6
+		$wpdb->query('SET'.(version_compare($wpdb->db_version(), '5.6', '>=') ? '' : ' OPTION').' SQL_BIG_SELECTS = 1');
+
+		$sidebars_in_context = $wpdb->get_results("
 			SELECT
-				posts.ID,
-				handle.meta_value handle
+				posts.ID, posts.post_parent
 			FROM $wpdb->posts posts
-			LEFT JOIN $wpdb->postmeta handle
-				ON handle.post_id = posts.ID
-				AND handle.meta_key = '".self::prefix."handle'
-			LEFT JOIN $wpdb->postmeta exposure
-				ON exposure.post_id = posts.ID
-				AND exposure.meta_key = '".self::prefix."exposure'
-			".implode(' ',$joins)."
+			".implode(' ',$context_data['JOIN'])."
 			WHERE
-				posts.post_type = 'sidebar' AND
-				exposure.meta_value ".(is_archive() || is_home() ? '>' : '<')."= '1' AND
-				posts.post_status ".(current_user_can('read_private_posts') ? "IN('publish','private')" : "= 'publish'")." AND 
-				(".implode(' AND ',$where).($where2 ? ' AND ('.implode(' OR ',$where2).')' : '').")
-			GROUP BY posts.ID
-			ORDER BY posts.menu_order ASC, handle.meta_value DESC, posts.post_date DESC
-		");
+			".implode(' AND ',$context_data['WHERE'])."
+		",OBJECT_K);
+
+		$valid = array();
+
+		//Force update of meta cache to prevent lazy loading
+		update_meta_cache('post',array_keys($sidebars_in_context));
+
+		//Exclude sidebars that have unrelated content in same group
+		foreach($sidebars_in_context as $key => $sidebar) {
+			$valid[$sidebar->ID] = $sidebar->post_parent;
+			//TODO: move to modules
+			foreach($context_data['EXCLUDE'] as $exclude) {
+				//quick fix to check for taxonomies terms
+				if($exclude == 'taxonomies') {
+					if($wpdb->get_var("SELECT COUNT(*) FROM $wpdb->term_relationships WHERE object_id = '{$sidebar->ID}'") > 0) {
+						unset($valid[$sidebar->ID]);
+						break;						
+					}
+				}
+				if(get_post_custom_values(self::PREFIX . $exclude, $sidebar->ID) !== null) {
+					unset($valid[$sidebar->ID]);
+					break;
+				}
+			}
+			
+		}
+
+		if(!empty($valid)) {
+
+			$context_data = array();
+			$context_data['JOIN'][] = "INNER JOIN $wpdb->postmeta handle ON handle.post_id = posts.ID AND handle.meta_key = '".self::PREFIX."handle'";
+			$context_data['JOIN'][] = "INNER JOIN $wpdb->postmeta exposure ON exposure.post_id = posts.ID AND exposure.meta_key = '".self::PREFIX."exposure'";
+			$context_data['WHERE'][] = "posts.post_type = '".self::TYPE_SIDEBAR."'";
+			$context_data['WHERE'][] = "exposure.meta_value ".(is_archive() || is_home() ? '>' : '<')."= '1'";
+			$context_data['WHERE'][] = "posts.post_status ".(current_user_can('read_private_posts') ? "IN('publish','private')" : "= 'publish'")."";
+			$context_data['WHERE'][] = "posts.ID IN(".implode(',',$valid).")";
+
+			$this->sidebar_cache = $wpdb->get_results("
+				SELECT
+					posts.ID,
+					handle.meta_value handle
+				FROM $wpdb->posts posts
+				".implode(' ',$context_data['JOIN'])."
+				WHERE
+				".implode(' AND ',$context_data['WHERE'])."
+				ORDER BY posts.menu_order ASC, handle.meta_value DESC, posts.post_date DESC
+			");
+			
+		}
 		
 		// Return proper cache. If query was empty, tell the cache.
 		return (empty($this->sidebar_cache) ? $this->sidebar_cache[0] = false : $this->sidebar_cache);
 		
 	}
-	
+
 	/**
-	 *
+	 * Remove unwanted meta boxes
+	 * @return void 
+	 */
+	public function clear_admin_menu() {
+		global $wp_meta_boxes;
+
+		$screen = get_current_screen();		
+
+		// Post type not set on all pages in WP3.1
+		if(!(isset($screen->post_type) && $screen->post_type == self::TYPE_SIDEBAR && $screen->base == 'post'))
+			return;
+
+		// Names of whitelisted meta boxes
+		$whitelist = array(
+			'cas-support'	=> 'cas-support',
+			'cas-groups'		=> 'cas-groups',
+			'cas-rules'			=> 'cas-rules',
+			'cas-options'		=> 'cas-options',
+			'submitdiv'			=> 'submitdiv',
+			'pageparentdiv' 	=> 'pageparentdiv',
+			'slugdiv'			=> 'slugdiv'
+		);
+
+		// Loop through context (normal,advanced,side)
+		foreach($wp_meta_boxes[self::TYPE_SIDEBAR] as $context_k => $context_v) {
+			// Loop through priority (high,core,default,low)
+			foreach($context_v as $priority_k => $priority_v) {
+				// Loop through boxes
+				foreach($priority_v as $box_k => $box_v) {
+					// If box is not whitelisted, remove it
+					if(!in_array($box_k,$whitelist)) {
+						$wp_meta_boxes[self::TYPE_SIDEBAR][$context_k][$priority_k][$box_k] = false;
+						//unset($whitelist[$box_k]);
+					}
+				}
+			}
+		}
+	}
+
+	/**
 	 * Meta boxes for sidebar edit
-	 *
+	 * @global object $post
+	 * @return void 
 	 */
 	public function create_meta_boxes() {
 		
-		// Load metadata
-		$this->_init_metadata();
+		// Remove ability to set self to host
+		if(get_the_ID())
+			unset($this->metadata['host']['list'][self::SIDEBAR_PREFIX.get_the_ID()]);
 
-		// Add boxes
-		// Author Words
-		add_meta_box(
-			'cas-dev-words',
-			__('Words from the author', 'content-aware-sidebars'),
-			array(&$this,'meta_box_author_words'),
-			'sidebar',
-			'side',
-			'high'
+		$boxes = array(
+			//About
+			array(
+				'id'		=> 'cas-support',
+				'title'		=> __('Support the Author of Content Aware Sidebars', self::DOMAIN),
+				'callback'	=> 'meta_box_author_words',
+				'context'	=> 'normal',
+				'priority'	=> 'high'
+			),
+			//Content
+			array(
+				'id'		=> 'cas-rules',
+				'title'		=> __('Content', self::DOMAIN),
+				'callback'	=> 'meta_box_rules',
+				'context'	=> 'normal',
+				'priority'	=> 'high'
+			),
+			//Options
+			array(
+				'id'		=> 'cas-options',
+				'title'		=> __('Options', self::DOMAIN),
+				'callback'	=> 'meta_box_options',
+				'context'	=> 'side',
+				'priority'	=> 'default'
+			),
 		);
-		
-		// Module rules
-		add_meta_box(
-			'cas-rules',
-			__('Content', 'content-aware-sidebars'),
-			array(&$this,'meta_box_rules'),
-			'sidebar',
-			'normal',
-			'high'
-		);
-			
-		// Options
-		add_meta_box(
-			'cas-options',
-			__('Options', 'content-aware-sidebars'),
-			array(&$this,'meta_box_options'),
-			'sidebar',
-			'side'
-		);
+
+		//Add meta boxes
+		foreach($boxes as $box) {
+			add_meta_box(
+				$box['id'],
+				$box['title'],
+				array(&$this, $box['callback']),
+				self::TYPE_SIDEBAR,
+				$box['context'],
+				$box['priority']
+			);
+		}
+
 	}
 	
-		
 	/**
-	 *
 	 * Hide some meta boxes from start
-	 *
-	 * @global type $wp_version
-	 * @param array $hidden
-	 * @param object $screen
+	 * @param  array $hidden 
+	 * @param  object $screen 
 	 * @return array 
 	 */
-	public function change_default_hidden( $hidden, $screen ) {
-		global $wp_version;
-		
-		//WordPress 3.3 has changed get_hidden_meta_boxes().
-		if($wp_version < 3.3) {
-			$condition = $screen->base == 'sidebar';
-		} else {
-			$condition = $screen->post_type == 'sidebar';
-		}
-		
-		if ($condition && get_user_option( 'metaboxhidden_sidebar' ) === false) {
-		
-			$hidden_meta_boxes = array('postexcerpt','pageparentdiv');
-			$hidden = array_merge($hidden,$hidden_meta_boxes);
-		
+	public function change_default_hidden($hidden, $screen) {
+
+		if ($screen->post_type == self::TYPE_SIDEBAR && get_user_option('metaboxhidden_sidebar') === false) {
+
+			$hidden_meta_boxes = array('pageparentdiv');
+			$hidden = array_merge($hidden, $hidden_meta_boxes);
+
 			$user = wp_get_current_user();
-			update_user_option( $user->ID, 'metaboxhidden_sidebar', $hidden, true );
-		
+			update_user_option($user->ID, 'metaboxhidden_sidebar', $hidden, true);
 		}
 		return $hidden;
 	}
-	
+
+	/**
+	 * Meta box for content rules
+	 * @return void 
+	 */
 	public function meta_box_rules() {
-		echo '<div id="cas-accordion">'."\n";
-		foreach($this->modules as $module) {
-			$module->meta_box_content();
-		}
+
+		echo '<div id="cas-container">'."\n";
+		echo '<div id="cas-accordion" class="accordion-container postbox">'."\n";
+		echo '<ul class="outer-border">';
+		do_action('cas-module-admin-box');
+		echo '</ul>';
 		echo '</div>'."\n";
+		echo '<div id="cas-groups" class="postbox">'."\n";
+		echo '<div class="cas-groups-header"><h3>'.__('Condition Groups',self::DOMAIN).'</h3><input type="button" class="button button-primary js-cas-group-new" value="'.__('Add New Group',self::DOMAIN).'" /></div>';
+		echo '<div class="cas-groups-body"><p>'.__('Click to edit a group or create a new one. Select content on the left to add it. In each group, you can combine different types of associated content.',self::DOMAIN).'</p>';
+		echo '<h4>'.__('Display sidebar with',self::DOMAIN).':</h4>';
+		echo '<ul>';
+		$groups = $this->_get_sidebar_groups(null,true);
+
+		$i = 0;
+		foreach($groups as $group) {
+
+			echo '<li class="cas-group-single'.($i == 0 ? ' cas-group-active' : '').'">
+			<span class="cas-group-control cas-group-control-active">
+			<input type="button" class="button button-primary js-cas-group-save" value="'.__('Save',self::DOMAIN).'" /> | <a class="js-cas-group-cancel" href="#">'.__('Cancel',self::DOMAIN).'</a>
+			</span>
+			<span class="cas-group-control">
+			<input type="button" class="js-cas-group-edit button" value="'._x('Edit','group',self::DOMAIN).'" /> | <a class="submitdelete trash js-cas-group-remove" href="#">'.__('Remove',self::DOMAIN).'</a>
+			</span>
+			<div class="cas-content">';
+			do_action('cas-module-print-data',$group->ID);
+			echo '</div>
+			<input type="hidden" class="cas_group_id" name="cas_group_id" value="'.$group->ID.'" />';
+
+			echo '</li>';	
+			$i++;
+		}
+		echo '</ul></div>';
+		echo '<div class="cas-groups-footer">';
+		echo '<input type="button" class="button button-primary js-cas-group-new" value="'.__('Add New Group',self::DOMAIN).'" />';
+		echo '</div>';
+		echo '</div>'."\n";
+		echo '</div>'."\n";
+		
+	}
+
+	/**
+	 * Insert new condition group for sidebar
+	 * Uses current sidebar per default
+	 * @author Joachim Jensen <jv@intox.dk>
+	 * @since  2.0
+	 * @param  WP_Post|int    $post
+	 * @return int
+	 */
+	private function _add_sidebar_group($post_id = null) {
+		$post = get_post($post_id);
+
+		$status = $post->post_status;
+		//Make sure to go from auto-draft to draft
+		if($status == 'auto-draft') {
+			$status = 'draft';
+			wp_update_post( array(
+				'ID'           => $post->ID,
+				'post_status' => $status
+			));
+		}
+
+		return wp_insert_post(array(
+			'post_status'           => $status, 
+			'post_type'             => self::TYPE_CONDITION_GROUP,
+			'post_author'           => $post->post_author,
+			'post_parent'           => $post->ID,
+		));
+	}
+
+	/**
+	 * Get condition groups for sidebar
+	 * Uses current sidebar per default
+	 * Creates the first group if necessary
+	 * @author Joachim Jensen <jv@intox.dk>
+	 * @since  2.0
+	 * @param  WP_Post|int    $post_id
+	 * @param  boolean        $create_first
+	 * @return array
+	 */
+	private function _get_sidebar_groups($post_id = null, $create_first = false) {
+		$post = get_post($post_id);
+
+		$groups = get_posts(array(
+			'posts_per_page'   => -1,
+			'post_type'        => self::TYPE_CONDITION_GROUP,
+			'post_parent'      => $post->ID,
+			'post_status'		=> 'any',
+			'order' => 'ASC'
+		));
+		if($groups == null && $create_first) {
+			$group = $this->_add_sidebar_group($post);
+			$groups[] = get_post($group);
+		}
+
+		return $groups;
+
+	}
+
+	/**
+	 * AJAX call to add filters to a group
+	 * @author Joachim Jensen <jv@intox.dk>
+	 * @since  2.0
+	 * @return void
+	 */
+	public function add_sidebar_rule_ajax() {
+
+		try {
+			if(!isset($_POST['current_id']) || !isset($_POST['cas_group_id'])) {
+				echo "Unauthorized request";
+				throw new Exception("Forbidden",403);
+			}	
+
+			if(!check_ajax_referer(self::SIDEBAR_PREFIX.$_POST['current_id'],'token',false)) {
+				echo "Unauthorized request";
+				throw new Exception("Forbidden",403);
+			}
+
+			$post_id = intval($_POST['cas_group_id']);
+
+	   		// Update module data
+			do_action('cas-module-save-data',$post_id);
+
+			echo json_encode(array(
+				'message' => __('Condition group saved',self::DOMAIN),
+				"POST" => $_POST,
+				"GROUP_ID" => $post_id
+			));
+			
+		} catch(Exception $e) {
+			header("HTTP/1.1 ".$e->getCode()." ".$e->getMessage());
+		}
+		die();	
+	}
+
+	/**
+	 * AJAX call to add a group to a sidebar
+	 * @author Joachim Jensen <jv@intox.dk>
+	 * @since  2.0
+	 * @return void
+	 */
+	public function add_sidebar_group_ajax() {
+
+		try {
+			if(!isset($_POST['current_id'])) {
+				echo "Unauthorized request";
+				throw new Exception("Forbidden",403);
+			}	
+
+			if(!check_ajax_referer(self::SIDEBAR_PREFIX.$_POST['current_id'],'token',false)) {
+				echo "Unauthorized request";
+				throw new Exception("Forbidden",403);
+			}
+
+			$group = $this->_add_sidebar_group(intval($_POST['current_id']));
+
+			if(!$group) {
+				echo "Condition group could not be created";
+				throw new Exception("Internal Server Error",500);
+			}
+
+			echo json_encode(array(
+				'message' => __('Condition group added',self::DOMAIN),
+				'group'   => $group
+			));
+			
+		} catch(Exception $e) {
+			header("HTTP/1.1 ".$e->getCode()." ".$e->getMessage());
+		}
+		die();
+
+	}
+
+	/**
+	 * AJAX call to remove group from a sidebar
+	 * @author Joachim Jensen <jv@intox.dk>
+	 * @since  2.0
+	 * @return void
+	 */
+	public function remove_sidebar_group_ajax() {
+
+		try {
+			if(!isset($_POST['current_id']) || !isset($_POST['cas_group_id'])) {
+				echo "Unauthorized request";
+				throw new Exception("Forbidden",403);
+			}	
+
+			if(!check_ajax_referer(self::SIDEBAR_PREFIX.$_POST['current_id'],'token',false)) {
+				echo "Unauthorized request";
+				throw new Exception("Forbidden",403);
+			}
+
+			if(wp_delete_post(intval($_POST['cas_group_id']), true) === false) {
+				echo "Condition group could not be removed";
+				throw new Exception("Internal Server Error",500);
+			}
+
+			echo json_encode(array(
+				'message' => __('Condition group removed',self::DOMAIN)
+			));
+			
+		} catch(Exception $e) {
+			header("HTTP/1.1 ".$e->getCode()." ".$e->getMessage());
+		}
+		die();
+	}
+
+	/**
+	 * Whenever a sidebar changes post_status
+	 * Cascade that status to its groups
+	 * @author Joachim Jensen <jv@intox.dk>
+	 * @since  2.0
+	 * @param  string    $new_status
+	 * @param  string    $old_status
+	 * @param  WP_Post   $post
+	 * @return void
+	 */
+	public function cascade_sidebar_status($new_status, $old_status, $post) {
+		if($post->post_type == self::TYPE_SIDEBAR && $old_status != $new_status) {
+			global $wpdb;
+			$wpdb->query("
+				UPDATE $wpdb->posts
+				SET post_status = '".$new_status."' 
+				WHERE post_parent = '".$post->ID."' AND post_type = '".self::TYPE_CONDITION_GROUP."'
+			");
+		}	
 	}
 	
 	/**
-	 *
-	 * Options content
-	 *
+	 * Meta box for options
+	 * @return void
 	 */
 	public function meta_box_options() {
-		
+
 		$columns = array(
 			'exposure',
 			'handle' => 'handle,host',
 			'merge-pos'
 		);
-		
-		foreach($columns as $key => $value) {
-			
-			echo '<span>'.$this->metadata[is_numeric($key) ? $value : $key]['name'].':';
+
+		foreach ($columns as $key => $value) {
+
+			echo '<span>' . $this->metadata[is_numeric($key) ? $value : $key]['name'] . ':';
 			echo '<p>';
-			$values = explode(',',$value);
-			foreach($values as $val) {
+			$values = explode(',', $value);
+			foreach ($values as $val) {
 				$this->_form_field($val);
 			}
 			echo '</p></span>';
 		}
 	}
-	
+		
 	/**
-	 *
-	 * Author words content
-	 *
+	 * Meta box for author words
+	 * @return void 
 	 */
 	public function meta_box_author_words() {
-		
-		// Use nonce for verification
-		wp_nonce_field(basename(__FILE__),'_ca-sidebar-nonce');
-		?>
-		<div style="overflow:hidden;">	
-		<p><a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=KPZHE6A72LEN4&lc=US&item_name=WordPress%20Plugin%3a%20Content%20Aware%20Sidebars&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted"
-		   target="_blank" title="PayPal - The safer, easier way to pay online!">
-			<img align="right" border="0" src="https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif" width="147" height="47" alt="PayPal - The safer, easier way to pay online!">	
-		</a></p>
-		<p><?php _e('If you love this plugin, please consider donating.', 'content-aware-sidebars'); ?></p>
-		<br />
-		<p><?php printf(__('Remember to <a class="button" href="%1$s" target="_blank">rate</a> and <a class="button" href="%2$s" target="_blank">share</a> it too!', 'content-aware-sidebars'),
-			'http://wordpress.org/extend/plugins/content-aware-sidebars/',
-			'http://twitter.com/?status='.__('Check out Content Aware Sidebars for %23WordPress! :)','content-aware-sidebars').' http://tiny.cc/ca-sidebars'
-			); ?></p>
-		<a href="https://twitter.com/share" class="twitter-share-button" data-url="http://wordpress.org/extend/plugins/content-aware-sidebars/" data-text="<?php _e('Check out Content Aware Sidebars :)','content-aware-sidebars') ?>" data-hashtags="WordPress">Tweet</a>
-		<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
-		<iframe src="//www.facebook.com/plugins/like.php?href=http%3A%2F%2Fwordpress.org%2Fextend%2Fplugins%2Fcontent-aware-sidebars%2F&amp;send=false&amp;layout=button_count&amp;width=150&amp;show_faces=false&amp;action=like&amp;colorscheme=light&amp;font&amp;height=21&amp;appId=200775686659011" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:150px; height:21px;" allowTransparency="true"></iframe>	
-		</div>
+
+		// Use nonce for verification. Unique per sidebar
+		wp_nonce_field(self::SIDEBAR_PREFIX.get_the_ID(), '_ca-sidebar-nonce');
+		echo '<input type="hidden" id="current_sidebar" value="'.get_the_ID().'" />';
+?>
+			<div style="overflow:hidden;">
+				<div style="float:left;width:40%;overflow:hidden">
+					<p><strong><?php _e('If you love this plugin, please consider donating to support future development.', self::DOMAIN); ?></strong></p>
+					<p><a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&amp;business=KPZHE6A72LEN4&amp;lc=US&amp;item_name=WordPress%20Plugin%3a%20Content%20Aware%20Sidebars&amp;currency_code=USD&amp;bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted" 
+						target="_blank" title="PayPal - The safer, easier way to pay online!">
+							<img src="https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif" width="147" height="47" alt="PayPal - The safer, easier way to pay online!">	
+						</a>
+						
+					</p>
+				</div>
+				<div style="float:left;width:40%;">
+					<p><strong><?php _e('Or you could:',self::DOMAIN); ?></strong></p>
+					<ul>
+						<li><a href="http://wordpress.org/support/view/plugin-reviews/content-aware-sidebars?rate=5#postform" target="_blank"><?php _e('Rate the plugin on WordPress.org',self::DOMAIN); ?></a></li>
+						<li><a href="http://wordpress.org/extend/plugins/content-aware-sidebars/" target="_blank"><?php _e('Link to the plugin page',self::DOMAIN); ?></a></li>
+						<li><a href="http://wordpress.org/extend/plugins/content-aware-sidebars/" target="_blank"><?php _e('Translate the plugin into your language',self::DOMAIN); ?></a></li>
+					</ul>
+				</div>
+				<div style="float:left;width:20%;">
+					<p><a href="https://twitter.com/intoxstudio" class="twitter-follow-button" data-show-count="false">Follow @intoxstudio</a>
+						<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script></p>
+					<p>
+						<iframe src="//www.facebook.com/plugins/like.php?href=https%3A%2F%2Fwww.facebook.com%2Fintoxstudio&amp;width=450&amp;height=21&amp;colorscheme=light&amp;layout=button_count&amp;action=like&amp;show_faces=false&amp;send=false&amp;appId=436031373100972" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:450px; height:21px;" allowTransparency="true"></iframe>
+					</p>
+				</div>
+			</div>
 		<?php
 	}
-	
+		
 	/**
-	 *
 	 * Create form field for metadata
-	 *
 	 * @global object $post
-	 * @param array $setting 
+	 * @param  array $setting 
+	 * @return void 
 	 */
 	private function _form_field($setting) {
-		global $post;
-		
-		$meta = get_post_meta($post->ID, self::prefix.$setting, true);
+
+		$meta = get_post_meta(get_the_ID(), self::PREFIX . $setting, true);
 		$setting = $this->metadata[$setting];
 		$current = $meta != '' ? $meta : $setting['val'];
-		switch($setting['type']) {
-			case 'select' :			
-				echo '<select style="width:250px;" name="'.$setting['id'].'">'."\n";
-				foreach($setting['list'] as $key => $value) {
-					echo '<option value="'.$key.'"'.($key == $current ? ' selected="selected"' : '').'>'.$value.'</option>'."\n";
+		switch ($setting['type']) {
+			case 'select' :
+				echo '<select style="width:250px;" name="' . $setting['id'] . '">' . "\n";
+				foreach ($setting['list'] as $key => $value) {
+					echo '<option value="' . $key . '"' . selected($current,$key,false) . '>' . $value . '</option>' . "\n";
 				}
-				echo '</select>'."\n";
+				echo '</select>' . "\n";
 				break;
 			case 'checkbox' :
-				echo '<ul>'."\n";
-				foreach($setting['list'] as $key => $value) {
-					echo '<li><label><input type="checkbox" name="'.$setting['id'].'[]" value="'.$key.'"'.(in_array($key,$current) ? ' checked="checked"' : '').' /> '.$value.'</label></li>'."\n";
+				echo '<ul>' . "\n";
+				foreach ($setting['list'] as $key => $value) {
+					echo '<li><label><input type="checkbox" name="' . $setting['id'] . '[]" value="' . $key . '"' . (in_array($key, $current) ? ' checked="checked"' : '') . ' /> ' . $value . '</label></li>' . "\n";
 				}
-				echo '</ul>'."\n";
+				echo '</ul>' . "\n";
 				break;
 			case 'text' :
 			default :
-				echo '<input style="width:200px;" type="text" name="'.$setting['id'].'" value="'.$current.'" />'."\n";
+				echo '<input style="width:200px;" type="text" name="' . $setting['id'] . '" value="' . $current . '" />' . "\n";
 				break;
 		}
 	}
-	
+		
 	/**
-	 *
 	 * Save meta values for post
-	 *
-	 * @global type $wpdb
-	 * @param int $post_id
-	 * @return type 
+	 * @param  int $post_id 
+	 * @return void 
 	 */
 	public function save_post($post_id) {
-		global $wpdb;
-		
+
 		// Save button pressed
-		if(!isset($_POST['original_publish']) && !isset($_POST['save_post']))
+		if (!isset($_POST['original_publish']) && !isset($_POST['save_post']))
 			return;
-		
+
 		// Only sidebar type
-		if(get_post_type($post_id) != 'sidebar')
-			return;	
-		
+		if (get_post_type($post_id) != self::TYPE_SIDEBAR)
+			return;
+
 		// Verify nonce
-		if (!check_admin_referer(basename(__FILE__),'_ca-sidebar-nonce'))
+		if (!check_admin_referer(self::SIDEBAR_PREFIX.$post_id, '_ca-sidebar-nonce'))
 			return;
-		
+
 		// Check permissions
-		if (!current_user_can('edit_post', $post_id))
+		if (!current_user_can(self::CAPABILITY, $post_id))
 			return;
-		
+
 		// Check autosave
 		if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE)
 			return;
-		
+
 		// Load metadata
 		$this->_init_metadata();
-		
+
 		// Update metadata
-		foreach ($this->metadata as $field) {			
+		foreach ($this->metadata as $field) {
 			$new = isset($_POST[$field['id']]) ? $_POST[$field['id']] : '';
-			$old = get_post_meta($post_id, self::prefix.$field['id'], true);
-			
-			if ($new != '' && $new != $old) {			
-				update_post_meta($post_id, self::prefix.$field['id'], $new);
+			$old = get_post_meta($post_id, self::PREFIX . $field['id'], true);
+
+			if ($new != '' && $new != $old) {
+				update_post_meta($post_id, self::PREFIX . $field['id'], $new);
 			} elseif ($new == '' && $old != '') {
-				delete_post_meta($post_id, self::prefix.$field['id'], $old);
-			}
-		}
-		// Update module data
-		foreach ($this->modules as $module) {
-			$new = isset($_POST[$module->get_id()]) ? $_POST[$module->get_id()] : ''; 
-			$old = array_flip(get_post_meta($post_id, self::prefix.$module->get_id(), false));
-			
-			if(is_array($new)) {
-				// Skip existing data or insert new data
-				foreach($new as $new_single) {
-					if(isset($old[$new_single])) {
-						unset($old[$new_single]);
-					} else {
-						add_post_meta($post_id, self::prefix.$module->get_id(), $new_single);
-					}
-				}
-				// Remove existing data that have not been skipped
-				foreach($old as $old_key => $old_value) {
-					delete_post_meta($post_id, self::prefix.$module->get_id(), $old_key);
-				}
-			} elseif(!empty($old)) {
-				// Remove any old values when $new is empty
-				delete_post_meta($post_id, self::prefix.$module->get_id());
+				delete_post_meta($post_id, self::PREFIX . $field['id'], $old);
 			}
 		}
 	}
-	
+
 	/**
-	 *
 	 * Database data update module
-	 *
+	 * @return void 
 	 */
 	public function db_update() {
-		cas_run_db_update(self::db_version);
+		cas_run_db_update(self::DB_VERSION);
 	}
-	
+
 	/**
-	 *
 	 * Load scripts and styles for administration
-	 *
-	 * @global string $pagenow 
+	 * @param  string $hook 
+	 * @return void 
 	 */
 	public function load_admin_scripts($hook) {
-		global $wp_version;
-		
-		wp_register_script('cas_admin_script', WP_PLUGIN_URL.'/'.plugin_basename(dirname(__FILE__)).'/js/cas_admin.js', array('jquery'), '0.1', true);
-		wp_register_style('cas_admin_style', WP_PLUGIN_URL.'/'.plugin_basename(dirname(__FILE__)).'/css/style.css', array(), '0.1');
-		
-		if($hook == 'post.php' || $hook == 'post-new.php') {
-			// WordPress < 3.3 does not have jQuery UI accordion
-			if($wp_version < 3.3) {
-				//die(var_dump($wp_version < 3.3));
-				wp_register_script('cas-jquery-ui-accordion', WP_PLUGIN_URL.'/'.plugin_basename(dirname(__FILE__)).'/js/jquery.ui.accordion.js', array('jquery-ui-core','jquery-ui-widget'), '1.8.9', true);
-				wp_enqueue_script('cas-jquery-ui-accordion');
-			} else {
-				wp_enqueue_script('jquery-ui-accordion');
-			}
-			wp_enqueue_script('cas_admin_script');
+
+		$current_screen = get_current_screen();
+
+		if($current_screen->post_type == self::TYPE_SIDEBAR) {
 			
-			wp_enqueue_style('cas_admin_style');
-		} else if($hook == 'edit.php') {
-			wp_enqueue_style('cas_admin_style');
+			wp_register_script('cas_admin_script', plugins_url('/js/cas_admin.js', __FILE__), array('jquery'), self::PLUGIN_VERSION, true);
+			wp_register_style('cas_admin_style', plugins_url('/css/style.css', __FILE__), array(), self::PLUGIN_VERSION);
+
+			//Sidebar editor
+			if ($current_screen->base == 'post') {
+
+				if(!wp_script_is('accordion','registered')) {
+					wp_register_script('accordion', plugins_url('/js/accordion.min.js', __FILE__), array('jquery'), self::PLUGIN_VERSION, true);
+				}
+				wp_enqueue_script('accordion');
+				wp_enqueue_script('cas_admin_script');
+				wp_localize_script( 'cas_admin_script', 'CASAdmin', array(
+					'save'          => __('Save',self::DOMAIN),
+					'cancel'        => __('Cancel',self::DOMAIN),
+					'edit'          => _x('Edit','group',self::DOMAIN),
+					'remove'        => __('Remove',self::DOMAIN),
+					'confirmRemove' => __('Remove this group and its contents permanently?',self::DOMAIN),
+					'noResults'     => __('No results found.',self::DOMAIN)
+				));
+				wp_enqueue_style('cas_admin_style');
+			//Sidebar overview
+			} else if ($hook == 'edit.php') {
+				wp_enqueue_style('cas_admin_style');
+			}			
 		}
-		
+
 	}
 	
 	/**
-	 *
 	 * Load dependencies
-	 *
+	 * @return void
 	 */
 	private function _load_dependencies() {
-		
-		require_once('walker.php');
-		require_once('update_db.php');
-		require_once('modules/abstract.php');
-		
+		require('walker.php');
+		require('update_db.php');
+		require('modules/abstract.php');
 	}
-	
-	/**
-	 *
-	 * Forge content module
-	 *
-	 * @param type $module
-	 * @return object 
-	 */
-	private function _forge_module($module) {
-		if (include_once('modules/'.$module .'.php')) {
-			$class = 'CASModule_'.$module;
-			return new $class;
-		}
-		return false;
-	}
-	
-	/**
-	 *
-	 * Flush rewrite rules on plugin activation
-	 *
-	 */
-	public function plugin_activation() {
-		$this->init_sidebar_type();
-		flush_rewrite_rules();
-	}
-	
-	/**
-	 *
-	 * Flush rewrite rules on plugin deactivation
-	 *
-	 */
-	public function plugin_deactivation() {
-		flush_rewrite_rules();
-	}
-	
+
 }
 
 // Launch plugin
-global $ca_sidebars;
-$ca_sidebars = new ContentAwareSidebars();
+ContentAwareSidebars::instance();
 
 /**
- *
- * Template function
- * 
- * @global ContentAwareSidebars $ca_sidebars
- * @global array $_wp_sidebars_widgets
- * @param array|string $args
- * @return type 
+ * Template wrapper to display content aware sidebars
+ * @param  array|string  $args 
+ * @return void 
  */
 function display_ca_sidebar($args = array()) {
-	global $ca_sidebars, $_wp_sidebars_widgets;
-	
-	// Grab args or defaults
-	$defaults = array (
-		'include'	=> '',
- 		'before'	=> '<div id="sidebar" class="widget-area"><ul class="xoxo">',
-		'after'		=> '</ul></div>'
-	);
-	$args = wp_parse_args($args,$defaults);
-	extract($args,EXTR_SKIP);
-	
-	// Get sidebars
-	$posts = $ca_sidebars->get_sidebars();
-	if(!$posts)
-		return;
-	
-	// Handle include argument
-	if(!empty($include)) {
-		if(!is_array($include))
-			$include = explode(',',$include);
-		// Fast lookup
-		$include = array_flip($include);
-	}
-	
-	$i = $host = 0;	
-	foreach($posts as $post) {
-
-		$id = 'ca-sidebar-'.$post->ID;
-			
-		// Check for manual handling, if sidebar exists and if id should be included
-		if ($post->handle != 2 || !isset($_wp_sidebars_widgets[$id]) || (!empty($include) && !isset($include[$post->ID])))
-			continue;
-		
-		// Merge if more than one. First one is host.
-		if($i > 0) {
-			if(get_post_meta($post->ID, ContentAwareSidebars::prefix.'merge-pos', true))
-				$_wp_sidebars_widgets[$host] = array_merge($_wp_sidebars_widgets[$host],$_wp_sidebars_widgets[$id]);
-			else
-				$_wp_sidebars_widgets[$host] = array_merge($_wp_sidebars_widgets[$id],$_wp_sidebars_widgets[$host]);
-		} else {
-			$host = $id;
-		}
-		$i++;
-	}
-	
-	if ($host) {
-		echo $before;
-		dynamic_sidebar($host);
-		echo $after;
-	}
+	ContentAwareSidebars::instance()->manual_sidebar($args);
 }
+
+//eol
