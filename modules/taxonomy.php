@@ -144,7 +144,7 @@ class CASModule_taxonomy extends CASModule {
 			'number' => $number,
 			'hide_empty' => false,
 			'include' => $include,
-			'offset' => $offset,
+			'offset' => ($offset*$number),
 			'orderby' => $orderby,
 			'order' => $order
 		));
@@ -153,7 +153,7 @@ class CASModule_taxonomy extends CASModule {
 		$this->pagination = array(
 			'paged' => $offset+1,
 			'per_page' => $per_page,
-			'total_pages' => $total_items/$per_page,
+			'total_pages' => ceil($total_items/$per_page),
 			'total_items' => $total_items
 		);
 
@@ -345,7 +345,7 @@ class CASModule_taxonomy extends CASModule {
 					'hide_empty' => false,
 					'search' => $_REQUEST['q']
 				));
-				$name = ($taxonomy->name == 'category' ? 'post_category' : 'tax_input['.$matches[1].']'); 
+				$name = 'tax_input['.$matches[1].']';
 				$value = ($taxonomy->hierarchical ? 'term_id' : 'slug');
 				foreach($terms as $term) {
 					$suggestions[] = array(

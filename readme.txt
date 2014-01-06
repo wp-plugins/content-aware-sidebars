@@ -1,10 +1,10 @@
-﻿=== Plugin Name ===
+=== Plugin Name ===
 Contributors: intoxstudio
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=KPZHE6A72LEN4&lc=US&item_name=WordPress%20Plugin%3a%20Content%20Aware%20Sidebars&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted
-Tags: sidebar, widget area, content aware, context aware, seo, dynamic, flexible, modular, bbpress, buddypress, qtranslate, polylang, transposh, wpml
+Tags: sidebar, widget area, content aware, context aware, seo, dynamic, flexible, modular, bbpress, buddypress, qtranslate, polylang, transposh, wpml, woocommerce
 Requires at least: 3.3
 Tested up to: 3.8
-Stable tag: 2.0.2
+Stable tag: 2.0.3
 License: GPL2
 
 Create and display sidebars according to the content being viewed.
@@ -16,7 +16,7 @@ No extra database tables or table columns will be added.
 
 > **New in version 2**
 >
-> Condition groups let you display a sidebar with both associated and distinct content.
+> Condition groups let you display a sidebar together with both associated and distinct content.
 >
 > Improved GUI makes it even easier to select content and edit sidebars.
 >
@@ -61,7 +61,7 @@ No extra database tables or table columns will be added.
 * German (de_DE): Enno Wulff
 * Hungarian (hu_HU): Kis Lukács
 * Italian (it_IT): [Luciano Del Fico](http://www.myweb2.it/)
-* Latvian [lv_LV]: [Haralds Gribusts](http://www.fireclubllatvia.lv/)
+* Latvian (lv_LV): [Haralds Gribusts](http://www.fireclubllatvia.lv/)
 * Lithuanian (lt_LT): [Vincent G](http://host1free.com/)
 * Slovak (sk_SK): [Branco](http://webhostinggeeks.com/)
 * Spanish (es_ES): [Analia Jensen](http://www.linkedin.com/in/analiajensen)
@@ -112,6 +112,8 @@ The conditions "All posts containing tag X and written by author Y" in one group
 
 The downside to this is that, currently, Content Aware Sidebars does not validate that the content you add to a group actually is associated. Creating a group with the conditions "All posts and Search Results" is possible, but it will never be satisfied because the types of content (post type and static page) are incompatible.
 
+An empty condition group will cause the sidebar to be displayed with all content.
+
 Also note the exposure setting as it determines whether the selected content apply to archives, singulars or both.
 
 = All content items are not listed in the sidebar editor? =
@@ -148,6 +150,11 @@ The function accepts URL-style strings as parameters too, like the standard Word
 5. Viewing a Post that contains Very Categorized. `Very Categorized Posts` sidebar has replaced `Primary Sidebar`
 
 == Changelog ==
+
+= 2.0.3 =
+
+* Fixed: taxonomy pagination in sidebar editor
+* Fixed: categories found in search can now be saved. props Xandoc
 
 = 2.0.2 =
 
