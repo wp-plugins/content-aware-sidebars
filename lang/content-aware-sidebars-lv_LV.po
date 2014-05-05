@@ -5,8 +5,8 @@ msgstr ""
 "Project-Id-Version: Content Aware Sidebars 1.3\n"
 "Report-Msgid-Bugs-To: http://wordpress.org/tag/content-aware-sidebars\n"
 "POT-Creation-Date: 2013-05-14 13:07:12+00:00\n"
-"PO-Revision-Date: 2013-05-14 15:11+0100\n"
-"Last-Translator: Joachim Jensen <jv@intox.dk>\n"
+"PO-Revision-Date: 2013-11-29 15:23+0200\n"
+"Last-Translator: HG <firebirdclub@firebirdclublatvia.lv>\n"
 "Language-Team: Host1Free.com <info@host1free.com>\n"
 "Language: Lithuanian\n"
 "MIME-Version: 1.0\n"
@@ -14,138 +14,134 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 1.5.5\n"
 
-#: content-aware-sidebars.php:178 content-aware-sidebars.php:345
+#: content-aware-sidebars.php:178
+#: content-aware-sidebars.php:345
 msgid "Exposure"
-msgstr "Atidengimas"
+msgstr "Ekspozīcija"
 
 #: content-aware-sidebars.php:184
 msgid "Singular"
-msgstr "Išskirti"
+msgstr "Atsevišķs"
 
 #: content-aware-sidebars.php:185
 msgid "Singular & Archive"
-msgstr "Išskirti ir Archyvuoti"
+msgstr "Atsevišķs un Arhīvs"
 
 #: content-aware-sidebars.php:186
 msgid "Archive"
-msgstr "Archyvuoti"
+msgstr "Arhīvs"
 
-#: content-aware-sidebars.php:190 content-aware-sidebars.php:346
+#: content-aware-sidebars.php:190
+#: content-aware-sidebars.php:346
 msgctxt "option"
 msgid "Handle"
-msgstr "Apdoroti [ parinktis ]"
+msgstr "Pārvaldīt [iespējas]"
 
 #: content-aware-sidebars.php:192
 msgid "Replace host sidebar, merge with it or add sidebar manually."
-msgstr ""
-"Pakeisti serverio šoninę juostą, sulieti ją ar pridėti šoninę juostą "
-"rankiniu būdu"
+msgstr "Aizvietot galveno sānjoslu, sapludināt ar to vai pievienot sānjoslu manuāli."
 
 #: content-aware-sidebars.php:196
 msgid "Replace"
-msgstr "Pakeisti"
+msgstr "Aizvietot"
 
 #: content-aware-sidebars.php:197
 msgid "Merge"
-msgstr "Sulieti"
+msgstr "Sapludināt"
 
 #: content-aware-sidebars.php:198
 msgid "Manual"
-msgstr "Rankinis"
+msgstr "Manuāli"
 
 #: content-aware-sidebars.php:202
 msgid "Host Sidebar"
-msgstr "Serverio šoninė juosta"
+msgstr "Galvenā sānjosla"
 
-#: content-aware-sidebars.php:210 content-aware-sidebars.php:347
+#: content-aware-sidebars.php:210
+#: content-aware-sidebars.php:347
 msgid "Merge position"
-msgstr "Sulieti poziciją"
+msgstr "Sapludināšanas pozīcija"
 
 #: content-aware-sidebars.php:212
 msgid "Place sidebar on top or bottom of host when merging."
-msgstr ""
-"Patalpinti šoninę serverio juostą viršuje arba apačioje kuomet suliejama."
+msgstr "Novietot sānjoslu augšā vai apakšā galvenajai joslai, kad sapludina."
 
 #: content-aware-sidebars.php:216
 msgid "Top"
-msgstr "Viršus"
+msgstr "Augšā"
 
 #: content-aware-sidebars.php:217
 msgid "Bottom"
-msgstr "Apačia"
+msgstr "Apakšā"
 
 #: content-aware-sidebars.php:232
 msgid "Sidebars"
-msgstr "Šoninės juostos"
+msgstr "Sānjoslas"
 
 #: content-aware-sidebars.php:233
 msgid "Sidebar"
-msgstr "Šoninė juosta"
+msgstr "Sānjosla"
 
 #: content-aware-sidebars.php:234
 msgctxt "sidebar"
 msgid "Add New"
-msgstr "Pridėti Naują [ šoninę juostą ]"
+msgstr "Pievienot jaunu"
 
 #: content-aware-sidebars.php:235
 msgid "Add New Sidebar"
-msgstr "Pridėti Naują Šoninę Juostą"
+msgstr "Pievienot jaunu sānjoslu"
 
 #: content-aware-sidebars.php:236
 msgid "Edit Sidebar"
-msgstr "Redaguoti Šoninę Juostą"
+msgstr "Rediģēt sānjoslu"
 
 #: content-aware-sidebars.php:237
 msgid "New Sidebar"
-msgstr "Nauja Šoninė Juosta"
+msgstr "Jauna sānjosla"
 
 #: content-aware-sidebars.php:238
 msgid "All Sidebars"
-msgstr "Visos Šoninės Juostos"
+msgstr "Visas sānjoslas"
 
 #: content-aware-sidebars.php:239
 msgid "View Sidebar"
-msgstr "Peržiūrėti Šoninę Juostą"
+msgstr "Aplūkot sānjoslu"
 
 #: content-aware-sidebars.php:240
 msgid "Search Sidebars"
-msgstr "Ieškoti Šoninių Juostų"
+msgstr "Meklēt sānjoslas"
 
 #: content-aware-sidebars.php:241
 msgid "No sidebars found"
-msgstr "Šoninių juostų nerasta"
+msgstr "Nav atrasta neviena sānjosla"
 
 #: content-aware-sidebars.php:242
 msgid "No sidebars found in Trash"
-msgstr "Šiukšlėse nerasta jokių šoninių juostų"
+msgstr "Atkritnē nav atrasta neviena sānjosla"
 
 #: content-aware-sidebars.php:273
 msgid "Sidebar updated. <a href=\"%s\">Manage widgets</a>"
-msgstr "Šoninė juosta atnaujinta. <a href=\"%s\">Tvarkyti Valdiklius</a>"
+msgstr "Sānjosla atjaunota. <a href=\"%s\">Pārvaldīt logrīkus</a>"
 
 #: content-aware-sidebars.php:276
 msgid "Sidebar updated."
-msgstr "Šoninė juosta atnaujinta."
+msgstr "Sānjosla atjaunota."
 
 #: content-aware-sidebars.php:278
 msgid "Sidebar published. <a href=\"%s\">Manage widgets</a>"
-msgstr "Šoninė juosta publikuota. <a href=\"%s\">Manage widgets</a>"
+msgstr "Sānjosla publicēta. <a href=\"%s\">Pārvaldīt logrīkus</a>"
 
 #: content-aware-sidebars.php:279
 msgid "Sidebar saved."
-msgstr "Šoninė juosta įrašyta."
+msgstr "Sānjosla saglabāta."
 
 #: content-aware-sidebars.php:280
 msgid "Sidebar submitted. <a href=\"%s\">Manage widgets</a>"
-msgstr "Šoninė juosta išsiųsta. <a href=\"%s\">Manage widgets</a>"
+msgstr "Sānjosla iesniegta. <a href=\"%s\">Pārvaldīt logrīkus</a>"
 
 #: content-aware-sidebars.php:281
-msgid ""
-"Sidebar scheduled for: <strong>%1$s</strong>. <a href=\"%2$s\">Manage "
-"widgets</a>"
-msgstr ""
-"Šoninė juosta suplanuota už: <strong>%1$s</strong>. <a href=\"%s\">Manage "
-"widgets</a>"
+msgid "Sidebar scheduled for: <strong>%1$s</strong>. <a href=\"%2$s\">Manage widgets</a>"
+msgstr "Sānjosla ieplānota uz: <strong>%1$s</strong>. <a href=\"%s\">Pārvaldīt logrīkus</a>"
 
 #. translators: Publish box date format, see http:php.net/date
 #: content-aware-sidebars.php:283
@@ -154,122 +150,128 @@ msgstr "M j, Y @ G:i"
 
 #: content-aware-sidebars.php:284
 msgid "Sidebar draft updated."
-msgstr "Šoninės juostos juodraštis atnaujintas."
+msgstr "Sānjoslas melnraksts atjaunināts."
 
-#: content-aware-sidebars.php:321 content-aware-sidebars.php:402
+#: content-aware-sidebars.php:321
+#: content-aware-sidebars.php:402
 msgid "Please update Host Sidebar"
-msgstr "Prašome atnaujinti Serverio Šoninę Juostą"
+msgstr "Lūdzu atjauniniet galveno sānjoslu"
 
 #: content-aware-sidebars.php:457
 msgid "Manage Widgets"
-msgstr "Tvarkyti Valdiklius"
+msgstr "Pārvaldīt logrīkus"
 
 #: content-aware-sidebars.php:689
 msgid "Content"
-msgstr "Turinys"
+msgstr "Saturs"
 
 #: content-aware-sidebars.php:699
 msgid "Options"
-msgstr "Parinktys"
+msgstr "Iespējas"
 
 #: content-aware-sidebars.php:708
 msgid "Spread the Word"
-msgstr "Paskleiskite Žinią"
+msgstr "Izplatiet Vārdu"
 
 #: content-aware-sidebars.php:798
-msgid ""
-"If you love this plugin, please consider donating to support future "
-"development."
-msgstr ""
-"Jeigu Jums patiko šis papildinys, prašome paaukoti. Taip prisidėsi prie "
-"tolesnio papildinio plėtojimo."
+msgid "If you love this plugin, please consider donating to support future development."
+msgstr "Ja Jums patīk šis spraudnis, apsveriet iespēju noziedot tā turpmākai attīstībai."
 
 #: content-aware-sidebars.php:803
 msgid "Or you could:"
-msgstr "Arba galite:"
+msgstr "Vai arī Jūs variet:"
 
 #: content-aware-sidebars.php:805
 msgid "Rate the plugin on WordPress.org"
-msgstr "Įvertinti papildinį WordPress.org svetainėje"
+msgstr "Novērtēt spraudni WordPress.org"
 
 #: content-aware-sidebars.php:806
 msgid "Link to the plugin page"
-msgstr "Nukreipti į papildinio puslapį"
+msgstr "Saite uz spraudni"
 
-#: modules/abstract.php:57 modules/post_type.php:110
+#: modules/abstract.php:57
+#: modules/post_type.php:110
 msgid "Show with All %s"
-msgstr "Rodyti su Visais %s"
+msgstr "Parādīt ar visiem %s"
 
-#: modules/abstract.php:61 modules/post_type.php:134 modules/taxonomy.php:175
+#: modules/abstract.php:61
+#: modules/post_type.php:134
+#: modules/taxonomy.php:175
 msgctxt "verb"
 msgid "Search"
-msgstr "Ieškoti"
+msgstr "Meklēt"
 
-#: modules/abstract.php:61 modules/post_type.php:134 modules/taxonomy.php:175
+#: modules/abstract.php:61
+#: modules/post_type.php:134
+#: modules/taxonomy.php:175
 #: modules/url.php:42
 msgid "Add"
-msgstr "Pridėti"
+msgstr "Pievienot"
 
 #: modules/author.php:24
 msgid "Authors"
-msgstr "Autorius"
+msgstr "Autori"
 
 #: modules/bbpress.php:23
 msgid "bbPress User Profiles"
-msgstr "bbPress Vartotojų Profilius"
+msgstr "bbPress Lietotāja profili"
 
 #: modules/bp_member.php:23
 msgid "BuddyPress Members"
-msgstr "BuddyPress Narius"
+msgstr "BuddyPress Lietotāji"
 
 #: modules/page_template.php:24
 msgid "Page Templates"
-msgstr "Puslapių Ruošinius"
+msgstr "Lapu veidnes"
 
-#: modules/polylang.php:23 modules/qtranslate.php:23 modules/transposh.php:23
+#: modules/polylang.php:23
+#: modules/qtranslate.php:23
+#: modules/transposh.php:23
 #: modules/wpml.php:23
 msgid "Languages"
-msgstr "Kalbas"
+msgstr "Valodas"
 
 #: modules/post_type.php:30
 msgid "Post Types"
-msgstr "Įrašų Tipus"
+msgstr "Rakstu tipi"
 
-#: modules/post_type.php:104 modules/taxonomy.php:151
+#: modules/post_type.php:104
+#: modules/taxonomy.php:151
 msgid "Automatically select new children of a selected ancestor"
-msgstr "Automatiškai pasirinkti naujus pažymėtų savininkų \"vaikus\"."
+msgstr "Automātiski izvēlēties jaunus bērnu ierakstus izvēlētajam ierakstam"
 
-#: modules/post_type.php:114 modules/taxonomy.php:159
+#: modules/post_type.php:114
+#: modules/taxonomy.php:159
 msgid "No items."
-msgstr "Jokių elementų. "
+msgstr "Nav priekšmetu."
 
 #: modules/static.php:25
 msgid "Static Pages"
-msgstr "Statiniai Puslapiai"
+msgstr "Statiskās lapas"
 
 #: modules/static.php:34
 msgid "Front Page"
-msgstr "Titulinis Puslapis"
+msgstr "Glavenā lapa"
 
 #: modules/static.php:35
 msgid "Search Results"
-msgstr "Paieškos Rezultatai"
+msgstr "Meklēšanas rezultāti"
 
 #: modules/static.php:36
 msgid "404 Page"
-msgstr "404 Puslapis"
+msgstr "404 lapa"
 
 #: modules/taxonomy.php:36
 msgid "Taxonomies"
-msgstr "Taksonomijos"
+msgstr "Taksonomijas"
 
 #: modules/taxonomy.php:155
 msgid "Show with %s"
-msgstr "Rodyti su %s"
+msgstr "Parādīt ar %s"
 
 #: modules/url.php:24
 msgid "URLs"
-msgstr "Universalieji Adresai"
+msgstr "URLi"
 
 #. Plugin Name of the plugin/theme
 msgid "Content Aware Sidebars"
@@ -284,9 +286,7 @@ msgstr "http://www.intox.dk/"
 
 #. Description of the plugin/theme
 msgid "Manage and show sidebars according to the content being viewed."
-msgstr ""
-"Pagal šiuo metu peržiūrimą turinį valdykite ir rodykite tinkamas šonines "
-"juostas."
+msgstr "Pārvaldīt un rādīt sānsjolas atbilstoši aplūkojamajam saturam."
 
 #. Author of the plugin/theme
 msgid "Joachim Jensen, Intox Studio"
@@ -294,6 +294,6 @@ msgstr "Joachim Jensen, Intox Studio"
 
 #~ msgid "View All"
 #~ msgstr "Peržiūrėti Visus"
-
 #~ msgid "Most Used"
 #~ msgstr "Dažniausiai naudoti(os)"
+
