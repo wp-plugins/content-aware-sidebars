@@ -36,10 +36,9 @@ class CASModule_transposh extends CASModule {
 	 * @return array
 	 */
 	public function get_context_data() {
-		global $my_transposh_plugin;
 		return array(
 			$this->id,
-			$my_transposh_plugin->tgl
+			transposh_get_current_language()
 		);
 	}
 
@@ -51,7 +50,8 @@ class CASModule_transposh extends CASModule {
 	protected function _get_content($args = array()) {
 		global $my_transposh_plugin;
 		$langs = array();
-		foreach(explode(',',$my_transposh_plugin->options->get_viewable_langs()) as $lng) {
+
+		foreach(explode(',',$my_transposh_plugin->options->viewable_languages) as $lng) {
 			$langs[$lng] = transposh_consts::get_language_orig_name($lng);
 		}
 		if(isset($args['include'])) {

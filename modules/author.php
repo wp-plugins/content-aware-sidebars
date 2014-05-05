@@ -24,7 +24,10 @@ class CASModule_author extends CASModule {
 		$this->searchable = true;
 		$this->type_display = true;
 
-		add_action('wp_ajax_cas-autocomplete-'.$this->id, array(&$this,'ajax_content_search'));
+		if(is_admin()) {
+			add_action('wp_ajax_cas-autocomplete-'.$this->id, array(&$this,'ajax_content_search'));
+		}
+		
 	}
 	
 	/**

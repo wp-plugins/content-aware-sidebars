@@ -1,18 +1,20 @@
-=== Plugin Name ===
+﻿=== Plugin Name ===
 Contributors: intoxstudio
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=KPZHE6A72LEN4&lc=US&item_name=WordPress%20Plugin%3a%20Content%20Aware%20Sidebars&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted
-Tags: sidebar, widget area, content aware, context aware, seo, dynamic, flexible, modular, bbpress, buddypress, qtranslate, polylang, transposh, wpml, woocommerce
+Tags: sidebar, widget area, content aware, context aware, conditional, seo, dynamic, flexible, modular, bbpress, buddypress, qtranslate, polylang, transposh, wpml, woocommerce
 Requires at least: 3.3
-Tested up to: 3.8
-Stable tag: 2.0.3
-License: GPL2
+Tested up to: 3.9
+Stable tag: 2.1
+License: GPLv3
 
 Create and display sidebars according to the content being viewed.
 
 == Description ==
 
-Manage an infinite number of sidebars. Make your WordPress site even more dynamic and boost SEO by controlling what content your sidebars should be displayed with. Creating flexible, dynamic sidebars has never been easier, and no code is needed at all as everything is easily done in the administration panel.
-No extra database tables or table columns will be added.
+Manage an infinite number of sidebars.
+Boost on-site SEO with better Calls to Action by controlling what content your sidebars should be displayed with.
+The sidebar manager makes it incredibly easy for anyone to create flexible, dynamic sidebars without the need of code.
+Developed with speed and performance in mind and will add no extra database tables or table columns.
 
 > **New in version 2**
 >
@@ -26,25 +28,27 @@ No extra database tables or table columns will be added.
 
 * Easy-to-use sidebar manager
 * Display sidebars with all or specific:
-	* Singulars - e.g. some posts or pages
+	* Singulars - e.g. posts or pages
 	* (Custom) Post Types
-	* Singulars with given (custom) taxonomies or taxonomy terms
+	* Singulars with given (custom) taxonomies or taxonomy terms - e.g. categories or tags
 	* Singulars by a given author
 	* Page Templates
+	* Post Formats
 	* Post Type Archives
 	* Author Archives
 	* (Custom) Taxonomy Archives or Taxonomy Term Archives
-	* Search results
+	* Search Results
 	* 404 Page
 	* Front Page
 	* bbPress User Profiles
 	* BuddyPress Member Pages
 	* Languages (qTranslate, Polylang, Transposh, WPML)
 	* **Any combination of the above**
-* Merge new sidebars with others, replace others or simply add them to your theme manually with a template tag
+* Sidebars can automatically merge with or replace others
 * Create complex content with nested sidebars
 * Private sidebars only for members
 * Schedule sidebars for later publishing
+* Template Tag to insert a sidebar anywhere in your theme
 
 = Builtin Plugin Support =
 
@@ -52,11 +56,12 @@ No extra database tables or table columns will be added.
 * BuddyPress (v1.6.2+)
 * qTranslate (v2.5.29+)
 * Polylang (v0.9.6+)
-* Transposh Translation Filter (v0.8.2+)
-* WPML Multilingual Blog/CMS (v2.4.3+)
+* Transposh Translation Filter (v0.9.5+)
+* [WPML Multilingual Blog/CMS (v2.4.3+) Tested and certified](http://wpml.org/plugin/content-aware-sidebars/)
 
 = Translations =
 
+* Chinese (zh_CN): [Joe Tze](http://tkjune.com)
 * Danish (da_DK): [Joachim Jensen](http://www.intox.dk/)
 * German (de_DE): Enno Wulff
 * Hungarian (hu_HU): Kis Lukács
@@ -110,15 +115,13 @@ As of version 2.0, all types of content added to a condition group will be recog
 You can have one group with the conditions "All posts containing tag X" and another group with "All pages written by author Y". The sidebar will then be displayed with all posts containing tag X **or** all pages authored by Y.
 The conditions "All posts containing tag X and written by author Y" in one group are possible as well.
 
-The downside to this is that, currently, Content Aware Sidebars does not validate that the content you add to a group actually is associated. Creating a group with the conditions "All posts and Search Results" is possible, but it will never be satisfied because the types of content (post type and static page) are incompatible.
-
-An empty condition group will cause the sidebar to be displayed with all content.
+The downside to this is that, currently, Content Aware Sidebars does not validate that the content you add to a group actually is associated. Creating a group with the conditions "All posts and Search Results" is possible, but it will never be satisfied because the types of content (post type and static page) are incompatible. Instead, these conditions should have their own group.
 
 Also note the exposure setting as it determines whether the selected content apply to archives, singulars or both.
 
 = All content items are not listed in the sidebar editor? =
 
-As of version 2.0, several types of content have pagination in the sidebar editor. Items can also by found with a search function.
+As of version 2.0, several types of content have pagination in the sidebar editor. Items can also be found with a search function.
 
 For post types, only public, private and scheduled items are displayed.
 
@@ -149,7 +152,46 @@ The function accepts URL-style strings as parameters too, like the standard Word
 4. Viewing front page of site. `Primary Sidebar` is displayed
 5. Viewing a Post that contains Very Categorized. `Very Categorized Posts` sidebar has replaced `Primary Sidebar`
 
+== Upgrade Notice ==
+
+= 2.0 = 
+
+* Content Aware Sidebars data in your database will be updated automatically. It is highly recommended to backup this data before updating the plugin.
+* Minimum WordPress version compatibility is now 3.3.
+
+= 1.1 =
+
+* Content Aware Sidebars data in your database will be updated automatically. Remember to backup this data before updating the plugin.
+
+= 0.8 =
+
+* Content Aware Sidebars data in your database will be updated automatically. Remember to backup this data before updating the plugin.
+
+= 0.5 =
+
+* Note that the plugin now requires at least WordPress 3.1 because of post type archives.
+
+= 0.4 =
+
+* All current custom sidebars have to be updated after plugin upgrade due to the new archive rules
+
+= 0.1 =
+
+* Hello World
+
 == Changelog ==
+
+= 2.1 =
+
+* Added: empty condition groups cannot be saved
+* Added: confirmation on various condition group actions in sidebar editor
+* Added: improved ux design for sidebar editor
+* Added: chinese translation
+* Added: wp3.9 compatibility
+* Fixed: transposh compatibility now 0.9.5+
+* Fixed: removed warnings for auto-select new children functionality
+* Fixed: unprivileged users could in theory make, but never successfully execute, ajax requests for sidebar editor
+* Fixed: removed warning in widgets screen when handle is not set
 
 = 2.0.3 =
 
@@ -379,31 +421,3 @@ The function accepts URL-style strings as parameters too, like the standard Word
 = 0.1 =
 
 * First stable release
-
-== Upgrade Notice ==
-
-= 2.0 = 
-
-* Content Aware Sidebars data in your database will be updated automatically. It is highly recommended to backup this data before updating the plugin.
-* Minimum WordPress version compatibility is now 3.3.
-
-= 1.1 =
-
-* Content Aware Sidebars data in your database will be updated automatically. Remember to backup this data before updating the plugin.
-
-= 0.8 =
-
-* Content Aware Sidebars data in your database will be updated automatically. Remember to backup this data before updating the plugin.
-
-= 0.5 =
-
-* Note that the plugin now requires at least WordPress 3.1 because of post type archives.
-
-= 0.4 =
-
-* All current custom sidebars have to be updated after plugin upgrade due to the new archive rules
-
-= 0.1 =
-
-* Hello World
- 

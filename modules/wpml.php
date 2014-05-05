@@ -48,10 +48,11 @@ class CASModule_wpml extends CASModule {
 	 */
 	protected function _get_content($args = array()) {
 		$langs = array();
-		
+
 		foreach(icl_get_languages('skip_missing=N') as $lng) {
 			$langs[$lng['language_code']] = $lng['native_name'];	
-		}
+		}			
+
 		if(isset($args['include'])) {
 			$langs = array_intersect_key($langs,array_flip($args['include']));
 		}

@@ -35,10 +35,11 @@ class CASModule_taxonomy extends CASModule {
 		$this->type_display = true;
 		$this->searchable = true;
 
-		//add_action('init', array(&$this,'add_taxonomies_to_sidebar'),100);
 		add_action('created_term', array(&$this,'term_ancestry_check'),10,3);
 
-		add_action('wp_ajax_cas-autocomplete-'.$this->id, array(&$this,'ajax_content_search'));
+		if(is_admin()) {
+			add_action('wp_ajax_cas-autocomplete-'.$this->id, array(&$this,'ajax_content_search'));
+		}
 		
 	}
 	
@@ -88,11 +89,7 @@ class CASModule_taxonomy extends CASModule {
 	 * @since  2.0
 	 * @return array
 	 */
-	public function get_context_data() {
-		// for($i = 0; $i < 5000; $i++) {
-		// 	add_post_meta(rand(1,5000),'_bogus_key','bogus-'.rand(10000,99999),true);
-		// }
-		
+	public function get_context_data() {	
 
 		if(is_singular()) {
 			$terms = array();
@@ -182,10 +179,10 @@ class CASModule_taxonomy extends CASModule {
 				echo '<strong>'.$taxonomy->label.'</strong>';
 				echo '<ul>';
 				if(isset($ids[ContentAwareSidebars::PREFIX.'sub_' . $taxonomy->name])) {
-					echo '<li class=""><label><input type="checkbox" name="taxonomies[]" value="'.ContentAwareSidebars::PREFIX.'sub_' . $taxonomy->name . '" checked="checked" /> ' . __('Automatically select new children of a selected ancestor', ContentAwareSidebars::DOMAIN) . '</label></li>' . "\n";
+					echo '<li class=""><label><input type="checkbox" name="cas_condition[taxonomies][]" value="'.ContentAwareSidebars::PREFIX.'sub_' . $taxonomy->name . '" checked="checked" /> ' . __('Automatically select new children of a selected ancestor', ContentAwareSidebars::DOMAIN) . '</label></li>' . "\n";
 				}
 				if(isset($ids[$taxonomy->name])) {
-					echo '<li class=""><label><input type="checkbox" name="taxonomies[]" value="'.$taxonomy->name.'" checked="checked" /> '.$taxonomy->labels->all_items.'</label></li>' . "\n";
+					echo '<li class=""><label><input type="checkbox" name="cas_condition[taxonomies][]" value="'.$taxonomy->name.'" checked="checked" /> '.$taxonomy->labels->all_items.'</label></li>' . "\n";
 				}
 				if($posts) {
 					$selected = wp_get_object_terms($post_id, $taxonomy->name, array('fields' => ($taxonomy->hierarchical ? 'ids' : 'slugs')));
@@ -217,11 +214,11 @@ class CASModule_taxonomy extends CASModule {
 
 			if($taxonomy->hierarchical) {
 				echo '<ul><li>' . "\n";
-				echo '<label><input type="checkbox" name="taxonomies[]" value="'.ContentAwareSidebars::PREFIX.'sub_' . $taxonomy->name . '" /> ' . __('Automatically select new children of a selected ancestor', ContentAwareSidebars::DOMAIN) . '</label>' . "\n";
+				echo '<label><input type="checkbox" name="cas_condition[taxonomies][]" value="'.ContentAwareSidebars::PREFIX.'sub_' . $taxonomy->name . '" /> ' . __('Automatically select new children of a selected ancestor', ContentAwareSidebars::DOMAIN) . '</label>' . "\n";
 				echo '</li></ul>' . "\n";
 			}
 			echo '<ul><li>' . "\n";
-			echo '<label><input class="cas-chk-all" type="checkbox" name="taxonomies[]" value="' . $taxonomy->name . '" /> ' . sprintf(__('Display with %s', ContentAwareSidebars::DOMAIN), $taxonomy->labels->all_items) . '</label>' . "\n";
+			echo '<label><input class="cas-chk-all" type="checkbox" name="cas_condition[taxonomies][]" value="' . $taxonomy->name . '" /> ' . sprintf(__('Display with %s', ContentAwareSidebars::DOMAIN), $taxonomy->labels->all_items) . '</label>' . "\n";
 			echo '</li></ul>' . "\n";
 	
 			if (!$terms) {
@@ -345,7 +342,7 @@ class CASModule_taxonomy extends CASModule {
 					'hide_empty' => false,
 					'search' => $_REQUEST['q']
 				));
-				$name = 'tax_input['.$matches[1].']';
+				$name = 'cas_condition[tax_input]['.$matches[1].']';
 				$value = ($taxonomy->hierarchical ? 'term_id' : 'slug');
 				foreach($terms as $term) {
 					$suggestions[] = array(
@@ -368,7 +365,7 @@ class CASModule_taxonomy extends CASModule {
 	public function save_data($post_id) {
 		parent::save_data($post_id);
 
-		$tax_input = isset($_POST['tax_input']) ? $_POST['tax_input'] : array();
+		$tax_input = isset($_POST['cas_condition']['tax_input']) ? $_POST['cas_condition']['tax_input'] : array();
 
 		//Save terms
 		//Loop through each public taxonomy
@@ -420,7 +417,7 @@ class CASModule_taxonomy extends CASModule {
 
 			if($term->parent != '0') {	
 				// Get sidebars with term ancestor wanting to auto-select term
-				$posts = new WP_Query(array(
+				$query = new WP_Query(array(
 					'post_type'					=> ContentAwareSidebars::TYPE_CONDITION_GROUP,
 					'meta_query'				=> array(
 						array(
@@ -438,8 +435,8 @@ class CASModule_taxonomy extends CASModule {
 						)
 					)
 				));
-				if($posts) {
-					foreach($posts as $post) {
+				if($query && $query->found_posts) {
+					foreach($query->posts as $post) {
 						wp_set_post_terms($post->ID, $term_id, $taxonomy, true);
 					}
 				}

@@ -5,74 +5,252 @@
 
 (function($) {
 
+	/**
+	 * Condition group management
+	 * @author Joachim Jensen <jv@intox.dk>
+	 * @since  2.0
+	 */
 	function GroupHandler() {
-		this._currentIndex = 0;
-		this._stack = [];
-		this._activeClass = 'cas-group-active';
-		
-		this.push = function(obj) {
-			this._stack.push(obj);
-			this.setCurrentGroup(this._stack.length-1);
-			//console.log("adding group. now has "+this._stack.length+" groups.");
-		};
-		this.remove = function(obj) {
-			var index = obj.index();
-				
-			this._stack.splice(index,1);
-			obj.remove();
-			//console.log("removing group. now has "+this._stack.length+" groups.");
+		/**
+		 * Container element
+		 * @type {Object}
+		 */
+		this._$groupContainer = $('#cas-groups');
 
-			if(index == this._currentIndex) {
-					//console.log("removing current index");
-					//If we are the first element, set current to next,
-					//otherwise set current to prev
-					this.setCurrentGroup((index == 0) ? 0 : --index);
-				} else if(index < this._currentIndex) {
-					//if we are removing an element before current,
-					//update current silently
-					this._currentIndex--;
-					//console.log("current group now " + this._currentIndex);
+		/**
+		 * Current condition group
+		 * @type {Object}
+		 */
+		this._currentGroup = null;
+
+		/**
+		 * CSS class for current group
+		 * @type {string}
+		 */
+		this._activeClass = 'cas-group-active';
+
+		/**
+		 * Add a group to gui
+		 * @author Joachim Jensen <jv@intox.dk>
+		 * @since  2.1
+		 * @param  {Object}  obj
+		 */
+		this.add = function(obj) {
+			var canSet = this.setCurrent(obj);
+			if(canSet) {
+				cas_alert.dismiss();
+				if(!this.hasGroups()) {
+					this.getGroupContainer().addClass('cas-has-groups');
+				}
+				$('ul', this._$groupContainer).first().append(obj);
+			}		
+		}
+
+		/**
+		 * Remove a group from gui
+		 * @author Joachim Jensen <jv@intox.dk>
+		 * @since  2.1
+		 * @param  {Object}  obj
+		 * @return {void}
+		 */
+		this.remove = function(obj) {
+			var that = this;
+			obj
+			.css('background','red')
+			.fadeOut('slow', function() { 
+				obj.remove();
+				if(!that.hasGroups()) {
+					that.getGroupContainer().removeClass('cas-has-groups');
+				}
+			});
+		}
+
+		/**
+		 * Set a group as current group
+		 * Will reset former current group
+		 * @author Joachim Jensen <jv@intox.dk>
+		 * @since  2.1
+		 * @param  {Object}  obj
+		 * @return {Boolean}
+		 */
+		this.setCurrent = function(obj) {
+			var retval = true;
+			if(this.getCurrent()) {
+				retval = this.resetCurrent();
+			}
+			if(retval) {
+				this._currentGroup = obj;
+				this._setActive(true);
+			}
+			return retval;
+		}
+
+		/**
+		 * Reset current group if any
+		 * Will take care of confirmation on unsaved rules
+		 * and strip unsaved changes
+		 * @author Joachim Jensen <jv@intox.dk>
+		 * @since  2.1
+		 * @return {Boolean}
+		 */
+		this.resetCurrent = function() {
+			var retval = true;
+			cas_alert.dismiss();
+			if(this.getCurrent()) {
+
+				if(this.isNewGroup()) {
+					var remove = true;
+					//Confirm if there are unsaved rules
+					if(this.hasUnsavedRules()) {
+						remove = confirm(CASAdmin.confirmCancel);
+					}
+					if(remove) {
+						this._setActive(false);
+						this.remove(this.getCurrent());
+						this._currentGroup = null;
+					} else {
+						retval = false;
+					}
+					
+				} else {
+
+					var remove = true;
+					//Confirm if there are unsaved rules
+					if(this.hasUnsavedRules()) {
+						remove = confirm(CASAdmin.confirmCancel);
+					}
+					if(remove) {
+						//Remove new content that should not be saved
+						$("li.cas-new",this.getCurrent()).remove();
+						//Remove conditional headlines
+						$(".cas-condition",this.getCurrent()).each( function() {
+							if($(this).find('input').length == 0) {
+								$(this).remove();
+							}
+						});
+						this._setActive(false);
+						this._currentGroup = null;					
+					} else {
+						retval = false;
+					}
+
+					
 				}
 
-		};
-		this.getArray = function() {
-			return this._stack;
-		};
-		this.setArray = function(array) {
-			this._stack = array;
-		};
-		this.setCurrentGroup = function(index) {
-			if(index < this._stack.length) {
-				this.resetCurrentGroup();
-				$('.js-cas-condition-add').attr('disabled',false);
-				this._currentIndex = index;
-				this.getCurrentGroup().addClass(this._activeClass);
-				$("input:checkbox",this.getCurrentGroup()).attr('disabled',false).attr('checked',true);
-				//console.log("current group now "+this._currentIndex);
 			}
-		};
-		this.resetCurrentGroup = function() {
-			if(this._currentIndex != null && this._currentIndex < this._stack.length) {
-
-				$("li.cas-new",this.getCurrentGroup()).remove();
-
-				$(".cas-condition",this.getCurrentGroup()).each( function() {
-					if($(this).find('input').length == 0) {
-						$(this).remove();
-					}
-				});
-				
-				$("input:checkbox",this.getCurrentGroup()).attr('disabled',true);
-				this.getCurrentGroup().removeClass(this._activeClass);
-			}
-			$('.js-cas-condition-add').attr('disabled',true);
-			this._currentIndex = null;
+			return retval;		
 		}
-		this.getCurrentGroup = function() {
-			if(this._currentIndex != null && this._currentIndex < this._stack.length) {
-				return $(this._stack[this._currentIndex]);
+
+		/**
+		 * Get current group
+		 * @author Joachim Jensen <jv@intox.dk>
+		 * @since  2.1
+		 * @return {Object}
+		 */
+		this.getCurrent = function() {
+			return this._currentGroup;
+		}
+
+		/**
+		 * Determines if current group is a new one
+		 * I.e. it is not saved to database
+		 * @author Joachim Jensen <jv@intox.dk>
+		 * @since  2.1
+		 * @return {Boolean}
+		 */
+		this.isNewGroup = function() {
+			return this.getCurrent().find('.cas_group_id').length == 0;
+		}
+
+		/**
+		 * Determines if current group has unsaved changes
+		 * @author Joachim Jensen <jv@intox.dk>
+		 * @since  2.1
+		 * @return {Boolean}
+		 */
+		this.hasUnsavedRules = function() {
+			return this.getCurrent().find('li.cas-new').length > 0;
+		}
+
+		/**
+		 * Determines if there are any condition groups
+		 * @author Joachim Jensen <jv@intox.dk>
+		 * @since  2.1
+		 * @return {Boolean}
+		 */
+		this.hasGroups = function() {
+			return $('.cas-group-single',this.getGroupContainer()).length > 0;
+		}
+
+		/**
+		 * Manages CSS class for group and
+		 * the ability to add and edit rules
+		 * @author Joachim Jensen <jv@intox.dk>
+		 * @since  2.1
+		 * @param  {Boolean}  active
+		 */
+		this._setActive = function(active) {
+			$('.js-cas-condition-add').attr('disabled',!active);
+			this.getCurrent().toggleClass(this._activeClass,active);
+			var checkboxes = $("input:checkbox",this.getCurrent());
+			checkboxes.attr('disabled',!active);
+			if(active) {
+				checkboxes.attr('checked',true);
 			}
-			return null;
+		}
+
+		/**
+		 * Get condition group container
+		 * @author Joachim Jensen <jv@intox.dk>
+		 * @since  2.1
+		 * @return {Object}
+		 */
+		this.getGroupContainer = function() {
+			return this._$groupContainer;
+		}
+	}
+
+	/**
+	 * Alert handler for sidebar editor
+	 * @type {Object}
+	 */
+	var cas_alert = {
+
+		/**
+		 * Message object
+		 * @type {Object}
+		 */
+		_$message: null,
+
+		/**
+		 * Set and print alert message
+		 * @author Joachim Jensen <jv@intox.dk>
+		 * @since  2.1
+		 * @param  {string}  text
+		 * @param  {string}  cssClass
+		 */
+		set: function(text,cssClass) {
+			if(this._$message) {
+				this._$message.remove();
+			}
+			this._$message = $('<div class="cas-alert"><div class="'+cssClass+'"><p>'+text+'</p></div></div>');
+			this._$message
+			.fadeIn('slow')
+			.appendTo('body');			
+		},
+
+		/**
+		 * Remove a current alert message
+		 * @author Joachim Jensen <jv@intox.dk>
+		 * @since  2.1
+		 * @return {void}
+		 */
+		dismiss: function() {
+			if(this._$message) {
+				this._$message.fadeOut('slow',function() {
+					$(this).remove();
+				});				
+			}
 		}
 	}
 
@@ -81,10 +259,45 @@
 		groups:new GroupHandler(),
 		nonce: $('#_ca-sidebar-nonce').val(),
 		sidebarID: $('#current_sidebar').val(),
-		message: $('<div></div>'),
 
 		init: function() {
 
+			this.groups.setCurrent($('.cas-group-single',this.groups.getGroupContainer()).first());
+
+			this.addPaginationListener();	
+			this.addTabListener();
+			this.addPublishListener();
+
+			//this.addCheckboxListener();
+			this.addHandleListener();
+			this.addSearchListener();
+			this.addNewGroupListener();
+			this.addSetGroupListener();
+			this.addAddContentListener();
+
+		},
+
+		/**
+		 * Listen to publish click to remind
+		 * user of unsaved changes
+		 * @author Joachim Jensen <jv@intox.dk>
+		 * @since  2.1
+		 */
+		addPublishListener: function() {
+			$('#publish').click( function(e) {
+				var canSave = cas_admin.groups.resetCurrent();
+				if(!canSave) {
+					e.preventDefault();
+				}
+			});
+		},
+
+		/**
+		 * Listen to pagination for select boxes
+		 * @author Joachim Jensen <jv@intox.dk>
+		 * @since  2.1
+		 */
+		addPaginationListener: function() {
 			$('.cas-contentlist').on('click','.page-numbers', function(e) {
 				e.preventDefault();
 
@@ -105,21 +318,6 @@
 				});			
 
 			});
-
-			cas_admin.groups.setArray($("#cas-groups .cas-group-single"));	
-
-			this.addTabListener();	
-
-			//this.addCheckboxListener();
-			this.addHandleListener();
-			this.addSearchListener();
-
-			this.addNewGroupListener();
-			this.addSetGroupListener();
-
-			this.addAddContentListener();
-
-
 		},
 
 		/**
@@ -133,17 +331,17 @@
 
 				e.preventDefault();
 
-				if(cas_admin.groups.getCurrentGroup() != null) {
+				if(cas_admin.groups.getCurrent() != null) {
 
 					var button = $(this);
 
 					var old_checkboxes = $("input:checkbox:checked", button.closest('.cas-rule-content'));
-					var condition_elem = $('.cas-condition-'+button.attr('data-cas-condition'), cas_admin.groups.getCurrentGroup());
+					var condition_elem = $('.cas-condition-'+button.attr('data-cas-condition'), cas_admin.groups.getCurrent());
 					var data = [];
 
 					if(condition_elem.length == 0) {
 						condition_elem = $('<div class="cas-condition cas-condition-'+button.attr('data-cas-condition')+'"><strong>'+button.closest('.accordion-section').find('.accordion-section-title').text()+'</strong><ul></ul></div>');
-						cas_admin.groups.getCurrentGroup().find('.cas-content').append(condition_elem);
+						cas_admin.groups.getCurrent().find('.cas-content').append(condition_elem);
 					}
 					
 					//Check if checkbox with value already exists
@@ -170,51 +368,19 @@
 		 * @since  2.0
 		 */
 		addNewGroupListener: function() {
-			var groupContainer = $('#cas-groups');
-			groupContainer.on('click', '.js-cas-group-new', function(e) {
+			this.groups.getGroupContainer().on('click', '.js-cas-group-new', function(e) {
 
 				e.preventDefault();
 
-				var input = $('input', groupContainer);
-				
-				input.attr('disabled',true);
-				cas_admin.message.removeClass().html();
-				cas_admin.message.remove();
-
-				$.ajax({
-					url: ajaxurl,
-					data:{
-						action: 'cas_add_group',
-						token: cas_admin.nonce,
-						current_id: cas_admin.sidebarID
-					},
-					dataType: 'JSON',
-					type: 'POST',
-					success:function(data){
-						cas_admin.message.addClass('success').text(data.message);
-						$('.cas-groups-body',groupContainer).prepend(cas_admin.message);
-
-						var group = $('<li>', {class: 'cas-group-single', html: '<span class="cas-group-control cas-group-control-active">'+
-							'<input type="button" class="button button-primary js-cas-group-save" value="'+CASAdmin.save+'" /> | <a class="js-cas-group-cancel" href="#">'+CASAdmin.cancel+'</a>'+
+				var group = $('<li>', {class: 'cas-group-single cas-group-single-new', html: '<span class="cas-group-control cas-group-control-active">'+
+							'<input type="button" class="button js-cas-group-save" value="'+CASAdmin.save+'" /> | <a class="js-cas-group-cancel" href="#">'+CASAdmin.cancel+'</a>'+
 							'</span>'+
 							'<span class="cas-group-control">'+
-							'<input type="button" class="js-cas-group-edit button" value="'+CASAdmin.edit+'" /> | <a class="submitdelete trash js-cas-group-remove" href="#">'+CASAdmin.remove+'</a>'+
+							'<a class="js-cas-group-edit" href="#">'+CASAdmin.edit+'</a> | <a class="submitdelete trash js-cas-group-remove" href="#">'+CASAdmin.remove+'</a>'+
 							'</span>'+
-							'<div class="cas-content"></div>'+
-							'<input type="hidden" class="cas_group_id" value="'+data['group']+'" name="cas_group_id" />'});
+							'<div class="cas-content"></div>'});
 
-						$('ul', groupContainer).first().append(group);
-						cas_admin.groups.push(group[0]); //object vs node reference?
-
-						input.attr('disabled',false);
-						
-					},
-					error: function(xhr, desc, e) {
-						cas_admin.message.addClass('error').text(xhr.responseText);
-						$('.cas-groups-body',groupContainer).prepend(cas_admin.message);
-						input.attr('disabled',false);
-					}
-				});
+				cas_admin.groups.add(group);
 			});
 		},
 
@@ -225,14 +391,13 @@
 		 * @since  2.0
 		 */
 		addSetGroupListener: function() {
-			var groupContainer = $("#cas-groups");
-			groupContainer.on("click", ".js-cas-group-save", function(e){
+			this.groups.getGroupContainer().on("click", ".js-cas-group-save", function(e){
 				e.preventDefault();
 
-				cas_admin.message.removeClass().html();
-				cas_admin.message.remove();
+				var button = $(this);
+				button.attr('disabled',true);
 
-				var data = cas_admin.groups.getCurrentGroup().find("input").serializeArray();
+				var data = cas_admin.groups.getCurrent().find("input").serializeArray();
 				data.push({name:"action",value:"cas_add_rule"});
 				data.push({name:"token",value:cas_admin.nonce});
 				data.push({name:"current_id",value:cas_admin.sidebarID});
@@ -243,77 +408,71 @@
 					dataType: 'JSON',
 					type: 'POST',
 					success:function(data){
-						cas_admin.message.addClass('success').text(data.message);
-						$('.cas-groups-body',groupContainer).prepend(cas_admin.message);
 
-						var content = $("input:checkbox",cas_admin.groups.getCurrentGroup()).closest('li');
+						cas_alert.set(data.message,'updated')
+
+						var content = $("input:checkbox",cas_admin.groups.getCurrent()).closest('li');
 						if(content.length > 0) {
-							$("input:checkbox:not(:checked)",cas_admin.groups.getCurrentGroup()).closest('li').remove();
+							$("input:checkbox:not(:checked)",cas_admin.groups.getCurrent()).closest('li').remove();
 							content.removeClass('cas-new');
 						}
 
-						$(".cas-condition",cas_admin.groups.getCurrentGroup()).each( function() {
+						$(".cas-condition",cas_admin.groups.getCurrent()).each( function() {
 							if($(this).find('input').length == 0) {
 								$(this).remove();
 							}
 						});
+
+						if(data.new_post_id) {
+							console.log("in");
+							cas_admin.groups.getCurrent().append('<input type="hidden" class="cas_group_id" name="cas_group_id" value="'+data.new_post_id+'" />');
+						}
+						button.attr('disabled',false);
 						
 					},
 					error: function(xhr, desc, e) {
-						cas_admin.message.addClass('error').text(xhr.responseText);
-						$('.cas-groups-body',groupContainer).prepend(cas_admin.message);
+						cas_alert.set(xhr.responseText,'error');
+						button.attr('disabled',false);
 					}
 				});		
-			});
-			groupContainer.on("click", ".js-cas-group-cancel", function(e){	
+			})
+			.on("click", ".js-cas-group-cancel", function(e){	
 				e.preventDefault();
-				cas_admin.groups.resetCurrentGroup();
-			});
-			groupContainer.on("click", ".js-cas-group-edit", function(e){
+				cas_admin.groups.resetCurrent();
+			})
+			.on("click", ".js-cas-group-edit", function(e){
 				e.preventDefault();
-				cas_admin.groups.setCurrentGroup($(this).parents('.cas-group-single').index());
-			});
-			groupContainer.on("click", ".js-cas-group-remove", function(e){
+				cas_admin.groups.setCurrent($(this).parents('.cas-group-single'));
+			})
+			.on("click", ".js-cas-group-remove", function(e){
 				e.preventDefault();
 
 				if(confirm(CASAdmin.confirmRemove) == true) {
 
-					if(cas_admin.groups.getArray().length > 1) {
+					var button = $(this);
+					button.attr('disabled',true);
+					var group = $(this).closest('.cas-group-single');
+					$.ajax({
+						url: ajaxurl,
+						data:{
+							action: 'cas_remove_group',
+							token: cas_admin.nonce,
+							cas_group_id: group.find('.cas_group_id').val(),
+							current_id: cas_admin.sidebarID
+						},
+						dataType: 'JSON',
+						type: 'POST',
+						success:function(data){
+							cas_alert.set(data.message,'updated');
+							cas_admin.groups.remove(group);
+							button.attr('disabled',false);
+						},
+						error: function(xhr, desc, e) {
+							cas_alert.set(xhr.responseText,'error');
+							button.attr('disabled',false);
+						}
+					});	
 
-						cas_admin.message.removeClass().html();
-						cas_admin.message.remove();
-
-						var button = $(this);
-						button.attr('disabled',true);
-						var group = $(this).closest('.cas-group-single');
-						group.css('background','red');
-						$.ajax({
-							url: ajaxurl,
-							data:{
-								action: 'cas_remove_group',
-								token: cas_admin.nonce,
-								cas_group_id: group.find('.cas_group_id').val(),
-								current_id: cas_admin.sidebarID
-							},
-							dataType: 'JSON',
-							type: 'POST',
-							success:function(data){
-								cas_admin.message.addClass('success').text(data.message);
-								$('.cas-groups-body',groupContainer).prepend(cas_admin.message);
-
-								group.fadeOut('slow', function() { 
-									cas_admin.groups.remove($(this)); 
-								})
-
-								button.attr('disabled',false);
-							},
-							error: function(xhr, desc, e) {
-								cas_admin.message.addClass('error').text(xhr.responseText);
-								$('.cas-groups-body',groupContainer).prepend(cas_admin.message);
-								button.attr('disabled',false);
-							}
-						});	
-					}
 				}	
 			});
 		},
@@ -349,7 +508,6 @@
 
 				// select the search bar
 				$('.quick-search', wrapper).focus();
-
 					
 			});
 		},
@@ -380,19 +538,24 @@
 		 * The value of Handle selection will control the
 		 * accessibility of the host sidebar selection
 		 * If Handling is manual, selection of host sidebar will be disabled
+		 * @author Joachim Jensen <jv@intox.dk>
+		 * @since  2.1
 		 */
 		addHandleListener: function() {
-			$("select[name='handle']").change(function(){
-				cas_admin.toggleHostOption($(this));
-			}).change(); //fire change event on page load
-		},
-		toggleHostOption: function(handle) {
 			var host = $("select[name='host']");
-			host.attr("disabled", handle.val() == 2);
-			if(handle.val() == 2)
-				host.hide();
-			else
-				host.show();	
+			var code = $('<code>display_ca_sidebar();</code>');
+			host.parent().append(code);
+			$("select[name='handle']").change(function(){
+				var handle = $(this);
+				host.attr("disabled", handle.val() == 2);
+				if(handle.val() == 2) {
+					host.hide();
+					code.show();
+				} else {
+					host.show();
+					code.hide();
+				}	
+			}).change(); //fire change event on page load
 		},
 		/**
 		 * Use AJAX to search for content from a specific module
@@ -409,6 +572,7 @@
 					return false;
 				}
 
+				//If timer is already in progress, stop it
 				if( searchTimer ) clearTimeout(searchTimer);
 
 				searchTimer = setTimeout(function(){
@@ -417,6 +581,13 @@
 			}).attr('autocomplete','off');
 
 		},
+		/**
+		 * Make AJAX request to get results
+		 * @author Joachim Jensen <jv@intox.dk>
+		 * @since  2
+		 * @param  {Object}  input
+		 * @return {void}
+		 */
 		updateSearchResults: function(input) {
 			var panel,
 			minSearchLength = 2,

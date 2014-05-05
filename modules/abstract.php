@@ -53,38 +53,21 @@ abstract class CASModule {
 		$this->name = $title;
 		$this->ajax = $ajax;
 
-		add_action('cas-module-admin-box',array(&$this,'meta_box_content'));
-		add_action('cas-module-save-data',array(&$this,'save_data'));
-		add_filter('cas-module-print-data',array(&$this,'print_group_data'),10,2);
+		if(is_admin()) {
 
-		add_filter('cas-context-data',array(&$this,'parse_context_data'));
-		if($this->ajax) {
-			add_action('wp_ajax_cas-module-'.$this->id,array(&$this,'ajax_get_content'));
+			add_action('cas-module-admin-box',				array(&$this,'meta_box_content'));
+			add_action('cas-module-save-data',				array(&$this,'save_data'));
+
+			add_filter('cas-module-print-data',				array(&$this,'print_group_data'),10,2);
+
+			if($this->ajax) {
+				add_action('wp_ajax_cas-module-'.$this->id,	array(&$this,'ajax_get_content'));
+			}
 		}
+		
+		add_filter('cas-context-data',						array(&$this,'parse_context_data'));	
 
 	}
-
-	public function ajax_get_content() {
-		echo "hejsa";
-		die();
-	}
-
-	// public function ajax_get_content() {
-
-	// 	//validation
-	// 	$paged = isset($_POST['paged']) ? intval($_POST['paged']) : 0;
-	// 	$search = isset($_POST['search']) ? $_POST['search'] : false;
-
-	// 	$content = $this->_get_content($paged,$search);
-	// 	if($_POST['format'] == 'plain') {
-	// 		$response = "";
-	// 	} else {
-	// 		$response = "";
-	// 	}
-
-	// 	json_encode($response);
-	// 	die();
-	// }
 	
 	/**
 	 * Default meta box content
@@ -102,12 +85,12 @@ abstract class CASModule {
 		echo '<div class="accordion-section-content cas-rule-content" data-cas-module="'.$this->id.'" id="cas-'.$this->id.'">';
 
 		if($this->type_display) {
-			echo '<ul><li><label><input class="cas-chk-all" type="checkbox" name="'.$this->id.'[]" value="'.$this->id.'" /> '.sprintf(__('Display with All %s',ContentAwareSidebars::DOMAIN),$this->name).'</label></li></ul>'."\n";
+			echo '<ul><li><label><input class="cas-chk-all" type="checkbox" name="cas_condition['.$this->id.'][]" value="'.$this->id.'" /> '.sprintf(__('Display with All %s',ContentAwareSidebars::DOMAIN),$this->name).'</label></li></ul>'."\n";
 		}
 
 		$content = "";
 		foreach($this->_get_content() as $id => $name) {
-			$content .= '<li class="cas-'.$this->id.'-'.$id.'"><label><input class="cas-' . $this->id . '" type="checkbox" name="'.$this->id.'[]" title="'.$name.'" value="'.$id.'" /> '.$name.'</label></li>'."\n";
+			$content .= '<li class="cas-'.$this->id.'-'.$id.'"><label><input class="cas-' . $this->id . '" type="checkbox" name="cas_condition['.$this->id.'][]" title="'.$name.'" value="'.$id.'" /> '.$name.'</label></li>'."\n";
 		}
 
 		$tabs = array();
@@ -163,7 +146,7 @@ abstract class CASModule {
 	 */
 	public function save_data($post_id) {
 		$meta_key = ContentAwareSidebars::PREFIX . $this->id;
-		$new = isset($_POST[$this->id]) ? $_POST[$this->id] : '';
+		$new = isset($_POST['cas_condition'][$this->id]) ? $_POST['cas_condition'][$this->id] : '';
 		$old = array_flip(get_post_meta($post_id, $meta_key, false));
 
 		if (is_array($new)) {
@@ -186,6 +169,13 @@ abstract class CASModule {
 		}
 	}
 
+	/**
+	 * Print saved condition data for a group
+	 * @author Joachim Jensen <jv@intox.dk>
+	 * @since  2
+	 * @param  int    $post_id
+	 * @return void
+	 */
 	public function print_group_data($post_id) {
 		$data = get_post_custom_values(ContentAwareSidebars::PREFIX . $this->id, $post_id);
 		if($data) {
@@ -195,11 +185,11 @@ abstract class CASModule {
 			echo '<ul>';
 
 			if(in_array($this->id,$data)) {
-				echo '<li><label><input type="checkbox" name="'.$this->id.'[]" value="'.$this->id.'" checked="checked" /> '.sprintf(__('All %s',ContentAwareSidebars::DOMAIN),$this->name).'</label></li>';
+				echo '<li><label><input type="checkbox" name="cas_condition['.$this->id.'][]" value="'.$this->id.'" checked="checked" /> '.sprintf(__('All %s',ContentAwareSidebars::DOMAIN),$this->name).'</label></li>';
 			}
 
 			foreach($this->_get_content(array('include' => $data)) as $id => $name) {
-				echo '<li><label><input type="checkbox" name="'.$this->id.'[]" value="'.$id.'" checked="checked" /> '.$name.'</label></li>'."\n";
+				echo '<li><label><input type="checkbox" name="cas_condition['.$this->id.'][]" value="'.$id.'" checked="checked" /> '.$name.'</label></li>'."\n";
 			}
 			echo '</ul>';
 			echo '</div>';	
@@ -248,29 +238,42 @@ abstract class CASModule {
 		return $data;
 	}
 
+	/**
+	 * Create tab panels for administrative meta boxes
+	 * @author Joachim Jensen <jv@intox.dk>
+	 * @since  2
+	 * @param  string    $id
+	 * @param  array    $args
+	 * @return string
+	 */
 	final protected function create_tab_panels($id, $args) {
 		$return = '<div id="'.$id.'" class="posttypediv">';
-		$return .= '<ul class="category-tabs">';
-
-		$return2 = '';
+		
+		$content = '';
+		$tabs = '';
+		
 		$count = count($args);
 		foreach($args as $key => $tab) {
 			if($count > 1) {
-				$return .= '<li'.($tab['status'] ? ' class="tabs"' : '').'>';
-				$return .= '<a class="nav-tab-link" href="#tabs-panel-' . $id . '-'.$key.'" data-type="tabs-panel-' . $id . '-'.$key.'"> '.$tab['title'].' </a>';
-				$return .= '</li>';				
+				$tabs .= '<li'.($tab['status'] ? ' class="tabs"' : '').'>';
+				$tabs .= '<a class="nav-tab-link" href="#tabs-panel-' . $id . '-'.$key.'" data-type="tabs-panel-' . $id . '-'.$key.'"> '.$tab['title'].' </a>';
+				$tabs .= '</li>';				
 			}
-			$return2 .= '<div id="tabs-panel-' . $id . '-'.$key.'" class="tabs-panel'.($tab['status'] ? ' tabs-panel-active' : ' tabs-panel-inactive').'">';
+			$content .= '<div id="tabs-panel-' . $id . '-'.$key.'" class="tabs-panel'.($tab['status'] ? ' tabs-panel-active' : ' tabs-panel-inactive').'">';
 			if(isset($tab['content_before'])) {
-				$return2 .= $tab['content_before'];
+				$content .= $tab['content_before'];
 			}
-			$return2 .= '<ul id="cas-list-' . $id . '" class="cas-contentlist categorychecklist form-no-clear">'."\n";
-			$return2 .= $tab['content'];
-			$return2 .= '</ul>'."\n";
-			$return2 .= '</div>';
+			$content .= '<ul id="cas-list-' . $id . '" class="cas-contentlist categorychecklist form-no-clear">'."\n";
+			$content .= $tab['content'];
+			$content .= '</ul>'."\n";
+			$content .= '</div>';
 		}
-		$return .= '</ul>';
-		$return .= $return2;
+
+		if($tabs) {
+			$return .= '<ul class="category-tabs">'.$tabs.'</ul>';
+		}
+		$return .= $content;
+
 		$return .'</div>';
 
 		return $return;

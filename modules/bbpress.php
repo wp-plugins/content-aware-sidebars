@@ -23,7 +23,11 @@ class CASModule_bbpress extends CASModule_author {
 		$this->name = __('bbPress User Profiles',ContentAwareSidebars::DOMAIN);
 		
 		add_filter('cas-db-where-post_types', array(&$this,'add_forum_dependency'));
-		add_action('wp_ajax_cas-autocomplete-'.$this->id, array(&$this,'ajax_content_search'));
+
+		if(is_admin()) {
+			add_action('wp_ajax_cas-autocomplete-'.$this->id, array(&$this,'ajax_content_search'));
+		}
+		
 	}
 	
 	/**

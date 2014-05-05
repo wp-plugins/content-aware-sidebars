@@ -7,18 +7,20 @@
 Plugin Name: Content Aware Sidebars
 Plugin URI: http://www.intox.dk/
 Description: Manage and show sidebars according to the content being viewed.
-Version: 2.0.3
+Version: 2.1
 Author: Joachim Jensen, Intox Studio
 Author URI: http://www.intox.dk/
 Text Domain: content-aware-sidebars
 Domain Path: /lang/
-License: GPL2
+License: GPLv3
 
-	Copyright 2011-2013  Joachim Jensen  (email : jv@intox.dk)
+	Content Aware Sidebars Plugin
+	Copyright (C) 2011-2014 Joachim Jensen - jv@intox.dk
 
-	This program is free software; you can redistribute it and/or modify
-	it under the terms of the GNU General Public License, version 2, as 
-	published by the Free Software Foundation.
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
 	This program is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -26,9 +28,7 @@ License: GPL2
 	GNU General Public License for more details.
 
 	You should have received a copy of the GNU General Public License
-	along with this program; if not, write to the Free Software
-	Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-
+	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 final class ContentAwareSidebars {
@@ -136,7 +136,6 @@ final class ContentAwareSidebars {
 			add_filter('post_row_actions',                                   array(&$this,'sidebar_row_actions'),10,2);
 			add_filter('post_updated_messages',                              array(&$this,'sidebar_updated_messages'));
 
-			add_action('wp_ajax_cas_add_group',                              array(&$this,'add_sidebar_group_ajax'));
 			add_action('wp_ajax_cas_add_rule',                               array(&$this,'add_sidebar_rule_ajax'));
 			add_action('wp_ajax_cas_remove_group',                           array(&$this,'remove_sidebar_group_ajax'));
 
@@ -401,6 +400,10 @@ final class ContentAwareSidebars {
 			
 			$handle = get_post_meta($post->ID,self::PREFIX . 'handle', true);
 			//$handle = $post->{self::PREFIX . 'handle'};
+			if(!isset($this->metadata['handle']['list'][$handle])) {
+				continue;
+			}
+			
 			$desc = $this->metadata['handle']['list'][$handle];
 
 			if ($handle < 2) {
@@ -778,7 +781,7 @@ final class ContentAwareSidebars {
 
 		// Names of whitelisted meta boxes
 		$whitelist = array(
-			'cas-support'	=> 'cas-support',
+			'cas-support'       => 'cas-support',
 			'cas-groups'		=> 'cas-groups',
 			'cas-rules'			=> 'cas-rules',
 			'cas-options'		=> 'cas-options',
@@ -794,7 +797,7 @@ final class ContentAwareSidebars {
 				// Loop through boxes
 				foreach($priority_v as $box_k => $box_v) {
 					// If box is not whitelisted, remove it
-					if(!in_array($box_k,$whitelist)) {
+					if(!isset($whitelist[$box_k])) {
 						$wp_meta_boxes[self::TYPE_SIDEBAR][$context_k][$priority_k][$box_k] = false;
 						//unset($whitelist[$box_k]);
 					}
@@ -880,28 +883,31 @@ final class ContentAwareSidebars {
 	 */
 	public function meta_box_rules() {
 
+		$groups = $this->_get_sidebar_groups(null,false);
+
 		echo '<div id="cas-container">'."\n";
 		echo '<div id="cas-accordion" class="accordion-container postbox">'."\n";
 		echo '<ul class="outer-border">';
 		do_action('cas-module-admin-box');
 		echo '</ul>';
 		echo '</div>'."\n";
-		echo '<div id="cas-groups" class="postbox">'."\n";
+		echo '<div id="cas-groups" class="postbox'.(empty($groups) ? '' : ' cas-has-groups').'">'."\n";
 		echo '<div class="cas-groups-header"><h3>'.__('Condition Groups',self::DOMAIN).'</h3><input type="button" class="button button-primary js-cas-group-new" value="'.__('Add New Group',self::DOMAIN).'" /></div>';
 		echo '<div class="cas-groups-body"><p>'.__('Click to edit a group or create a new one. Select content on the left to add it. In each group, you can combine different types of associated content.',self::DOMAIN).'</p>';
 		echo '<h4>'.__('Display sidebar with',self::DOMAIN).':</h4>';
-		echo '<ul>';
-		$groups = $this->_get_sidebar_groups(null,true);
 
 		$i = 0;
+
+		echo '<ul>';
+		echo '<li class="cas-no-groups">'.__('No content. Please add at least one condition group to make the sidebar content aware.',self::DOMAIN).'</li>';
 		foreach($groups as $group) {
 
 			echo '<li class="cas-group-single'.($i == 0 ? ' cas-group-active' : '').'">
 			<span class="cas-group-control cas-group-control-active">
-			<input type="button" class="button button-primary js-cas-group-save" value="'.__('Save',self::DOMAIN).'" /> | <a class="js-cas-group-cancel" href="#">'.__('Cancel',self::DOMAIN).'</a>
+			<input type="button" class="button js-cas-group-save" value="'.__('Save',self::DOMAIN).'" /> | <a class="js-cas-group-cancel" href="#">'.__('Cancel',self::DOMAIN).'</a>
 			</span>
 			<span class="cas-group-control">
-			<input type="button" class="js-cas-group-edit button" value="'._x('Edit','group',self::DOMAIN).'" /> | <a class="submitdelete trash js-cas-group-remove" href="#">'.__('Remove',self::DOMAIN).'</a>
+			<a class="js-cas-group-edit" href="#">'._x('Edit','group',self::DOMAIN).'</a> | <a class="submitdelete js-cas-group-remove" href="#">'.__('Remove',self::DOMAIN).'</a>
 			</span>
 			<div class="cas-content">';
 			do_action('cas-module-print-data',$group->ID);
@@ -911,7 +917,10 @@ final class ContentAwareSidebars {
 			echo '</li>';	
 			$i++;
 		}
-		echo '</ul></div>';
+		echo '</ul>';
+
+		
+		echo '</div>';
 		echo '<div class="cas-groups-footer">';
 		echo '<input type="button" class="button button-primary js-cas-group-new" value="'.__('Add New Group',self::DOMAIN).'" />';
 		echo '</div>';
@@ -936,7 +945,7 @@ final class ContentAwareSidebars {
 		if($status == 'auto-draft') {
 			$status = 'draft';
 			wp_update_post( array(
-				'ID'           => $post->ID,
+				'ID'          => $post->ID,
 				'post_status' => $status
 			));
 		}
@@ -966,8 +975,8 @@ final class ContentAwareSidebars {
 			'posts_per_page'   => -1,
 			'post_type'        => self::TYPE_CONDITION_GROUP,
 			'post_parent'      => $post->ID,
-			'post_status'		=> 'any',
-			'order' => 'ASC'
+			'post_status'      => 'any',
+			'order'            => 'ASC'
 		));
 		if($groups == null && $create_first) {
 			$group = $this->_add_sidebar_group($post);
@@ -987,69 +996,42 @@ final class ContentAwareSidebars {
 	public function add_sidebar_rule_ajax() {
 
 		try {
-			if(!isset($_POST['current_id']) || !isset($_POST['cas_group_id'])) {
-				echo "Unauthorized request";
+			if(!isset($_POST['current_id'])) {
+				_e('Unauthorized request',self::DOMAIN);
 				throw new Exception("Forbidden",403);
 			}	
 
 			if(!check_ajax_referer(self::SIDEBAR_PREFIX.$_POST['current_id'],'token',false)) {
-				echo "Unauthorized request";
+				_e('Unauthorized request',self::DOMAIN);
 				throw new Exception("Forbidden",403);
 			}
 
-			$post_id = intval($_POST['cas_group_id']);
+			$response = array();
 
-	   		// Update module data
+			//Make sure some rules are sent
+			if(!isset($_POST['cas_condition'])) {
+				_e('Condition group cannot be empty',self::DOMAIN);
+				throw new Exception("Internal Server Error",500);
+			}
+
+			//If ID was not sent at this point, it is a new group
+			if(!isset($_POST['cas_group_id'])) {
+				$post_id = $this->_add_sidebar_group(intval($_POST['current_id']));
+				$response['new_post_id'] = $post_id;
+			} else {
+				$post_id = intval($_POST['cas_group_id']);
+			}
+
 			do_action('cas-module-save-data',$post_id);
 
-			echo json_encode(array(
-				'message' => __('Condition group saved',self::DOMAIN),
-				"POST" => $_POST,
-				"GROUP_ID" => $post_id
-			));
+			$response['message'] = __('Condition group saved',self::DOMAIN);
+
+			echo json_encode($response);
 			
 		} catch(Exception $e) {
 			header("HTTP/1.1 ".$e->getCode()." ".$e->getMessage());
 		}
 		die();	
-	}
-
-	/**
-	 * AJAX call to add a group to a sidebar
-	 * @author Joachim Jensen <jv@intox.dk>
-	 * @since  2.0
-	 * @return void
-	 */
-	public function add_sidebar_group_ajax() {
-
-		try {
-			if(!isset($_POST['current_id'])) {
-				echo "Unauthorized request";
-				throw new Exception("Forbidden",403);
-			}	
-
-			if(!check_ajax_referer(self::SIDEBAR_PREFIX.$_POST['current_id'],'token',false)) {
-				echo "Unauthorized request";
-				throw new Exception("Forbidden",403);
-			}
-
-			$group = $this->_add_sidebar_group(intval($_POST['current_id']));
-
-			if(!$group) {
-				echo "Condition group could not be created";
-				throw new Exception("Internal Server Error",500);
-			}
-
-			echo json_encode(array(
-				'message' => __('Condition group added',self::DOMAIN),
-				'group'   => $group
-			));
-			
-		} catch(Exception $e) {
-			header("HTTP/1.1 ".$e->getCode()." ".$e->getMessage());
-		}
-		die();
-
 	}
 
 	/**
@@ -1061,18 +1043,18 @@ final class ContentAwareSidebars {
 	public function remove_sidebar_group_ajax() {
 
 		try {
-			if(!isset($_POST['current_id']) || !isset($_POST['cas_group_id'])) {
-				echo "Unauthorized request";
+			if(!isset($_POST['current_id'],$_POST['cas_group_id'])) {
+				_e('Unauthorized request',self::DOMAIN);
 				throw new Exception("Forbidden",403);
 			}	
 
 			if(!check_ajax_referer(self::SIDEBAR_PREFIX.$_POST['current_id'],'token',false)) {
-				echo "Unauthorized request";
+				_e('Unauthorized request',self::DOMAIN);
 				throw new Exception("Forbidden",403);
 			}
 
 			if(wp_delete_post(intval($_POST['cas_group_id']), true) === false) {
-				echo "Condition group could not be removed";
+				_e('Condition group could not be removed',self::DOMAIN);
 				throw new Exception("Internal Server Error",500);
 			}
 
@@ -1151,7 +1133,7 @@ final class ContentAwareSidebars {
 						
 					</p>
 				</div>
-				<div style="float:left;width:40%;">
+				<div style="float:left;width:40%;border-left:#ebebeb 1px solid;border-right:#ebebeb 1px solid;box-sizing:border-box;-moz-box-sizing:border-box;">
 					<p><strong><?php _e('Or you could:',self::DOMAIN); ?></strong></p>
 					<ul>
 						<li><a href="http://wordpress.org/support/view/plugin-reviews/content-aware-sidebars?rate=5#postform" target="_blank"><?php _e('Rate the plugin on WordPress.org',self::DOMAIN); ?></a></li>
@@ -1282,7 +1264,8 @@ final class ContentAwareSidebars {
 					'edit'          => _x('Edit','group',self::DOMAIN),
 					'remove'        => __('Remove',self::DOMAIN),
 					'confirmRemove' => __('Remove this group and its contents permanently?',self::DOMAIN),
-					'noResults'     => __('No results found.',self::DOMAIN)
+					'noResults'     => __('No results found.',self::DOMAIN),
+					'confirmCancel' => __('The current group has unsaved changes. Do you want to continue and discard these changes?', self::DOMAIN)
 				));
 				wp_enqueue_style('cas_admin_style');
 			//Sidebar overview
@@ -1298,9 +1281,10 @@ final class ContentAwareSidebars {
 	 * @return void
 	 */
 	private function _load_dependencies() {
-		require('walker.php');
-		require('update_db.php');
-		require('modules/abstract.php');
+		$path = plugin_dir_path( __FILE__ );
+		require($path.'/walker.php');
+		require($path.'/update_db.php');
+		require($path.'/modules/abstract.php');
 	}
 
 }

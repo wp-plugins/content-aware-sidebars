@@ -2,179 +2,186 @@
 # This file is distributed under the same license as the Content Aware Sidebars package.
 msgid ""
 msgstr ""
-"Project-Id-Version: Content Aware Sidebars\n"
+"Project-Id-Version: Content Aware Sidebars 2.1\n"
 "Report-Msgid-Bugs-To: http://wordpress.org/tag/content-aware-sidebars\n"
 "POT-Creation-Date: 2014-05-01 12:57+0100\n"
-"PO-Revision-Date: 2014-05-01 13:19+0100\n"
+"PO-Revision-Date: 2014-05-01 13:12+0100\n"
 "Last-Translator: \n"
-"Language-Team: MyWeb2 <info@myweb2.it>\n"
-"Language: it_IT\n"
+"Language-Team: \n"
+"Language: zh_CN\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Poedit-SourceCharset: UTF-8\n"
 "X-Generator: Poedit 1.5.5\n"
+"X-Poedit-KeywordsList: __;_e;__ngettext:1,2;_n:1,2;__ngettext_noop:1,2;"
+"_n_noop:1,2;_c,_nc:4c,1,2;_x:1,2c;_nx:4c,1,2;_nx_noop:4c,1,2;_ex:1,2c;"
+"esc_attr__;esc_attr_e;esc_attr_x:1,2c;esc_html__;esc_html_e;esc_html_x:1,2c\n"
+"X-Poedit-Basepath: .\n"
+"X-Textdomain-Support: yes\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Poedit-SearchPath-0: .\n"
+"X-Poedit-SearchPath-1: ..\n"
 
 #: ../content-aware-sidebars.php:111
 msgid "Manage and show sidebars according to the content being viewed."
-msgstr "Gestisce e mostra sidebars a seconda del contenuto visualizzato."
+msgstr "根据页面内容管理和显示边栏"
 
 #: ../content-aware-sidebars.php:112
 msgid "Content Aware Sidebars"
-msgstr "Content Aware Sidebars"
+msgstr "自由定制边栏"
 
 #: ../content-aware-sidebars.php:232 ../content-aware-sidebars.php:432
 msgid "Exposure"
-msgstr "Tipologia"
+msgstr "显示于"
 
 #: ../content-aware-sidebars.php:238
 msgid "Singular"
-msgstr "Singola"
+msgstr "文章页"
 
 #: ../content-aware-sidebars.php:239
 msgid "Singular & Archive"
-msgstr "Singola e archivio"
+msgstr "文章页和列表页"
 
 #: ../content-aware-sidebars.php:240
 msgid "Archive"
-msgstr "Archivio"
+msgstr "列表页"
 
 #: ../content-aware-sidebars.php:244 ../content-aware-sidebars.php:433
 msgctxt "option"
 msgid "Handle"
-msgstr "Comportamento"
+msgstr "处理方式"
 
 #: ../content-aware-sidebars.php:246
 msgid "Replace host sidebar, merge with it or add sidebar manually."
-msgstr ""
-"Sostituisce sidebar, si fonde con essa o aggiunge la sidebar manualmente."
+msgstr "替换主边栏, 合并或者手动添加边栏"
 
 #: ../content-aware-sidebars.php:250
 msgid "Replace"
-msgstr "Sostituzione"
+msgstr "替换"
 
 #: ../content-aware-sidebars.php:251
 msgid "Merge"
-msgstr "Unione"
+msgstr "合并"
 
 #: ../content-aware-sidebars.php:252
 msgid "Manual"
-msgstr "Manuale"
+msgstr "手动"
 
 #: ../content-aware-sidebars.php:256
 msgid "Host Sidebar"
-msgstr "Sidebar"
+msgstr "主边栏"
 
 #: ../content-aware-sidebars.php:264 ../content-aware-sidebars.php:434
 msgid "Merge position"
-msgstr "Posizione"
+msgstr "合并位置"
 
 #: ../content-aware-sidebars.php:266
 msgid "Place sidebar on top or bottom of host when merging."
-msgstr "Posizione sidebar in alto o in basso dell'host durante la fusione."
+msgstr "合并时将边栏放置在主边栏的顶部或底部"
 
 #: ../content-aware-sidebars.php:270
 msgid "Top"
-msgstr "Alto"
+msgstr "顶部"
 
 #: ../content-aware-sidebars.php:271
 msgid "Bottom"
-msgstr "Basso"
+msgstr "底部"
 
 #: ../content-aware-sidebars.php:296
 msgid "Sidebars"
-msgstr "Sidebars"
+msgstr "边栏"
 
 #: ../content-aware-sidebars.php:297
 msgid "Sidebar"
-msgstr "Sidebar"
+msgstr "边栏"
 
 #: ../content-aware-sidebars.php:298
 msgctxt "sidebar"
 msgid "Add New"
-msgstr "Aggiungi"
+msgstr "新建"
 
 #: ../content-aware-sidebars.php:299
 msgid "Add New Sidebar"
-msgstr "Aggiungi Nuova Sidebar"
+msgstr "添加边栏"
 
 #: ../content-aware-sidebars.php:300
 msgid "Edit Sidebar"
-msgstr "Modifica Sidebar"
+msgstr "编辑边栏"
 
 #: ../content-aware-sidebars.php:301
 msgid "New Sidebar"
-msgstr "Nuova Sidebar"
+msgstr "新建边栏"
 
 #: ../content-aware-sidebars.php:302
 msgid "All Sidebars"
-msgstr "Tutte le Sidebars"
+msgstr "全部边栏"
 
 #: ../content-aware-sidebars.php:303
 msgid "View Sidebar"
-msgstr "Vedi Sidebar"
+msgstr "查看边栏"
 
 #: ../content-aware-sidebars.php:304
 msgid "Search Sidebars"
-msgstr "Cerca Sidebars"
+msgstr "搜索边栏"
 
 #: ../content-aware-sidebars.php:305
 msgid "No sidebars found"
-msgstr "Nessuna sidebar trovata"
+msgstr "未找到边栏"
 
 #: ../content-aware-sidebars.php:306
 msgid "No sidebars found in Trash"
-msgstr "nessuna sidebar cancellata"
+msgstr "回收站中未找到边栏"
 
 #: ../content-aware-sidebars.php:321 ../content-aware-sidebars.php:892
 msgid "Condition Groups"
-msgstr "Condizione gruppi "
+msgstr "显示条件组"
 
 #: ../content-aware-sidebars.php:322
 msgid "Condition Group"
-msgstr "Condizione gruppo "
+msgstr "显示条件组"
 
 #: ../content-aware-sidebars.php:323
 msgctxt "group"
 msgid "Add New"
-msgstr "Aggiungi"
+msgstr "新建"
 
 #: ../content-aware-sidebars.php:324 ../content-aware-sidebars.php:892
 #: ../content-aware-sidebars.php:922
 msgid "Add New Group"
-msgstr "Aggiungi"
+msgstr "新建组"
 
 #: ../content-aware-sidebars.php:325 ../content-aware-sidebars.php:907
 #: ../content-aware-sidebars.php:1299
 msgctxt "group"
 msgid "Edit"
-msgstr "Modifica"
+msgstr "编辑"
 
 #: ../content-aware-sidebars.php:351 ../content-aware-sidebars.php:354
 msgid "Sidebar updated."
-msgstr "Sidebar aggiornata."
+msgstr "边栏已更新."
 
 #: ../content-aware-sidebars.php:351 ../content-aware-sidebars.php:356
 #: ../content-aware-sidebars.php:358 ../content-aware-sidebars.php:363
 msgid "Manage widgets"
-msgstr "Gestione Widgets"
+msgstr "管理小工具"
 
 #: ../content-aware-sidebars.php:356
 msgid "Sidebar published."
-msgstr "Sidebar pubblicata."
+msgstr "已发布边栏"
 
 #: ../content-aware-sidebars.php:357
 msgid "Sidebar saved."
-msgstr "Sidebar salvata."
+msgstr "边栏已保存."
 
 #: ../content-aware-sidebars.php:358
 msgid "Sidebar submitted."
-msgstr "Sidebar aggiornata."
+msgstr "已提交边栏"
 
 #: ../content-aware-sidebars.php:359
 #, php-format
 msgid "Sidebar scheduled for: <strong>%1$s</strong>."
-msgstr "Sidebar posticipata per: <strong>%1$s</strong>."
+msgstr "已为 <strong>%1$s</strong> 设置了边栏计划"
 
 #: ../content-aware-sidebars.php:361
 msgid "M j, Y @ G:i"
@@ -182,312 +189,221 @@ msgstr "M j, Y @ G:i"
 
 #: ../content-aware-sidebars.php:364
 msgid "Sidebar draft updated."
-msgstr "Bozza sidebar aggiornata. "
+msgstr "边栏草稿已更新."
 
 #: ../content-aware-sidebars.php:408 ../content-aware-sidebars.php:493
 msgid "Please update Host Sidebar"
-msgstr "Aggiorna Sidebar"
+msgstr "请更新主边栏"
 
 #: ../content-aware-sidebars.php:568
 msgid "Manage Widgets"
-msgstr "Gestione Widgets"
+msgstr "管理小工具"
 
 #: ../content-aware-sidebars.php:821
 msgid "Support the Author of Content Aware Sidebars"
-msgstr "Supporta l'autore di Content Aware Sidebars"
+msgstr "支持Content Aware Sidebars"
 
 #: ../content-aware-sidebars.php:829
 msgid "Content"
-msgstr "Contenuto"
+msgstr "内容"
 
 #: ../content-aware-sidebars.php:837
 msgid "Options"
-msgstr "Opzioni"
+msgstr "选项"
 
 #: ../content-aware-sidebars.php:893
 msgid ""
 "Click to edit a group or create a new one. Select content on the left to add "
 "it. In each group, you can combine different types of associated content."
 msgstr ""
-"Clicca per modificare un gruppo o crearne uno nuovo. Seleziona il contenuto "
-"a sinistra per aggiungerlo. In ogni gruppo, è possibile combinare diversi "
-"tipi di contenuti associati."
+"点击修改或新建组。选择左侧内容添加到组中。在每组中，你可以组合不同的有关内"
+"容。"
 
 #: ../content-aware-sidebars.php:894
 msgid "Display sidebar with"
-msgstr "Visualizza larghezza sidebar"
+msgstr "边栏显示在"
 
 #: ../content-aware-sidebars.php:899
 msgid ""
 "No content. Please add at least one condition group to make the sidebar "
 "content aware."
-msgstr ""
-"Nessun contenuto. Si prega di aggiungere almeno una condizione di gruppo per "
-"impostare il il contenuto della sidebar"
+msgstr "没有内容。请至少选择一项内容组以定制边栏"
 
 #: ../content-aware-sidebars.php:904 ../content-aware-sidebars.php:1297
 msgid "Save"
-msgstr "Salva"
+msgstr "保存"
 
 #: ../content-aware-sidebars.php:904 ../content-aware-sidebars.php:1298
 msgid "Cancel"
-msgstr "Annulla"
+msgstr "取消"
 
 #: ../content-aware-sidebars.php:907 ../content-aware-sidebars.php:1300
 msgid "Remove"
-msgstr "Elimina"
+msgstr "删除"
 
 #: ../content-aware-sidebars.php:997 ../content-aware-sidebars.php:1002
 #: ../content-aware-sidebars.php:1044 ../content-aware-sidebars.php:1049
 #: ../content-aware-sidebars.php:1082 ../content-aware-sidebars.php:1087
 msgid "Unauthorized request"
-msgstr "Richiesta non autorizzata"
+msgstr "未授权请求"
 
 #: ../content-aware-sidebars.php:1010
 msgid "Condition group cannot be empty"
-msgstr "Impossibile creare condizioni di gruppo"
+msgstr "未能创建条件组"
 
 #: ../content-aware-sidebars.php:1024
 msgid "Condition group saved"
-msgstr "Condizioni di gruppo salvate"
+msgstr "已保存条件组"
 
 #: ../content-aware-sidebars.php:1056
 msgid "Condition group could not be created"
-msgstr "Impossibile creare condizioni di gruppo"
+msgstr "未能创建条件组"
 
 #: ../content-aware-sidebars.php:1061
 msgid "Condition group added"
-msgstr "Aggiunta condizione di gruppo"
+msgstr "已添加条件组"
 
 #: ../content-aware-sidebars.php:1092
 msgid "Condition group could not be removed"
-msgstr "Le condizioni di gruppo non possono essere eliminate"
+msgstr "未能删除条件组"
 
 #: ../content-aware-sidebars.php:1097
 msgid "Condition group removed"
-msgstr "Condizione di gruppo eliminata "
+msgstr "已删除条件组"
 
 #: ../content-aware-sidebars.php:1163
 msgid ""
 "If you love this plugin, please consider donating to support future "
 "development."
-msgstr ""
-"Se ti piace questo plugin, considera l'eventualità di fare una donazione."
+msgstr "如果你喜欢这个插件, 请考虑捐赠."
 
 #: ../content-aware-sidebars.php:1172
 msgid "Or you could:"
-msgstr "Ti potrebbe anche interessare:"
+msgstr "或者你可以："
 
 #: ../content-aware-sidebars.php:1174
 msgid "Rate the plugin on WordPress.org"
-msgstr "Valutare il plugin su WordPress.org"
+msgstr "在WordPress.org为此插件评分"
 
 #: ../content-aware-sidebars.php:1175
 msgid "Link to the plugin page"
-msgstr "Collegarti alla pagina WordPress del plugin"
+msgstr "链接到插件页面"
 
 #: ../content-aware-sidebars.php:1176
 msgid "Translate the plugin into your language"
-msgstr "Tradurre questo plugin nella tua lingua"
+msgstr "翻译此插件"
 
 #: ../content-aware-sidebars.php:1301
 msgid "Remove this group and its contents permanently?"
-msgstr "Vuoi eliminare questo gruppo e il suo contenuto in modo permanente?"
+msgstr "永久删除此组和它的内容？"
 
 #: ../content-aware-sidebars.php:1302
 msgid "No results found."
-msgstr "Nessuna sidebar trovata"
+msgstr "未找到结果"
 
 #: ../content-aware-sidebars.php:1303
 msgid ""
 "The current group has unsaved changes. Do you want to continue and discard "
 "these changes?"
-msgstr ""
-"Il gruppo attuale contiene modifiche non salvate. Vuoi proseguire e "
-"eliminare questi cambiamenti?"
+msgstr "当前修改未保存，放弃修改吗？"
 
 #: ../modules/abstract.php:88
 #, php-format
 msgid "Display with All %s"
-msgstr "Visualizza tutte le %s"
+msgstr "在所有%s显示"
 
 #: ../modules/abstract.php:98 ../modules/bp_member.php:104
 #: ../modules/post_type.php:198 ../modules/taxonomy.php:243
 msgid "View All"
-msgstr "Vedi tutti"
+msgstr "查看全部"
 
 #: ../modules/abstract.php:105 ../modules/abstract.php:108
 #: ../modules/post_type.php:204 ../modules/post_type.php:207
 #: ../modules/taxonomy.php:249 ../modules/taxonomy.php:252
 msgid "Search"
-msgstr "Cerca"
+msgstr "搜索"
 
 #: ../modules/abstract.php:116 ../modules/bp_member.php:113
 #: ../modules/post_type.php:217 ../modules/taxonomy.php:262
 msgid "Add to Group"
-msgstr "Aggiungi gruppo"
+msgstr "添加到组"
 
 #: ../modules/abstract.php:188
 #, php-format
 msgid "All %s"
-msgstr "Tutte le %s"
+msgstr "全部%s"
 
 #: ../modules/author.php:22
 msgid "Authors"
-msgstr "Autori"
+msgstr "作者"
 
 #: ../modules/bbpress.php:23
 msgid "bbPress User Profiles"
-msgstr "Profilo utente bbPress"
+msgstr "bbPress用户资料"
 
 #: ../modules/bp_member.php:21
 msgid "BuddyPress Members"
-msgstr "Utenti BuddyPress"
+msgstr "BuddyPress用户"
 
 #: ../modules/page_template.php:22
 msgid "Page Templates"
-msgstr "Template pagine"
+msgstr "页面模板"
 
 #: ../modules/polylang.php:21 ../modules/qtranslate.php:21
 #: ../modules/transposh.php:21 ../modules/wpml.php:21
 msgid "Languages"
-msgstr "Lingue"
+msgstr "语言"
 
 #: ../modules/post_type.php:28
 msgid "Post Types"
-msgstr "Tipi di messaggi"
+msgstr "文章类型"
 
 #: ../modules/post_type.php:105 ../modules/post_type.php:171
 #: ../modules/taxonomy.php:182 ../modules/taxonomy.php:217
 msgid "Automatically select new children of a selected ancestor"
-msgstr "Seleziona automaticamente nuovi figli di un percorso selezionato"
+msgstr "自动为选中的父级选择新子级"
 
 #: ../modules/post_type.php:177 ../modules/taxonomy.php:221
 #, php-format
 msgid "Display with %s"
-msgstr "Larghezza %s"
+msgstr "在%s显示"
 
 #: ../modules/post_type.php:182 ../modules/taxonomy.php:225
 msgid "No items."
-msgstr "Nessun oggetto."
+msgstr "没有项目."
 
 #: ../modules/post_type.php:193
 msgid "Most Recent"
-msgstr "Più usati"
+msgstr "最新"
 
 #: ../modules/static.php:23
 msgid "Static Pages"
-msgstr "Pagine statiche"
+msgstr "静态页面"
 
 #: ../modules/static.php:33
 msgid "Front Page"
-msgstr "Pagina principale"
+msgstr "首页"
 
 #: ../modules/static.php:34
 msgid "Search Results"
-msgstr "Risultati di ricerca"
+msgstr "搜索结果"
 
 #: ../modules/static.php:35
 msgid "404 Page"
-msgstr "Pagina 404"
+msgstr "404页面"
 
 #: ../modules/taxonomy.php:34
 msgid "Taxonomies"
-msgstr "Tassonomie"
+msgstr "分类"
 
 #: ../modules/taxonomy.php:238
 msgid "Most Used"
-msgstr "Più usati"
+msgstr "最常用"
 
 #: ../modules/url.php:22
 msgid "URLs"
-msgstr "URL"
+msgstr "网址"
 
 #: ../modules/url.php:40
 msgid "Add"
-msgstr "Aggiungi"
-
-#~ msgid "Show with All %s"
-#~ msgstr "Seleziona tutto: %s"
-
-#, fuzzy
-#~ msgid "New Sidebar Group"
-#~ msgstr "Nuova Sidebar"
-
-#, fuzzy
-#~ msgid "Sidebar Groups"
-#~ msgstr "Sidebars"
-
-#, fuzzy
-#~ msgid "Sidebar Group"
-#~ msgstr "Sidebar"
-
-#, fuzzy
-#~ msgid "Add New Sidebar Group"
-#~ msgstr "Aggiungi Nuova Sidebar"
-
-#, fuzzy
-#~ msgid "Edit Sidebar Group"
-#~ msgstr "Modifica Sidebar"
-
-#, fuzzy
-#~ msgid "All Sidebar Groups"
-#~ msgstr "Tutte le Sidebars"
-
-#, fuzzy
-#~ msgid "View Sidebar Group"
-#~ msgstr "Vedi Sidebar"
-
-#, fuzzy
-#~ msgid "Search Sidebar Groups"
-#~ msgstr "Cerca Sidebars"
-
-#, fuzzy
-#~ msgid "No sidebar groups found"
-#~ msgstr "Nessuna sidebar trovata"
-
-#, fuzzy
-#~ msgid "No sidebar groups found in Trash"
-#~ msgstr "nessuna sidebar cancellata"
-
-#~ msgid "http://www.intox.dk/"
-#~ msgstr "http://www.intox.dk/"
-
-#~ msgid "Joachim Jensen, Intox Studio"
-#~ msgstr "Joachim Jensen, Intox Studio"
-
-#~ msgid "Sidebar updated. <a href=\"%s\">Manage widgets</a>"
-#~ msgstr "Sidebar aggiornata. <a href=\"%s\">Gestione widgets</a>"
-
-#~ msgid "Sidebar published. <a href=\"%s\">Manage widgets</a>"
-#~ msgstr "Sidebar publicata. <a href=\"%s\">Gestione widgets</a>"
-
-#~ msgid "Sidebar submitted. <a href=\"%s\">Manage widgets</a>"
-#~ msgstr "Sidebar inviata. <a href=\"%s\">Gestione widgets</a>"
-
-#~ msgid "Spread the Word"
-#~ msgstr "Spargi la voce"
-
-#~ msgid "Show with %s"
-#~ msgstr "Mostra %s"
-
-#~ msgid "Words from the author"
-#~ msgstr "Parole dell'autore"
-
-#~ msgid ""
-#~ "Remember to <a class=\"button\" href=\"%1$s\" target=\"_blank\">rate</a> "
-#~ "and <a class=\"button\" href=\"%2$s\" target=\"_blank\">share</a> it too!"
-#~ msgstr ""
-#~ "Ricorda  di <a class=\"button\" href=\"%1$s\" target=\"_blank"
-#~ "\">valutarlo</a> e <a class=\"button\" href=\"%2$s\" target=\"_blank"
-#~ "\">condiverlo</a>!"
-
-#~ msgid "Check out Content Aware Sidebars for %23WordPress! :)"
-#~ msgstr "Verifica Content Aware Sidebars per %23WordPress! :)"
-
-#~ msgid "bbPress"
-#~ msgstr "bbPress"
-
-#, fuzzy
-#~ msgid "Sidebar draft updated. <a href=\"%s\">Manage widgets</a>"
-#~ msgstr "Sidebar aggiornata. <a href=\"%s\">Gestione widgets</a>"
+msgstr "新建"

@@ -67,27 +67,4 @@ class CASModule_static extends CASModule {
 		);			
 	}
 	
-	// /**
-	//  * Meta box content
-	//  * @global object $post
-	//  * @return void 
-	//  */
-	// public function meta_box_content() {
-	// 	global $post;
-
-	// 	echo '<li class="control-section accordion-section">';		
-	// 	echo '<h3 class="accordion-section-title" title="'.$this->name.'" tabindex="0">'.$this->name.'</h3>'."\n";
-	// 	echo '<div class="accordion-section-content cas-rule-content" id="cas-' . $this->id . '">'. "\n";
-	// 	$meta = get_post_meta($post->ID, ContentAwareSidebars::PREFIX . $this->id, false);
-	// 	$current = $meta != '' ? $meta : array();
-
-	// 	echo '<ul id="cas-list-' . $this->id . '" class="cas-contentlist categorychecklist form-no-clear">'. "\n";
-	// 	foreach ($this->_get_content() as $id => $name) {
-	// 		echo '<li><label><input type="checkbox" name="' . $this->id . '[]" value="' . $id . '"' . (in_array($id, $current) ? ' checked="checked"' : '') . ' /> ' . $name . '</label></li>' . "\n";
-	// 	}
-	// 	echo '</ul>'. "\n";
-	// 	echo '</div>'. "\n";
-	// 	echo '</li>';
-	// }
-	
 }

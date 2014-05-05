@@ -89,11 +89,11 @@ class CASModule_bp_member extends CASModule {
 		$tab_content = "";
 
 		foreach ($this->_get_content() as $id => $name) {
-			$tab_content .= '<li class="cas-'.$this->id.'-'.$id.'"><label class="selectit"><input type="checkbox" name="' . $field . '[]" value="' . $id . '" /> ' . $name . '</label></li>' . "\n";
+			$tab_content .= '<li class="cas-'.$this->id.'-'.$id.'"><label class="selectit"><input type="checkbox" name="cas_condition[' . $field . '][]" value="' . $id . '" /> ' . $name . '</label></li>' . "\n";
 			if(isset($bp->bp_options_nav[$id])) {
 				$tab_content .= '<li><ul class="children">';
 				foreach($bp->bp_options_nav[$id] as $child) {
-					$tab_content .= '<li class="cas-'.$this->id.'-'.$id.'-'.$child['slug'].'"><label class="selectit"><input type="checkbox" name="' . $field . '[]" value="' . $id . '-'. $child['slug'].'" /> ' . $child['name'] . '</label></li>' . "\n";
+					$tab_content .= '<li class="cas-'.$this->id.'-'.$id.'-'.$child['slug'].'"><label class="selectit"><input type="checkbox" name="cas_condition[' . $field . '][]" value="' . $id . '-'. $child['slug'].'" /> ' . $child['name'] . '</label></li>' . "\n";
 				}
 				$tab_content .= '</ul></li>';
 			}

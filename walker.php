@@ -68,7 +68,7 @@ class CAS_Walker_Checklist extends Walker {
 
 			$value = $term->ID;
 			$title = $term->post_title;
-			$name = 'post_types[]';
+			$name = 'cas_condition[post_types][]';
 			
 		} else {
 
@@ -83,7 +83,7 @@ class CAS_Walker_Checklist extends Walker {
 
 			$value = $term->$value_var;
 			$title = $term->name;
-			$name = 'tax_input['.$taxonomy->name.'][]';
+			$name = 'cas_condition[tax_input]['.$taxonomy->name.'][]';
 
 		}
 
