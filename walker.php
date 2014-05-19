@@ -87,7 +87,13 @@ class CAS_Walker_Checklist extends Walker {
 
 		}
 
-		$output .= "\n".'<li><label class="selectit"><input value="'.$value.'" type="checkbox" title="'.esc_attr( $title ).'" name="'.$name.'"'.checked(in_array($value,$selected_terms),true,false).'/> '.esc_html( $title ).'</label>';
+		if(is_array($selected_terms)) {
+			$selected = checked(in_array($value,$selected_terms),true,false);
+		} else {
+			$selected = checked($selected_terms,true,false);
+		}
+
+		$output .= "\n".'<li><label class="selectit"><input value="'.$value.'" type="checkbox" title="'.esc_attr( $title ).'" name="'.$name.'"'.$selected.'/> '.esc_html( $title ).'</label>';
 
 	}
 

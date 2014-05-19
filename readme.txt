@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=KPZHE
 Tags: sidebar, widget area, content aware, context aware, conditional, seo, dynamic, flexible, modular, bbpress, buddypress, qtranslate, polylang, transposh, wpml, woocommerce
 Requires at least: 3.3
 Tested up to: 3.9
-Stable tag: 2.1
+Stable tag: 2.2
 License: GPLv3
 
 Create and display sidebars according to the content being viewed.
@@ -18,15 +18,19 @@ Developed with speed and performance in mind and will add no extra database tabl
 
 > **New in version 2**
 >
+> Manage widgets for your created sidebars in the Theme Customizer.
+>
 > Condition groups let you display a sidebar together with both associated and distinct content.
 >
 > Improved GUI makes it even easier to select content and edit sidebars.
 >
 > Improved API for developers who want to extend and manipulate content support.
+>
 
 = Features =
 
-* Easy-to-use sidebar manager
+* Easy-to-use Sidebar Manager
+* Widget management integration in Theme Customizer (WP3.9+)
 * Display sidebars with all or specific:
 	* Singulars - e.g. posts or pages
 	* (Custom) Post Types
@@ -48,7 +52,7 @@ Developed with speed and performance in mind and will add no extra database tabl
 * Create complex content with nested sidebars
 * Private sidebars only for members
 * Schedule sidebars for later publishing
-* Template Tag to insert a sidebar anywhere in your theme
+* Template Tag to display content aware sidebars anywhere in your theme
 
 = Builtin Plugin Support =
 
@@ -125,6 +129,12 @@ As of version 2.0, several types of content have pagination in the sidebar edito
 
 For post types, only public, private and scheduled items are displayed.
 
+= What is the difference between handles Replace and Forced replace? =
+
+If two or more sidebars is set to replace the same host sidebar and their conditions overlap for some content, they will replace the host sidebar first and then gracefully merge with each other, so that they all are displayed with that content.
+
+A sidebar that has handle Forced replace will simply replace the host sidebar. If two sidebars have this handle for the same host sidebar and their conditions overlap for some content, only the sidebar that is loaded last will be displayed.
+
 = How do I use display_ca_sidebar( $args )? =
 
 This function is optional and handles all sidebars that are set to be handled manually. It can be inserted anywhere on your site in any quantity, either as it is, or with the following parameters:
@@ -180,6 +190,14 @@ The function accepts URL-style strings as parameters too, like the standard Word
 * Hello World
 
 == Changelog ==
+
+= 2.2 =
+
+* Added: sidebar displayed in theme customizer (wp3.4+)
+* Added: widget management integration in theme customizer (wp3.9+)
+* Added: handle for forced replace
+* Fixed: reduced database queries in sidebar editor
+* Fixed: disable all add to group buttons before creating first condition group
 
 = 2.1 =
 

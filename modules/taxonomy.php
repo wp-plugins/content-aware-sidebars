@@ -19,7 +19,7 @@ class CASModule_taxonomy extends CASModule {
 	 * Registered public taxonomies
 	 * @var array
 	 */
-	private $taxonomy_objects;
+	private $taxonomy_objects = array();
 
 	/**
 	 * Terms of a given singular
@@ -136,16 +136,20 @@ class CASModule_taxonomy extends CASModule {
 			'offset' => 0
 		));
 		extract($args);
-
-		$terms = get_terms($taxonomy, array(
-			'number' => $number,
-			'hide_empty' => false,
-			'include' => $include,
-			'offset' => ($offset*$number),
-			'orderby' => $orderby,
-			'order' => $order
-		));
 		$total_items = wp_count_terms($taxonomy,array('hide_empty'=>false));
+		if(!$total_items) {
+			$terms = array();
+		} else {
+			$terms = get_terms($taxonomy, array(
+				'number' => $number,
+				'hide_empty' => false,
+				'include' => $include,
+				'offset' => ($offset*$number),
+				'orderby' => $orderby,
+				'order' => $order
+			));	
+		}
+	
 		$per_page = $number;
 		$this->pagination = array(
 			'paged' => $offset+1,
@@ -171,9 +175,18 @@ class CASModule_taxonomy extends CASModule {
 	public function print_group_data($post_id) {
 		$ids = array_flip((array)get_post_custom_values(ContentAwareSidebars::PREFIX . $this->id, $post_id));
 
+		//Fetch all terms and group by tax to prevent lazy loading
+		$terms = wp_get_object_terms( $post_id, array_keys($this->_get_taxonomies()));
+		$terms_by_tax = array();
+		foreach($terms as $term) {
+			$terms_by_tax[$term->taxonomy][] = $term;
+		}
+
 		foreach($this->_get_taxonomies() as $taxonomy) {
 
-			$posts = wp_get_object_terms( $post_id, $taxonomy->name);
+			$posts = isset($terms_by_tax[$taxonomy->name]) ? $terms_by_tax[$taxonomy->name] : 0;
+
+			//$posts = wp_get_object_terms( $post_id, $taxonomy->name);
 			if($posts || isset($ids[$taxonomy->name]) || isset($ids[ContentAwareSidebars::PREFIX.'sub_' . $taxonomy->name])) {
 				echo '<div class="cas-condition cas-condition-'.$this->id.'-'.$taxonomy->name.'">';
 				echo '<strong>'.$taxonomy->label.'</strong>';
@@ -185,8 +198,7 @@ class CASModule_taxonomy extends CASModule {
 					echo '<li class=""><label><input type="checkbox" name="cas_condition[taxonomies][]" value="'.$taxonomy->name.'" checked="checked" /> '.$taxonomy->labels->all_items.'</label></li>' . "\n";
 				}
 				if($posts) {
-					$selected = wp_get_object_terms($post_id, $taxonomy->name, array('fields' => ($taxonomy->hierarchical ? 'ids' : 'slugs')));
-					echo $this->term_checklist($taxonomy, $posts, $selected);
+					echo $this->term_checklist($taxonomy, $posts);
 				}
 				echo '</ul>';
 				echo '</div>';	
@@ -237,12 +249,12 @@ class CASModule_taxonomy extends CASModule {
 				$tabs['popular'] = array(
 					'title' => __('Most Used'),
 					'status' => true,
-					'content' => $this->term_checklist($taxonomy, $popular_terms, array(), false)
+					'content' => $this->term_checklist($taxonomy, $popular_terms)
 				);
 				$tabs['all'] = array(
 					'title' => __('View All'),
 					'status' => false,
-					'content' => $this->term_checklist($taxonomy, $terms, array(), true)
+					'content' => $this->term_checklist($taxonomy, $terms, false, true)
 				);
 				if($this->searchable) {
 					$tabs['search'] = array(
@@ -276,7 +288,7 @@ class CASModule_taxonomy extends CASModule {
 	 * @param  array   $selected_ids 
 	 * @return void 
 	 */
-	private function term_checklist($taxonomy, $terms, $selected_terms = array(), $pagination = false) {
+	private function term_checklist($taxonomy, $terms, $selected_terms = false, $pagination = false) {
 
 		$walker = new CAS_Walker_Checklist('category',array('parent' => 'parent', 'id' => 'term_id'));
 

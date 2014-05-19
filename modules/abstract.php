@@ -76,8 +76,10 @@ abstract class CASModule {
 	 */
 	public function meta_box_content() {
 		global $post;
+
+		$data = $this->_get_content();
 		
-		if(!$this->_get_content())
+		if(!$data)
 			return;
 
 		echo '<li class="control-section accordion-section">';		
@@ -89,7 +91,7 @@ abstract class CASModule {
 		}
 
 		$content = "";
-		foreach($this->_get_content() as $id => $name) {
+		foreach($data as $id => $name) {
 			$content .= '<li class="cas-'.$this->id.'-'.$id.'"><label><input class="cas-' . $this->id . '" type="checkbox" name="cas_condition['.$this->id.'][]" title="'.$name.'" value="'.$id.'" /> '.$name.'</label></li>'."\n";
 		}
 

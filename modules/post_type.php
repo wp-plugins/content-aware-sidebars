@@ -68,7 +68,8 @@ class CASModule_post_type extends CASModule {
 			'orderby' => $orderby,
 			'order' => $order,
 			'paged' => $paged,
-			'ignore_sticky_posts' => true
+			'ignore_sticky_posts' => true,
+			'update_post_term_cache' => false
 		));
 		$this->pagination = array(
 			'paged' => $paged,
@@ -76,7 +77,7 @@ class CASModule_post_type extends CASModule {
 			'total_pages' => $query->max_num_pages,
 			'total_items' => $query->found_posts
 		);
-		wp_reset_postdata();
+		//wp_reset_postdata();
 		return $query->posts;
 	}
 

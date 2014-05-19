@@ -62,6 +62,7 @@ class CASModule_author extends CASModule {
 	protected function _get_content($args = array()) {
 
 		$args['number'] = 20;
+		$args['fields'] = array('ID','display_name');
 
 		$user_query = new WP_User_Query(  $args );
 
