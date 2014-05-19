@@ -1,57 +1,84 @@
-=== Plugin Name ===
+﻿=== Plugin Name ===
 Contributors: intoxstudio
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=KPZHE6A72LEN4&lc=US&item_name=WordPress%20Plugin%3a%20Content%20Aware%20Sidebars&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted
-Tags: sidebar, widget, content aware, seo, dynamic, flexible, modular, bbpress, qtranslate, transposh, wpml
-Requires at least: 3.1
-Tested up to: 3.4.2
-Stable tag: 1.1.1
-License: GPL2
+Tags: sidebar, widget area, content aware, context aware, conditional, seo, dynamic, flexible, modular, bbpress, buddypress, qtranslate, polylang, transposh, wpml, woocommerce
+Requires at least: 3.3
+Tested up to: 3.9
+Stable tag: 2.2
+License: GPLv3
 
 Create and display sidebars according to the content being viewed.
 
 == Description ==
 
-Manage an infinite number of sidebars. Make your WordPress site even more dynamic and boost SEO by controlling what content the sidebars should be displayed with. Creating flexible, dynamic sidebars has never been easier, and no code is needed at all as everything is easily done in the administration panel.
-No extra database tables or table columns will be added.
+Manage an infinite number of sidebars.
+Boost on-site SEO with better Calls to Action by controlling what content your sidebars should be displayed with.
+The sidebar manager makes it incredibly easy for anyone to create flexible, dynamic sidebars without the need of code.
+Developed with speed and performance in mind and will add no extra database tables or table columns.
+
+> **New in version 2**
+>
+> Manage widgets for your created sidebars in the Theme Customizer.
+>
+> Condition groups let you display a sidebar together with both associated and distinct content.
+>
+> Improved GUI makes it even easier to select content and edit sidebars.
+>
+> Improved API for developers who want to extend and manipulate content support.
+>
 
 = Features =
 
-* Easy-to-use sidebar manager
+* Easy-to-use Sidebar Manager
+* Widget management integration in Theme Customizer (WP3.9+)
 * Display sidebars with all or specific:
-	* Singulars - e.g. some posts or pages
+	* Singulars - e.g. posts or pages
 	* (Custom) Post Types
-	* Singulars with given (custom) taxonomies or taxonomy terms
+	* Singulars with given (custom) taxonomies or taxonomy terms - e.g. categories or tags
 	* Singulars by a given author
 	* Page Templates
+	* Post Formats
 	* Post Type Archives
 	* Author Archives
 	* (Custom) Taxonomy Archives or Taxonomy Term Archives
-	* Search results
+	* Search Results
 	* 404 Page
 	* Front Page
 	* bbPress User Profiles
-	* Languages (qTranslate, Transposh, WPML) 
+	* BuddyPress Member Pages
+	* Languages (qTranslate, Polylang, Transposh, WPML)
 	* **Any combination of the above**
-* Merge new sidebars with others, replace others or simply add them to your theme manually with a template tag
+* Sidebars can automatically merge with or replace others
 * Create complex content with nested sidebars
 * Private sidebars only for members
 * Schedule sidebars for later publishing
+* Template Tag to display content aware sidebars anywhere in your theme
 
 = Builtin Plugin Support =
 
 * bbPress (v2.0.2+)
+* BuddyPress (v1.6.2+)
 * qTranslate (v2.5.29+)
-* Transposh Translation Filter (v0.8.2+)
-* WPML Multilingual Blog/CMS (v2.4.3+)
+* Polylang (v0.9.6+)
+* Transposh Translation Filter (v0.9.5+)
+* [WPML Multilingual Blog/CMS (v2.4.3+) Tested and certified](http://wpml.org/plugin/content-aware-sidebars/)
 
 = Translations =
 
+* Chinese (zh_CN): [Joe Tze](http://tkjune.com)
 * Danish (da_DK): [Joachim Jensen](http://www.intox.dk/)
+* German (de_DE): Enno Wulff
+* Hungarian (hu_HU): Kis Lukács
 * Italian (it_IT): [Luciano Del Fico](http://www.myweb2.it/)
+* Latvian (lv_LV): [Haralds Gribusts](http://www.fireclubllatvia.lv/)
 * Lithuanian (lt_LT): [Vincent G](http://host1free.com/)
+* Slovak (sk_SK): [Branco](http://webhostinggeeks.com/)
+* Spanish (es_ES): [Analia Jensen](http://www.linkedin.com/in/analiajensen)
+
+Do you want to see your name here?
 
 If you have translated the plugin into your language or updated an existing translation, please send the .po and .mo files to jv[at]intox.dk.
-Download the latest [.pot file](http://plugins.svn.wordpress.org/content-aware-sidebars/trunk/lang/content-aware-sidebars.pot) or the [.po file in your language](http://plugins.svn.wordpress.org/content-aware-sidebars/trunk/lang/).
+Download the latest [template .po file](http://plugins.svn.wordpress.org/content-aware-sidebars/trunk/lang/content-aware-sidebars.po) or the [.po file in your language](http://plugins.svn.wordpress.org/content-aware-sidebars/trunk/lang/).
 
 = Contact =
 
@@ -66,7 +93,47 @@ www.intox.dk
 
 == Frequently Asked Questions ==
 
-If you have any questions not answered here, head to the [Support Forum](http://wordpress.org/tags/content-aware-sidebars?forum_id=10) or [contact me directly](http://www.intox.dk/kontakt/).
+If you have any questions not answered here, head over to the [Support Forum](http://wordpress.org/tags/content-aware-sidebars?forum_id=10).
+
+= Will Content Aware Sidebars work with my theme? =
+
+Yes.
+
+If the theme supports dynamic widget areas/sidebars, new sidebars can be created to replace or merge with those under certain conditions.
+If not, it is still possible to create sidebars and then use the function `display_ca_sidebar()` in the theme.
+
+= Will Content Aware Sidebars work with/support my plugin? =
+
+Work with? Yes.
+
+Support? Most likely.
+
+If the plugin uses public Custom Post Types or Custom Taxonomies, these will automatically be supported. Additionally, Content Aware Sidebars uses modules with WordPress Hooks that you can control and it features builtin support for some of the most popular plugins in the WordPress Repository.
+
+Content Aware Sidebars will never alter data used by your plugin.
+
+= My new sidebar is not displayed where I expect it to? =
+
+As of version 2.0, all types of content added to a condition group will be recognized as associated. The introduction of these groups has made it possible to create extremely focused and at the same time distinct conditions for when to display a sidebar.
+
+You can have one group with the conditions "All posts containing tag X" and another group with "All pages written by author Y". The sidebar will then be displayed with all posts containing tag X **or** all pages authored by Y.
+The conditions "All posts containing tag X and written by author Y" in one group are possible as well.
+
+The downside to this is that, currently, Content Aware Sidebars does not validate that the content you add to a group actually is associated. Creating a group with the conditions "All posts and Search Results" is possible, but it will never be satisfied because the types of content (post type and static page) are incompatible. Instead, these conditions should have their own group.
+
+Also note the exposure setting as it determines whether the selected content apply to archives, singulars or both.
+
+= All content items are not listed in the sidebar editor? =
+
+As of version 2.0, several types of content have pagination in the sidebar editor. Items can also be found with a search function.
+
+For post types, only public, private and scheduled items are displayed.
+
+= What is the difference between handles Replace and Forced replace? =
+
+If two or more sidebars is set to replace the same host sidebar and their conditions overlap for some content, they will replace the host sidebar first and then gracefully merge with each other, so that they all are displayed with that content.
+
+A sidebar that has handle Forced replace will simply replace the host sidebar. If two sidebars have this handle for the same host sidebar and their conditions overlap for some content, only the sidebar that is loaded last will be displayed.
 
 = How do I use display_ca_sidebar( $args )? =
 
@@ -78,19 +145,167 @@ This function is optional and handles all sidebars that are set to be handled ma
 'after' => '</ul></div>'
 );`
 
-
 If ID's of specific sidebars are passed to `include`, the function will only handle these. The visuals of the content aware sidebars can be modified by passing `before` and `after`.
 The function accepts URL-style strings as parameters too, like the standard WordPress Template Tags.
 
+= What are the minimum requirements? =
+
+* WordPress 3.3
+* PHP 5.2.4
+* MySQL 5
+
 == Screenshots ==
 
-1. Add a new Content Aware Sidebar to be displayed with all Posts that contains Very Categorized. It replaces `Main Sidebar`
+1. Add a new Content Aware Sidebar to be displayed with all Posts that contains the category Very Categorized. It replaces `Primary Sidebar`
 2. Simple overview of all created Content Aware Sidebars
 3. Add widgets to the newly added sidebar
-4. Viewing front page of site. `Main Sidebar` is displayed
-5. Viewing a Post that contains Very Categorized. `Very Categorized Posts` sidebar has replaced `Main Sidebar`
+4. Viewing front page of site. `Primary Sidebar` is displayed
+5. Viewing a Post that contains Very Categorized. `Very Categorized Posts` sidebar has replaced `Primary Sidebar`
+
+== Upgrade Notice ==
+
+= 2.0 = 
+
+* Content Aware Sidebars data in your database will be updated automatically. It is highly recommended to backup this data before updating the plugin.
+* Minimum WordPress version compatibility is now 3.3.
+
+= 1.1 =
+
+* Content Aware Sidebars data in your database will be updated automatically. Remember to backup this data before updating the plugin.
+
+= 0.8 =
+
+* Content Aware Sidebars data in your database will be updated automatically. Remember to backup this data before updating the plugin.
+
+= 0.5 =
+
+* Note that the plugin now requires at least WordPress 3.1 because of post type archives.
+
+= 0.4 =
+
+* All current custom sidebars have to be updated after plugin upgrade due to the new archive rules
+
+= 0.1 =
+
+* Hello World
 
 == Changelog ==
+
+= 2.2 =
+
+* Added: sidebar displayed in theme customizer (wp3.4+)
+* Added: widget management integration in theme customizer (wp3.9+)
+* Added: handle for forced replace
+* Fixed: reduced database queries in sidebar editor
+* Fixed: disable all add to group buttons before creating first condition group
+
+= 2.1 =
+
+* Added: empty condition groups cannot be saved
+* Added: confirmation on various condition group actions in sidebar editor
+* Added: improved ux design for sidebar editor
+* Added: chinese translation
+* Added: wp3.9 compatibility
+* Fixed: transposh compatibility now 0.9.5+
+* Fixed: removed warnings for auto-select new children functionality
+* Fixed: unprivileged users could in theory make, but never successfully execute, ajax requests for sidebar editor
+* Fixed: removed warning in widgets screen when handle is not set
+
+= 2.0.3 =
+
+* Fixed: taxonomy pagination in sidebar editor
+* Fixed: categories found in search can now be saved. props Xandoc
+
+= 2.0.2 =
+
+* Fixed: terms caused a sidebar to be displayed on all pages
+
+= 2.0.1 =
+
+* Fixed: admin menu would in some cases be overwritten by other plugins
+
+= 2.0 =
+
+* Added: condition groups
+* Added: gui and uxd overhaul for sidebar editor
+* Added: pagination for taxonomies in sidebar editor
+* Added: pagination for post types in sidebar editor
+* Added: mysql 5.6+ compatibility
+* Added: more efficient uninstall process
+* Added: easier for developers to extend and manipulate content support
+* Added: wp3.8 and mp6 compatibility
+* Added: german translation
+* Added: hungarian translation
+* Added: latvian translation
+* Added: spanish translation
+* Added: all conditions follow a strict logical "and" operator per group
+* Fixed: scripts and styles only loaded on sidebar administrative pages
+* Fixed: slovak translation now recognized
+* Fixed: paths to assets compatible with ssl
+* Removed: jquery ui autocomplete and accordion
+
+= 1.3.5 =
+
+* Fixed: menu would disappear in rare cases. Props grezvany13
+* Fixed: search function now searches in title and slug (not content) for post types
+* Added: search function displays at most 20 results instead of 10
+
+= 1.3.4 =
+
+* Fixed: cas_walker_checklist now follows walker declaration for wp3.6
+* Fixed: content list in accordion now not scrollable
+* Fixed: only terms from public taxonomies are included for content recognition.
+* Fixed: polylang fully supported again
+* Fixed: consistent css across wp versions
+* Removed: flushing rewrite rules on activation/deactivation is needless
+
+= 1.3.3 =
+
+* Added: html placeholder in search field
+* Added: items already displayed in edit page moved to top and checked when found in search
+* Fixed: private and scheduled singulars included in search results
+* Fixed: search results displayed in ascending order
+
+= 1.3.2 =
+
+* Added: items found in search now added to list directly on select
+* Fixed: some terms found by search could not be saved
+* Fixed: widget locations are saved again for each theme
+
+= 1.3.1 =
+
+* Added: authors and bbpress user profiles now searchable on edit page
+* Added: items found in search on edit page are prepended and checked by default
+* Added: updated edit page gui
+* Added: search field only visible when quantity is above 20
+* Fixed: select all checkbox will now disable all input in container
+* Fixed: host sidebar could sometimes not be found in sidebar list
+
+= 1.3 =
+
+* Added: post type posts and taxonomy terms now searchable on edit page
+* Added: sidebar handle and host shown on widgets page
+* Added: slovak translation
+* Fixed: sidebar meta boxes more robust to external modifications
+* Fixed: admin column headers more robust to external modifications
+* Fixed: sidebar menu now always hidden for users without right cap
+* Fixed: code optimization and refactor for performance
+* Removed: support for sidebar excerpt
+
+= 1.2 =
+
+* Added: polylang support
+* Added: buddypress support
+* Added: managing sidebars now requires edit_theme_options cap
+* Added: bbpress user profile has own rules instead of author rules
+* Added: filter for content recognition
+* Added: auto-select new children of selected taxonomy or post type ancestor
+
+= 1.1.2 =
+
+* Added: wordpress 3.5 compatibility 
+* Fixed: slight css changes on edit screen
+* Fixed: "show with all" checkbox toggles other checkboxes correctly
 
 = 1.1.1 =
 
@@ -224,26 +439,3 @@ The function accepts URL-style strings as parameters too, like the standard Word
 = 0.1 =
 
 * First stable release
-
-== Upgrade Notice ==
-
-= 1.1 =
-
-* Content Aware Sidebar data in your database will be updated automatically. Remember to backup this data before updating the plugin.
-
-= 0.8 =
-
-* Content Aware Sidebar data in your database will be updated automatically. Remember to backup this data before updating the plugin.
-
-= 0.5 =
-
-* Note that the plugin now requires at least WordPress 3.1 because of post type archives.
-
-= 0.4 =
-
-* All current custom sidebars have to be updated after plugin upgrade due to the new archive rules
-
-= 0.1 =
-
-* Hello World
- 

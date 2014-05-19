@@ -11,78 +11,274 @@
  */
 abstract class CASModule {
 	
+	/**
+	 * Module idenfification
+	 * @var string
+	 */
 	protected $id;
+
+	/**
+	 * Module name
+	 * @var string
+	 */
 	protected $name;
+
+	/**
+	 * Enable AJAX search in editor
+	 * @var boolean
+	 */
+	protected $searchable = false;
+
+	/**
+	 * Enable display for all content of type
+	 * @var boolean
+	 */
+	protected $type_display = false;
+
+	protected $pagination = array(
+		'per_page' => 20,
+		'total_pages' => 1,
+		'total_items' => 0 
+	);
+
+	protected $ajax = false;
 	
 	/**
 	 *
 	 * Constructor
 	 *
 	 */
-	public function __construct() {
-		$this->id = substr(get_class($this),strpos(get_class($this),'_')+1);
-	}
-	
-	public function meta_box_content() {
-		global $post;
-		
-		if(!$this->_get_content())
-			return;
-		
-		echo '<h4><a href="#">'.$this->name.'</a></h4>'."\n";
-		echo '<div class="cas-rule-content" id="cas-'.$this->id.'">';
-		$field = $this->id;
-		$meta = get_post_meta($post->ID, ContentAwareSidebars::prefix.$field, false);
-		$current = $meta != '' ? $meta : array();
-		?>
-		<p>
-			<label><input type="checkbox" name="<?php echo $field; ?>[]" value="<?php echo $field; ?>" <?php checked(in_array($field, $current), true, true); ?> /> <?php printf(__('Show with All %s','content-aware-sidebars'),$this->name); ?></label>
-		</p>
-		<div id="list-<?php echo $field; ?>" class="categorydiv" style="min-height:100%;">
-			<ul id="<?php echo $field; ?>-tabs" class="category-tabs">
-				<li class="tabs"><a href="#<?php echo $field; ?>-all" tabindex="3"><?php _e('View All'); ?></a></li>
-			</ul>		
-			<div id="<?php echo $field; ?>-all" class="tabs-panel"  style="min-height:100%;">
-				<ul id="authorlistchecklist" class="list:<?php echo $field; ?> categorychecklist form-no-clear">
-					<?php
-					foreach($this->_get_content() as $id => $name) {
-						echo '<li><label><input type="checkbox" name="'.$field.'[]" value="'.$id.'"'.checked(in_array($id,$current), true, false).' /> '.$name.'</label></li>'."\n";
-					}
-					?>
-				</ul>
-			</div>
-		</div>
-<?php	
-		echo '</div>';
-	}
-	
-	public function db_join() {
-		global $wpdb;
-		return "LEFT JOIN $wpdb->postmeta {$this->id} ON {$this->id}.post_id = posts.ID AND {$this->id}.meta_key = '".ContentAwareSidebars::prefix.$this->id."' ";
-	}
-	
-	public function exclude_sidebar($continue, $post, $prefix) {
-		if(!$continue) {
-			//print_r($this->id."<br />");
-			if (get_post_meta($post->ID, $prefix.$this->id, true) != '') {
-				//print_r($this->id." has<br />");
-				$continue = true;
+	public function __construct($id, $title, $ajax = false) {
+		$this->id = $id;
+		$this->name = $title;
+		$this->ajax = $ajax;
+
+		if(is_admin()) {
+
+			add_action('cas-module-admin-box',				array(&$this,'meta_box_content'));
+			add_action('cas-module-save-data',				array(&$this,'save_data'));
+
+			add_filter('cas-module-print-data',				array(&$this,'print_group_data'),10,2);
+
+			if($this->ajax) {
+				add_action('wp_ajax_cas-module-'.$this->id,	array(&$this,'ajax_get_content'));
 			}
 		}
-		return $continue;
 		
+		add_filter('cas-context-data',						array(&$this,'parse_context_data'));	
+
 	}
 	
-	public function db_where2() {
-		return "{$this->id}.meta_value IS NOT NULL";
+	/**
+	 * Default meta box content
+	 * @global object $post
+	 * @return void 
+	 */
+	public function meta_box_content() {
+		global $post;
+
+		$data = $this->_get_content();
+		
+		if(!$data)
+			return;
+
+		echo '<li class="control-section accordion-section">';		
+		echo '<h3 class="accordion-section-title" title="'.$this->name.'" tabindex="0">'.$this->name.'</h3>'."\n";
+		echo '<div class="accordion-section-content cas-rule-content" data-cas-module="'.$this->id.'" id="cas-'.$this->id.'">';
+
+		if($this->type_display) {
+			echo '<ul><li><label><input class="cas-chk-all" type="checkbox" name="cas_condition['.$this->id.'][]" value="'.$this->id.'" /> '.sprintf(__('Display with All %s',ContentAwareSidebars::DOMAIN),$this->name).'</label></li></ul>'."\n";
+		}
+
+		$content = "";
+		foreach($data as $id => $name) {
+			$content .= '<li class="cas-'.$this->id.'-'.$id.'"><label><input class="cas-' . $this->id . '" type="checkbox" name="cas_condition['.$this->id.'][]" title="'.$name.'" value="'.$id.'" /> '.$name.'</label></li>'."\n";
+		}
+
+		$tabs = array();
+		$tabs['all'] = array(
+			'title' => __('View All'),
+			'status' => true,
+			'content' => $content
+		);
+
+		if($this->searchable) {
+			$tabs['search'] = array(
+				'title' => __('Search'),
+				'status' => false,
+				'content' => '',
+				'content_before' => '<p><input class="cas-autocomplete-' . $this->id . ' cas-autocomplete quick-search" id="cas-autocomplete-' . $this->id . '" type="search" name="cas-autocomplete" value="" placeholder="'.__('Search').'" autocomplete="off" /><span class="spinner"></span></p>'
+			);
+		}
+
+		echo $this->create_tab_panels($this->id,$tabs);
+
+		echo '<p class="button-controls">';
+
+		echo '<span class="add-to-group"><input data-cas-condition="'.$this->id.'" data-cas-module="'.$this->id.'" type="button" name="cas-condition-add" class="js-cas-condition-add button" value="'.__('Add to Group',ContentAwareSidebars::DOMAIN).'"></span>';
+
+		echo '</p>';
+
+		echo '</div>';
+		echo '</li>';
 	}
 	
-	public function get_id() {
+	/**
+	 * Default query join
+	 * @global object $wpdb
+	 * @return string 
+	 */
+	public function db_join() {
+		global $wpdb;
+		return "LEFT JOIN $wpdb->postmeta {$this->id} ON {$this->id}.post_id = posts.ID AND {$this->id}.meta_key = '".ContentAwareSidebars::PREFIX.$this->id."' ";
+	}
+	
+	/**
+	 * Idenficiation getter
+	 * @return string 
+	 */
+	final public function get_id() {
 		return $this->id;
 	}
+
+	/**
+	 * Save data on POST
+	 * @param  int  $post_id
+	 * @return void
+	 */
+	public function save_data($post_id) {
+		$meta_key = ContentAwareSidebars::PREFIX . $this->id;
+		$new = isset($_POST['cas_condition'][$this->id]) ? $_POST['cas_condition'][$this->id] : '';
+		$old = array_flip(get_post_meta($post_id, $meta_key, false));
+
+		if (is_array($new)) {
+			//$new = array_unique($new);
+			// Skip existing data or insert new data
+			foreach ($new as $new_single) {
+				if (isset($old[$new_single])) {
+					unset($old[$new_single]);
+				} else {
+					add_post_meta($post_id, $meta_key, $new_single);
+				}
+			}
+			// Remove existing data that have not been skipped
+			foreach ($old as $old_key => $old_value) {
+				delete_post_meta($post_id, $meta_key, $old_key);
+			}
+		} elseif (!empty($old)) {
+			// Remove any old values when $new is empty
+			delete_post_meta($post_id, $meta_key);
+		}
+	}
+
+	/**
+	 * Print saved condition data for a group
+	 * @author Joachim Jensen <jv@intox.dk>
+	 * @since  2
+	 * @param  int    $post_id
+	 * @return void
+	 */
+	public function print_group_data($post_id) {
+		$data = get_post_custom_values(ContentAwareSidebars::PREFIX . $this->id, $post_id);
+		if($data) {
+			echo '<div class="cas-condition cas-condition-'.$this->id.'">';
+
+			echo '<strong>'.$this->name.'</strong>';
+			echo '<ul>';
+
+			if(in_array($this->id,$data)) {
+				echo '<li><label><input type="checkbox" name="cas_condition['.$this->id.'][]" value="'.$this->id.'" checked="checked" /> '.sprintf(__('All %s',ContentAwareSidebars::DOMAIN),$this->name).'</label></li>';
+			}
+
+			foreach($this->_get_content(array('include' => $data)) as $id => $name) {
+				echo '<li><label><input type="checkbox" name="cas_condition['.$this->id.'][]" value="'.$id.'" checked="checked" /> '.$name.'</label></li>'."\n";
+			}
+			echo '</ul>';
+			echo '</div>';	
+		}
+	}
 	
-	abstract protected function _get_content();
-	abstract public function is_content();
-	abstract public function db_where();
+	/**
+	 * Get content for sidebar edit screen
+	 * @return array 
+	 */
+	abstract protected function _get_content($args = array());
+
+	/**
+	 * Determine if current content is relevant
+	 * @return boolean 
+	 */
+	abstract public function in_context();
+
+	/**
+	 * Get data from current content
+	 * @author Joachim Jensen <jv@intox.dk>
+	 * @since  2.0
+	 * @return array|string
+	 */
+	abstract public function get_context_data();
+
+	/**
+	 * Parse context data together with 
+	 * table query
+	 */
+	final public function parse_context_data($data) {
+		if(apply_filters("cas-is-content-{$this->id}", $this->in_context())) {
+			$data['JOIN'][$this->id] = apply_filters("cas-db-join-{$this->id}", $this->db_join());
+
+			$context_data = $this->get_context_data();
+
+			if(is_array($context_data)) {
+				$context_data = "({$this->id}.meta_value IS NULL OR {$this->id}.meta_value IN ('".implode("','",$context_data) ."'))";
+			}
+			$data['WHERE'][$this->id] = apply_filters("cas-db-where-{$this->id}", $context_data);
+
+			
+		} else {
+			$data['EXCLUDE'][] = $this->id;
+		}
+		return $data;
+	}
+
+	/**
+	 * Create tab panels for administrative meta boxes
+	 * @author Joachim Jensen <jv@intox.dk>
+	 * @since  2
+	 * @param  string    $id
+	 * @param  array    $args
+	 * @return string
+	 */
+	final protected function create_tab_panels($id, $args) {
+		$return = '<div id="'.$id.'" class="posttypediv">';
+		
+		$content = '';
+		$tabs = '';
+		
+		$count = count($args);
+		foreach($args as $key => $tab) {
+			if($count > 1) {
+				$tabs .= '<li'.($tab['status'] ? ' class="tabs"' : '').'>';
+				$tabs .= '<a class="nav-tab-link" href="#tabs-panel-' . $id . '-'.$key.'" data-type="tabs-panel-' . $id . '-'.$key.'"> '.$tab['title'].' </a>';
+				$tabs .= '</li>';				
+			}
+			$content .= '<div id="tabs-panel-' . $id . '-'.$key.'" class="tabs-panel'.($tab['status'] ? ' tabs-panel-active' : ' tabs-panel-inactive').'">';
+			if(isset($tab['content_before'])) {
+				$content .= $tab['content_before'];
+			}
+			$content .= '<ul id="cas-list-' . $id . '" class="cas-contentlist categorychecklist form-no-clear">'."\n";
+			$content .= $tab['content'];
+			$content .= '</ul>'."\n";
+			$content .= '</div>';
+		}
+
+		if($tabs) {
+			$return .= '<ul class="category-tabs">'.$tabs.'</ul>';
+		}
+		$return .= $content;
+
+		$return .'</div>';
+
+		return $return;
+	}
 	
 }
