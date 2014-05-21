@@ -43,12 +43,12 @@ class CASModule_post_type extends CASModule {
 	 */
 	protected function _get_content($args = array()) {
 		$args = wp_parse_args($args, array(
-			'include' => '',
-			'post_type' => 'post',
-			'orderby' => 'date',
-			'order' => 'DESC',
-			'paged' => 1
-
+			'include'        => '',
+			'post_type'      => 'post',
+			'orderby'        => 'date',
+			'order'          => 'DESC',
+			'paged'          => 1,
+			'posts_per_page' => 20
 		));
 		extract($args);
 
@@ -60,20 +60,20 @@ class CASModule_post_type extends CASModule {
 
 		//WP3.1 does not support (array) as post_status
 		$query = new WP_Query(array(
-			'posts_per_page' => 20,
-			'post_type'	=> $post_type,
-			'post_status'	=> 'publish,private,future',
-			'post__in' => $include,
-			'exclude'	=> $exclude,
-			'orderby' => $orderby,
-			'order' => $order,
-			'paged' => $paged,
-			'ignore_sticky_posts' => true,
+			'posts_per_page'         => $posts_per_page,
+			'post_type'              => $post_type,
+			'post_status'            => 'publish,private,future',
+			'post__in'               => $include,
+			'exclude'                => $exclude,
+			'orderby'                => $orderby,
+			'order'                  => $order,
+			'paged'                  => $paged,
+			'ignore_sticky_posts'    => true,
 			'update_post_term_cache' => false
 		));
 		$this->pagination = array(
-			'paged' => $paged,
-			'per_page' => 20,
+			'paged'       => $paged,
+			'per_page'    => 20,
 			'total_pages' => $query->max_num_pages,
 			'total_items' => $query->found_posts
 		);
@@ -97,7 +97,7 @@ class CASModule_post_type extends CASModule {
 		if($ids) {
 			$lookup = array_flip((array)$ids);
 			foreach($this->_get_post_types() as $post_type) {
-				$posts =$this->_get_content(array('include' => $ids, 'posts_per_page' => -1, 'post_type' => $post_type->name));
+				$posts =$this->_get_content(array('include' => $ids, 'posts_per_page' => -1, 'post_type' => $post_type->name, 'orderby' => 'title', 'order' => 'ASC'));
 				if($posts || isset($lookup[$post_type->name]) || isset($lookup[ContentAwareSidebars::PREFIX.'sub_' . $post_type->name])) {
 					echo '<div class="cas-condition cas-condition-'.$this->id.'-'.$post_type->name.'">';
 					echo '<strong>'.$post_type->label.'</strong>';

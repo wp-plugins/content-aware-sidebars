@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=KPZHE
 Tags: sidebar, widget, widget area, content aware, context aware, conditional, seo, dynamic, bbpress, buddypress, qtranslate, polylang, transposh, wpml, woocommerce
 Requires at least: 3.3
 Tested up to: 3.9
-Stable tag: 2.2
+Stable tag: 2.2.1
 License: GPLv3
 
 Create and display sidebars according to the content being viewed.
@@ -190,6 +190,12 @@ The function accepts URL-style strings as parameters too, like the standard Word
 * Hello World
 
 == Changelog ==
+
+= 2.2.1 =
+
+* Fixed: taxonomy archive conditions did not work with other modules properly
+* Fixed: removed display limit of 20 for saved post type conditions
+* Fixed: saved post type conditions ordered alphabetically
 
 = 2.2 =
 

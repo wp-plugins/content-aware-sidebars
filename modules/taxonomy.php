@@ -74,7 +74,7 @@ class CASModule_taxonomy extends CASModule {
 	public function db_join() {
 		global $wpdb;
 		
-		$joins = "LEFT JOIN $wpdb->term_relationships term ON term.object_id = posts.ID ";
+		$joins  = "LEFT JOIN $wpdb->term_relationships term ON term.object_id = posts.ID ";
 		$joins .= "LEFT JOIN $wpdb->term_taxonomy taxonomy ON taxonomy.term_taxonomy_id = term.term_taxonomy_id ";
 		$joins .= "LEFT JOIN $wpdb->terms terms ON terms.term_id = taxonomy.term_id ";
 		$joins .= "LEFT JOIN $wpdb->postmeta taxonomies ON taxonomies.post_id = posts.ID AND taxonomies.meta_key = '".ContentAwareSidebars::PREFIX."taxonomies'";
@@ -110,8 +110,8 @@ class CASModule_taxonomy extends CASModule {
 			
 		}
 		$term = get_queried_object();
-		
-		return "((taxonomy.taxonomy = '".$term->taxonomy."' AND terms.slug = '".$term->slug."') OR taxonomies.meta_value = '".$term->taxonomy."')";
+
+		return "(terms.slug IS NULL OR (taxonomy.taxonomy = '".$term->taxonomy."' AND terms.slug = '".$term->slug."')) AND (taxonomies.meta_value IS NULL OR taxonomies.meta_value = '".$term->taxonomy."')";
 	}
 	
 	/**
@@ -128,12 +128,12 @@ class CASModule_taxonomy extends CASModule {
 	 */
 	protected function _get_content($args = array()) {
 		$args = wp_parse_args($args, array(
-			'include' => '',
+			'include'  => '',
 			'taxonomy' => 'category',
-			'number' => 20,
-			'orderby' => 'name',
-			'order' => 'ASC',
-			'offset' => 0
+			'number'   => 20,
+			'orderby'  => 'name',
+			'order'    => 'ASC',
+			'offset'   => 0
 		));
 		extract($args);
 		$total_items = wp_count_terms($taxonomy,array('hide_empty'=>false));
@@ -141,19 +141,19 @@ class CASModule_taxonomy extends CASModule {
 			$terms = array();
 		} else {
 			$terms = get_terms($taxonomy, array(
-				'number' => $number,
+				'number'     => $number,
 				'hide_empty' => false,
-				'include' => $include,
-				'offset' => ($offset*$number),
-				'orderby' => $orderby,
-				'order' => $order
+				'include'    => $include,
+				'offset'     => ($offset*$number),
+				'orderby'    => $orderby,
+				'order'      => $order
 			));	
 		}
 	
 		$per_page = $number;
 		$this->pagination = array(
-			'paged' => $offset+1,
-			'per_page' => $per_page,
+			'paged'       => $offset+1,
+			'per_page'    => $per_page,
 			'total_pages' => ceil($total_items/$per_page),
 			'total_items' => $total_items
 		);
@@ -169,7 +169,7 @@ class CASModule_taxonomy extends CASModule {
 				$this->taxonomy_objects[$tax->name] = $tax;
 			}
 		}
-		return $this->taxonomy_objects;		
+		return $this->taxonomy_objects;
 	}
 
 	public function print_group_data($post_id) {
@@ -247,13 +247,13 @@ class CASModule_taxonomy extends CASModule {
 
 				$tabs = array();
 				$tabs['popular'] = array(
-					'title' => __('Most Used'),
-					'status' => true,
+					'title'   => __('Most Used'),
+					'status'  => true,
 					'content' => $this->term_checklist($taxonomy, $popular_terms)
 				);
 				$tabs['all'] = array(
-					'title' => __('View All'),
-					'status' => false,
+					'title'   => __('View All'),
+					'status'  => false,
 					'content' => $this->term_checklist($taxonomy, $terms, false, true)
 				);
 				if($this->searchable) {
@@ -301,16 +301,16 @@ class CASModule_taxonomy extends CASModule {
 
 		if($pagination) {
 			$paginate = paginate_links(array(
-				'base'         => admin_url( 'admin-ajax.php').'%_%',
-				'format'       => '?paged=%#%',
-				'total'        => $this->pagination['total_pages'],
-				'current'      => $this->pagination['paged'],
-				'mid_size'     => 2,
-				'end_size'     => 1,
-				'prev_next'    => true,
-				'prev_text'    => 'prev',
-				'next_text'    => 'next',
-				'add_args'     => array('item_object'=>$taxonomy->name),
+				'base'      => admin_url( 'admin-ajax.php').'%_%',
+				'format'    => '?paged=%#%',
+				'total'     => $this->pagination['total_pages'],
+				'current'   => $this->pagination['paged'],
+				'mid_size'  => 2,
+				'end_size'  => 1,
+				'prev_next' => true,
+				'prev_text' => 'prev',
+				'next_text' => 'next',
+				'add_args'  => array('item_object'=>$taxonomy->name),
 			));
 			$return = $paginate.$return.$paginate;
 		}
@@ -350,21 +350,21 @@ class CASModule_taxonomy extends CASModule {
 		if ( preg_match('/cas-autocomplete-'.$this->id.'-([a-zA-Z_-]*\b)/', $_REQUEST['type'], $matches) ) {
 			if(($taxonomy = get_taxonomy( $matches[1] ))) {
 				$terms = get_terms($taxonomy->name, array(
-					'number' => 10,
+					'number'     => 10,
 					'hide_empty' => false,
-					'search' => $_REQUEST['q']
+					'search'     => $_REQUEST['q']
 				));
 				$name = 'cas_condition[tax_input]['.$matches[1].']';
 				$value = ($taxonomy->hierarchical ? 'term_id' : 'slug');
 				foreach($terms as $term) {
 					$suggestions[] = array(
-						'label' => $term->name,
-						'value' => $term->$value,
-						'id'	=> $term->$value,
+						'label'  => $term->name,
+						'value'  => $term->$value,
+						'id'     => $term->$value,
 						'module' => $this->id,
-						'name' => $name,
-						'id2' => $this->id.'-'.$term->taxonomy,
-						'elem' => $term->taxonomy.'-'.$term->term_id
+						'name'   => $name,
+						'id2'    => $this->id.'-'.$term->taxonomy,
+						'elem'   => $term->taxonomy.'-'.$term->term_id
 					);
 				}
 			}
@@ -430,20 +430,20 @@ class CASModule_taxonomy extends CASModule {
 			if($term->parent != '0') {	
 				// Get sidebars with term ancestor wanting to auto-select term
 				$query = new WP_Query(array(
-					'post_type'					=> ContentAwareSidebars::TYPE_CONDITION_GROUP,
-					'meta_query'				=> array(
+					'post_type'  => ContentAwareSidebars::TYPE_CONDITION_GROUP,
+					'meta_query' => array(
 						array(
-							'key'				=> ContentAwareSidebars::PREFIX . $this->id,
-							'value'				=> ContentAwareSidebars::PREFIX.'sub_' . $taxonomy,
-							'compare'			=> '='
+							'key'     => ContentAwareSidebars::PREFIX . $this->id,
+							'value'   => ContentAwareSidebars::PREFIX.'sub_' . $taxonomy,
+							'compare' => '='
 						)
 					),
 					'tax_query' => array(
 						array(
-							'taxonomy'			=> $taxonomy,
-							'field'				=> 'id',
-							'terms'				=> get_ancestors($term_id, $taxonomy),
-							'include_children'	=> false
+							'taxonomy'         => $taxonomy,
+							'field'            => 'id',
+							'terms'            => get_ancestors($term_id, $taxonomy),
+							'include_children' => false
 						)
 					)
 				));
