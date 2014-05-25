@@ -80,9 +80,9 @@ Do you want to see your name here?
 If you have translated the plugin into your language or updated an existing translation, please send the .po and .mo files to jv[at]intox.dk.
 Download the latest [template .po file](http://plugins.svn.wordpress.org/content-aware-sidebars/trunk/lang/content-aware-sidebars.po) or the [.po file in your language](http://plugins.svn.wordpress.org/content-aware-sidebars/trunk/lang/).
 
-= Contact =
+= More information =
 
-www.intox.dk
+[Documentation](http://www.intox.dk/en/plugin/content-aware-sidebars-en/)
 
 == Installation ==
 
@@ -93,66 +93,7 @@ www.intox.dk
 
 == Frequently Asked Questions ==
 
-If you have any questions not answered here, head over to the [Support Forum](http://wordpress.org/tags/content-aware-sidebars?forum_id=10).
-
-= Will Content Aware Sidebars work with my theme? =
-
-Yes.
-
-If the theme supports dynamic widget areas/sidebars, new sidebars can be created to replace or merge with those under certain conditions.
-If not, it is still possible to create sidebars and then use the function `display_ca_sidebar()` in the theme.
-
-= Will Content Aware Sidebars work with/support my plugin? =
-
-Work with? Yes.
-
-Support? Most likely.
-
-If the plugin uses public Custom Post Types or Custom Taxonomies, these will automatically be supported. Additionally, Content Aware Sidebars uses modules with WordPress Hooks that you can control and it features builtin support for some of the most popular plugins in the WordPress Repository.
-
-Content Aware Sidebars will never alter data used by your plugin.
-
-= My new sidebar is not displayed where I expect it to? =
-
-As of version 2.0, all types of content added to a condition group will be recognized as associated. The introduction of these groups has made it possible to create extremely focused and at the same time distinct conditions for when to display a sidebar.
-
-You can have one group with the conditions "All posts containing tag X" and another group with "All pages written by author Y". The sidebar will then be displayed with all posts containing tag X **or** all pages authored by Y.
-The conditions "All posts containing tag X and written by author Y" in one group are possible as well.
-
-The downside to this is that, currently, Content Aware Sidebars does not validate that the content you add to a group actually is associated. Creating a group with the conditions "All posts and Search Results" is possible, but it will never be satisfied because the types of content (post type and static page) are incompatible. Instead, these conditions should have their own group.
-
-Also note the exposure setting as it determines whether the selected content apply to archives, singulars or both.
-
-= All content items are not listed in the sidebar editor? =
-
-As of version 2.0, several types of content have pagination in the sidebar editor. Items can also be found with a search function.
-
-For post types, only public, private and scheduled items are displayed.
-
-= What is the difference between handles Replace and Forced replace? =
-
-If two or more sidebars is set to replace the same host sidebar and their conditions overlap for some content, they will replace the host sidebar first and then gracefully merge with each other, so that they all are displayed with that content.
-
-A sidebar that has handle Forced replace will simply replace the host sidebar. If two sidebars have this handle for the same host sidebar and their conditions overlap for some content, only the sidebar that is loaded last will be displayed.
-
-= How do I use display_ca_sidebar( $args )? =
-
-This function is optional and handles all sidebars that are set to be handled manually. It can be inserted anywhere on your site in any quantity, either as it is, or with the following parameters:
-
-`$args = array(
-'include' => '',
-'before' => '<div id="sidebar" class="widget-area"><ul class="xoxo">',
-'after' => '</ul></div>'
-);`
-
-If ID's of specific sidebars are passed to `include`, the function will only handle these. The visuals of the content aware sidebars can be modified by passing `before` and `after`.
-The function accepts URL-style strings as parameters too, like the standard WordPress Template Tags.
-
-= What are the minimum requirements? =
-
-* WordPress 3.3
-* PHP 5.2.4
-* MySQL 5
+[Click here to go to the official FAQ page](http://www.intox.dk/en/plugin/content-aware-sidebars-en/faq/).
 
 == Screenshots ==
 
