@@ -4,6 +4,12 @@
  * @author Joachim Jensen <jv@intox.dk>
  */
 
+if (!defined('ContentAwareSidebars::DB_VERSION')) {
+	header('Status: 403 Forbidden');
+	header('HTTP/1.1 403 Forbidden');
+	exit;
+}
+
 /**
  *
  * All modules should extend this one.
@@ -44,9 +50,11 @@ abstract class CASModule {
 	protected $ajax = false;
 	
 	/**
-	 *
 	 * Constructor
-	 *
+	 * @author  Joachim Jensen <jv@intox.dk>
+	 * @param   string    $id
+	 * @param   string    $title
+	 * @param   boolean   $ajax
 	 */
 	public function __construct($id, $title, $ajax = false) {
 		$this->id = $id;
@@ -59,6 +67,7 @@ abstract class CASModule {
 			add_action('cas-module-save-data',				array(&$this,'save_data'));
 
 			add_filter('cas-module-print-data',				array(&$this,'print_group_data'),10,2);
+			add_filter('manage_'.ContentAwareSidebars::TYPE_SIDEBAR.'_columns', array(&$this,'metabox_preferences'));
 
 			if($this->ajax) {
 				add_action('wp_ajax_cas-module-'.$this->id,	array(&$this,'ajax_get_content'));
@@ -67,6 +76,18 @@ abstract class CASModule {
 		
 		add_filter('cas-context-data',						array(&$this,'parse_context_data'));	
 
+	}
+
+	/**
+	 * Display module in Screen Settings
+	 * @author Joachim Jensen <jv@intox.dk>
+	 * @version 2.3
+	 * @param   array    $columns
+	 * @return  array
+	 */
+	public function metabox_preferences($columns) {
+		$columns['box-'.$this->id] = $this->name;
+		return $columns;
 	}
 	
 	/**
@@ -82,7 +103,11 @@ abstract class CASModule {
 		if(!$data)
 			return;
 
-		echo '<li class="control-section accordion-section">';		
+		$hidden_columns  = get_hidden_columns( ContentAwareSidebars::TYPE_SIDEBAR );
+		$id = 'box-'.$this->id;
+		$hidden = in_array($id, $hidden_columns) ? ' hide-if-js' : '';
+
+		echo '<li id="'.$id.'" class="manage-column column-box-'.$this->id.' control-section accordion-section'.$hidden.'">';
 		echo '<h3 class="accordion-section-title" title="'.$this->name.'" tabindex="0">'.$this->name.'</h3>'."\n";
 		echo '<div class="accordion-section-content cas-rule-content" data-cas-module="'.$this->id.'" id="cas-'.$this->id.'">';
 
@@ -125,7 +150,7 @@ abstract class CASModule {
 	
 	/**
 	 * Default query join
-	 * @global object $wpdb
+	 * @global wpdb   $wpdb
 	 * @return string 
 	 */
 	public function db_join() {
@@ -174,7 +199,7 @@ abstract class CASModule {
 	/**
 	 * Print saved condition data for a group
 	 * @author Joachim Jensen <jv@intox.dk>
-	 * @since  2
+	 * @since  2.0
 	 * @param  int    $post_id
 	 * @return void
 	 */
@@ -197,10 +222,12 @@ abstract class CASModule {
 			echo '</div>';	
 		}
 	}
-	
+
 	/**
 	 * Get content for sidebar edit screen
-	 * @return array 
+	 * @author  Joachim Jensen <jv@intox.dk>
+	 * @param   array     $args
+	 * @return  array
 	 */
 	abstract protected function _get_content($args = array());
 
@@ -219,8 +246,10 @@ abstract class CASModule {
 	abstract public function get_context_data();
 
 	/**
-	 * Parse context data together with 
-	 * table query
+	 * Parse context data to sql query
+	 * @author  Joachim Jensen <jv@intox.dk>
+	 * @param   array|string    $data
+	 * @return  array
 	 */
 	final public function parse_context_data($data) {
 		if(apply_filters("cas-is-content-{$this->id}", $this->in_context())) {
@@ -245,7 +274,7 @@ abstract class CASModule {
 	 * @author Joachim Jensen <jv@intox.dk>
 	 * @since  2
 	 * @param  string    $id
-	 * @param  array    $args
+	 * @param  array     $args
 	 * @return string
 	 */
 	final protected function create_tab_panels($id, $args) {

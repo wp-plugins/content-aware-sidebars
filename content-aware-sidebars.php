@@ -7,7 +7,7 @@
 Plugin Name: Content Aware Sidebars
 Plugin URI: http://www.intox.dk/
 Description: Manage and show sidebars according to the content being viewed.
-Version: 2.2.1
+Version: 2.3
 Author: Joachim Jensen, Intox Studio
 Author URI: http://www.intox.dk/
 Text Domain: content-aware-sidebars
@@ -31,6 +31,12 @@ License: GPLv3
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+if (!defined('ABSPATH')) {
+	header('Status: 403 Forbidden');
+	header('HTTP/1.1 403 Forbidden');
+	exit;
+}
+
 final class ContentAwareSidebars {
 	
 	/**
@@ -41,7 +47,7 @@ final class ContentAwareSidebars {
 	/**
 	 * Plugin version
 	 */
-	const PLUGIN_VERSION       = '2.2.1';
+	const PLUGIN_VERSION       = '2.3';
 
 	/**
 	 * Prefix for data (keys) stored in database
@@ -159,6 +165,7 @@ final class ContentAwareSidebars {
 	 * Widget management in Theme Customizer
 	 * expects this
 	 * @author Joachim Jensen <jv@intox.dk>
+	 * @global type $wp_customize
 	 * @since  2.2
 	 * @return void
 	 */
@@ -366,21 +373,20 @@ final class ContentAwareSidebars {
 	 * @return array           
 	 */
 	public function sidebar_updated_messages( $messages ) {
+		$manage_widgets = sprintf(' <a href="%1$s">%2$s</a>','widgets.php',__('Manage widgets',self::DOMAIN));
 		$messages[self::TYPE_SIDEBAR] = array(
 			0 => '',
-			1 => __('Sidebar updated.',self::DOMAIN).sprintf(' <a href="%1$s">%2$s</a>','widgets.php',__('Manage widgets',self::DOMAIN)),
+			1 => __('Sidebar updated.',self::DOMAIN).$manage_widgets,
 			2 => '',
 			3 => '',
 			4 => __('Sidebar updated.',self::DOMAIN),
 			5 => '',
-			6 => __('Sidebar published.',self::DOMAIN).sprintf(' <a href="%1$s">%2$s</a>','widgets.php',__('Manage widgets',self::DOMAIN)),
+			6 => __('Sidebar published.',self::DOMAIN).$manage_widgets,
 			7 => __('Sidebar saved.',self::DOMAIN),
-			8 => __('Sidebar submitted.',self::DOMAIN).sprintf(' <a href="%1$s">%2$s</a>','widgets.php',__('Manage widgets',self::DOMAIN)),
-			9 => sprintf(__('Sidebar scheduled for: <strong>%1$s</strong>.',self::DOMAIN).' <a href="%2$s">%3$s</a>',
+			8 => __('Sidebar submitted.',self::DOMAIN).$manage_widgets,
+			9 => sprintf(__('Sidebar scheduled for: <strong>%1$s</strong>.',self::DOMAIN),
 				// translators: Publish box date format, see http://php.net/date
-				date_i18n(__('M j, Y @ G:i'),strtotime(get_the_ID())),
-				'widgets.php',
-				__('Manage widgets',self::DOMAIN)),
+				date_i18n(__('M j, Y @ G:i'),strtotime(get_the_ID()))).$manage_widgets,
 			10 => __('Sidebar draft updated.',self::DOMAIN),
 		);
 		return $messages;
@@ -442,7 +448,7 @@ final class ContentAwareSidebars {
 			));
 		}
 	}
-	
+
 	/**
 	 * Add admin column headers
 	 * @param  array $columns 
@@ -453,9 +459,9 @@ final class ContentAwareSidebars {
 		return array(
 			'cb'        => $columns['cb'],
 			'title'     => $columns['title'],
-			'exposure'  => __('Exposure', self::DOMAIN),
 			'handle'    => _x('Handle','option', self::DOMAIN),
 			'merge-pos' => __('Merge position', self::DOMAIN),
+			'widgets'   => __('Widgets'),
 			'date'      => $columns['date']
 		);
 	}
@@ -468,7 +474,6 @@ final class ContentAwareSidebars {
 	public function admin_column_sortable_headers($columns) {
 		return array_merge(
 			array(
-				'exposure'  => 'exposure',
 				'handle'    => 'handle',
 				'merge-pos' => 'merge-pos'
 			), $columns
@@ -501,25 +506,31 @@ final class ContentAwareSidebars {
 		if (get_post_type($post_id) != self::TYPE_SIDEBAR)
 			return;
 
+		if($column_name == 'widgets') {
+			$sidebars_widgets = wp_get_sidebars_widgets();
+			echo (isset($sidebars_widgets[self::SIDEBAR_PREFIX . $post_id]) ? count($sidebars_widgets[self::SIDEBAR_PREFIX . $post_id]) : 0);
+			return;
+		} 
+
 		// Load metadata
 		if (!$this->metadata)
 			$this->_init_metadata();
 
 		$current = get_post_meta($post_id, self::PREFIX . $column_name, true);
-		$current_from_list = "";
+		$retval = "";
 
 		if(isset($this->metadata[$column_name]['list'][$current])) {
 
-			$current_from_list = $this->metadata[$column_name]['list'][$current];
+			$retval = $this->metadata[$column_name]['list'][$current];
 			
 			if ($column_name == 'handle' && $current != 2) {
 				$host = get_post_meta($post_id, self::PREFIX . 'host', true);
-				$current_from_list .= ": " . (isset($this->metadata['host']['list'][$host]) ? $this->metadata['host']['list'][$host] : '<span style="color:red;">' . __('Please update Host Sidebar', self::DOMAIN) . '</span>');
+				$retval .= ": " . (isset($this->metadata['host']['list'][$host]) ? $this->metadata['host']['list'][$host] : '<span style="color:red;">' . __('Please update Host Sidebar', self::DOMAIN) . '</span>');
 			}
 
 		}
 		
-		echo $current_from_list;
+		echo $retval;
 	}
 	
 	/**
@@ -809,7 +820,6 @@ final class ContentAwareSidebars {
 			'cas-rules'     => 'cas-rules',
 			'cas-options'   => 'cas-options',
 			'submitdiv'     => 'submitdiv',
-			'pageparentdiv' => 'pageparentdiv',
 			'slugdiv'       => 'slugdiv'
 		);
 
@@ -878,6 +888,20 @@ final class ContentAwareSidebars {
 				$box['priority']
 			);
 		}
+
+		$screen = get_current_screen();
+
+		$screen->add_help_tab( array( 
+			'id'      => self::PREFIX.'help',
+			'title'   => __('Condition Groups',self::DOMAIN),
+			'content' => '<p>'.__('Each created condition group describe some specific content (conditions) that the current sidebar should be displayed with.',self::DOMAIN).'</p>'.
+				'<p>'.__('Content added to a condition group uses logical conjunction, while condition groups themselves use logical disjunction. '.
+				'This means that content added to a group should be associated, as they are treated as such, and that the groups do not interfere with each other. Thus it is possible to have both extremely focused and at the same time distinct conditions.',self::DOMAIN).'</p>',
+		) );
+		$screen->set_help_sidebar( '<h4>'.__('More Information').'</h4>'.
+			'<p><a href="http://www.intox.dk/en/plugin/content-aware-sidebars-en/faq/" target="_blank">'.__('FAQ',self::DOMAIN).'</a></p>'.
+			'<p><a href="http://wordpress.org/support/plugin/content-aware-sidebars" target="_blank">'.__('Get Support',self::DOMAIN).'</a></p>'
+		);
 
 	}
 	
@@ -1126,7 +1150,9 @@ final class ContentAwareSidebars {
 
 		foreach ($columns as $key => $value) {
 
-			echo '<span>' . $this->metadata[is_numeric($key) ? $value : $key]['name'] . ':';
+			$id = is_numeric($key) ? $value : $key;
+
+			echo '<span class="'.$id.'"><strong>' . $this->metadata[$id]['name'] . '</strong>';
 			echo '<p>';
 			$values = explode(',', $value);
 			foreach ($values as $val) {
@@ -1134,6 +1160,13 @@ final class ContentAwareSidebars {
 			}
 			echo '</p></span>';
 		}
+
+		global $post; 
+
+		echo '<span>';
+		echo '<strong>'.__('Order').'</strong>';
+		echo '<p><label for="menu_order" class="screen-reader-text">'.__('Order').'</label>';
+		echo '<input type="number" value="'.$post->menu_order.'" id="menu_order" size="4" name="menu_order"></p></span>';
 	}
 		
 	/**

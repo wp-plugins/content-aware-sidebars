@@ -4,6 +4,12 @@
  * @author Joachim Jensen <jv@intox.dk>
  */
 
+if (!defined('ContentAwareSidebars::DB_VERSION')) {
+	header('Status: 403 Forbidden');
+	header('HTTP/1.1 403 Forbidden');
+	exit;
+}
+
 /**
  *
  * Polylang Module
@@ -39,24 +45,30 @@ class CASModule_polylang extends CASModule {
 	 * @return array
 	 */
 	public function get_context_data() {
-		return array(
-			$this->id,
-			pll_current_language()
-		);
+		$data = array($this->id);
+		if(function_exists('pll_current_language')) {
+			$data[] = pll_current_language();
+		}
+		return $data;
 	}
 
 	/**
 	 * Get languages
 	 * @global object $polylang
+	 * @param  array  $args
 	 * @return array 
 	 */
 	protected function _get_content($args = array()) {
 		global $polylang;
+
 		$langs = array();
 
-		foreach($polylang->get_languages_list() as $lng) {
-			$langs[$lng->slug] = $lng->name;	
+		if(isset($polylang->model) && method_exists($polylang->model, 'get_languages_list')) {
+			foreach($polylang->model->get_languages_list(array('fields'=>false)) as $lng) {
+				$langs[$lng->slug] = $lng->name;
+			}
 		}
+
 		if(isset($args['include'])) {
 			$langs = array_intersect_key($langs,array_flip($args['include']));
 		}
@@ -72,5 +84,5 @@ class CASModule_polylang extends CASModule {
 		unset($post_types[ContentAwareSidebars::TYPE_SIDEBAR]);
 		return $post_types;
 	}
-	
+
 }
