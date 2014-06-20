@@ -7,6 +7,16 @@
 	background:transparent url('../img/icon-32.png') no-repeat !important;
 }
 
+.fixed .column-widgets {
+	width:10%;
+}
+.fixed .column-merge-pos {
+	width:20%;
+}
+.fixed .column-handle {
+	width:20%;
+}
+
 #cas-rules > .handlediv, #cas-rules > .hndle {
 	display:none;
 }

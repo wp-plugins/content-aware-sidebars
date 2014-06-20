@@ -4,6 +4,12 @@
  * @author Joachim Jensen <jv@intox.dk>
  */
 
+if (!defined('ContentAwareSidebars::DB_VERSION')) {
+	header('Status: 403 Forbidden');
+	header('HTTP/1.1 403 Forbidden');
+	exit;
+}
+
 /**
  *
  * Post Type Module
@@ -36,9 +42,24 @@ class CASModule_post_type extends CASModule {
 		}
 
 	}
-	
+
 	/**
-	 * Get registered post types
+	 * Display module in Screen Settings
+	 * @author  Joachim Jensen <jv@intox.dk>
+	 * @version 2.3
+	 * @param   array    $columns
+	 * @return  array
+	 */
+	public function metabox_preferences($columns) {
+		foreach ($this->_get_post_types() as $post_type) {
+			$columns['box-'.$this->id.'-'.$post_type->name] = $post_type->label;
+		}
+		return $columns;
+	}
+
+	/**
+	 * Get content for sidebar editor
+	 * @param  array $args
 	 * @return array 
 	 */
 	protected function _get_content($args = array()) {
@@ -81,6 +102,11 @@ class CASModule_post_type extends CASModule {
 		return $query->posts;
 	}
 
+	/**
+	 * Get registered public post types
+	 * @author  Joachim Jensen <jv@intox.dk>
+	 * @return  array
+	 */
 	protected function _get_post_types() {
 		if (empty($this->post_type_objects)) {
 			// List public post types
@@ -91,6 +117,13 @@ class CASModule_post_type extends CASModule {
 		return $this->post_type_objects;		
 	}
 
+	/**
+	 * Print saved condition data for a group
+	 * @author  Joachim Jensen <jv@intox.dk>
+	 * @version 2.0
+	 * @param   int    $post_id
+	 * @return  void
+	 */
 	public function print_group_data($post_id) {
 		$ids = get_post_custom_values(ContentAwareSidebars::PREFIX . $this->id, $post_id);
 		
@@ -151,16 +184,20 @@ class CASModule_post_type extends CASModule {
 
 	/**
 	 * Meta box content
-	 * @global object $post
-	 * @global object $wpdb
+	 * @global WP_Post $post
 	 * @return void 
 	 */
 	public function meta_box_content() {
 		global $post;
 
+		$hidden_columns  = get_hidden_columns( ContentAwareSidebars::TYPE_SIDEBAR );
+
 		foreach ($this->_get_post_types() as $post_type) {
 
-			echo '<li class="control-section accordion-section">';		
+			$id = 'box-'.$this->id.'-'.$post_type->name;
+			$hidden = in_array($id, $hidden_columns) ? ' hide-if-js' : '';
+
+			echo '<li id="'.$id.'" class="manage-column column-box-'.$this->id.'-'. $post_type->name.' control-section accordion-section'.$hidden.'">';
 			echo '<h3 class="accordion-section-title" title="'.$post_type->label.'" tabindex="0">'.$post_type->label.'</h3>'."\n";
 			echo '<div class="accordion-section-content cas-rule-content" data-cas-module="'.$this->id.'" id="cas-' . $this->id . '-' . $post_type->name . '">'."\n";
 
@@ -348,9 +385,9 @@ class CASModule_post_type extends CASModule {
 	
 	/**
 	 * Automatically select child of selected parent
-	 * @param  string $new_status 
-	 * @param  string $old_status 
-	 * @param  object $post       
+	 * @param  string  $new_status 
+	 * @param  string  $old_status 
+	 * @param  WP_Post $post       
 	 * @return void 
 	 */
 	public function post_ancestry_check($new_status, $old_status, $post) {

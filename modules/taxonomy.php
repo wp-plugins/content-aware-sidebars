@@ -4,6 +4,12 @@
  * @author Joachim Jensen <jv@intox.dk>
  */
 
+if (!defined('ContentAwareSidebars::DB_VERSION')) {
+	header('Status: 403 Forbidden');
+	header('HTTP/1.1 403 Forbidden');
+	exit;
+}
+
 /**
  *
  * Taxonomy Module
@@ -41,6 +47,20 @@ class CASModule_taxonomy extends CASModule {
 			add_action('wp_ajax_cas-autocomplete-'.$this->id, array(&$this,'ajax_content_search'));
 		}
 		
+	}
+
+	/**
+	 * Display module in Screen Settings
+	 * @author  Joachim Jensen <jv@intox.dk>
+	 * @version 2.3
+	 * @param   array    $columns
+	 * @return  array
+	 */
+	public function metabox_preferences($columns) {
+		foreach ($this->_get_taxonomies() as $tax) {
+			$columns['box-'.$this->id.'-'.$tax->name] = $tax->label;
+		}
+		return $columns;
 	}
 	
 	/**
@@ -123,7 +143,8 @@ class CASModule_taxonomy extends CASModule {
 	}
 
 	/**
-	 * Get registered taxonomies
+	 * Get content for sidebar editor
+	 * @param  array $args
 	 * @return array 
 	 */
 	protected function _get_content($args = array()) {
@@ -162,6 +183,11 @@ class CASModule_taxonomy extends CASModule {
 		return $terms;
 	}
 
+	/**
+	 * Get registered public taxonomies
+	 * @author  Joachim Jensen <jv@intox.dk>
+	 * @return  array
+	 */
 	protected function _get_taxonomies() {
 		// List public taxonomies
 		if (empty($this->taxonomy_objects)) {
@@ -172,6 +198,12 @@ class CASModule_taxonomy extends CASModule {
 		return $this->taxonomy_objects;
 	}
 
+	/**
+	 * Print condition data for a group
+	 * @author  Joachim Jensen <jv@intox.dk>
+	 * @param   int    $post_id
+	 * @return  void
+	 */
 	public function print_group_data($post_id) {
 		$ids = array_flip((array)get_post_custom_values(ContentAwareSidebars::PREFIX . $this->id, $post_id));
 
@@ -215,9 +247,14 @@ class CASModule_taxonomy extends CASModule {
 	public function meta_box_content() {
 		global $post;
 
+		$hidden_columns  = get_hidden_columns( ContentAwareSidebars::TYPE_SIDEBAR );
+
 		foreach ($this->_get_taxonomies() as $taxonomy) {
 
-			echo '<li class="control-section accordion-section">';		
+			$id = 'box-'.$this->id.'-'.$taxonomy->name;
+			$hidden = in_array($id, $hidden_columns) ? ' hide-if-js' : '';
+
+			echo '<li id="'.$id.'" class="manage-column column-'.$id.' control-section accordion-section'.$hidden.'">';
 			echo '<h3 class="accordion-section-title" title="'.$taxonomy->label.'" tabindex="0">'.$taxonomy->label.'</h3>'."\n";
 			echo '<div class="accordion-section-content cas-rule-content" data-cas-module="'.$this->id.'" id="cas-' . $this->id . '-' . $taxonomy->name . '">';
 
@@ -374,6 +411,12 @@ class CASModule_taxonomy extends CASModule {
 		die();
 	}
 
+	/**
+	 * Save data on POST
+	 * @author  Joachim Jensen <jv@intox.dk>
+	 * @param   int    $post_id
+	 * @return  void
+	 */
 	public function save_data($post_id) {
 		parent::save_data($post_id);
 

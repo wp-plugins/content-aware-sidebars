@@ -75,18 +75,13 @@
 		 */
 		this.setCurrent = function(obj) {
 			var retval = true;
-			
-			if(obj.length == 0) {
-				retval =  false;
-			} else if(this.getCurrent()) {
+			if(this.getCurrent()) {
 				retval = this.resetCurrent();
 			}
-
 			if(retval) {
 				this._currentGroup = obj;
 				this._setActive(true);
 			}
-
 			return retval;
 		}
 
@@ -267,12 +262,7 @@
 
 		init: function() {
 
-			var new_current_group = $('.cas-group-single',this.groups.getGroupContainer()).first()
-			if(new_current_group.length == 0) {
-				$('.js-cas-condition-add').attr('disabled',true);
-			} else {
-				this.groups.setCurrent(new_current_group);
-			}
+			this.groups.setCurrent($('.cas-group-single',this.groups.getGroupContainer()).first());
 
 			this.addPaginationListener();	
 			this.addTabListener();
@@ -434,7 +424,6 @@
 						});
 
 						if(data.new_post_id) {
-							console.log("in");
 							cas_admin.groups.getCurrent().append('<input type="hidden" class="cas_group_id" name="cas_group_id" value="'+data.new_post_id+'" />');
 						}
 						button.attr('disabled',false);
@@ -497,7 +486,7 @@
 			var class_active = 'tabs-panel-active',
 			class_inactive = 'tabs-panel-inactive';
 
-			$("#cas-accordion .accordion-section").first().addClass('open');
+			$("#cas-accordion .accordion-section:not(.hide-if-js)").first().addClass('open');
 
 			$('.nav-tab-link').on('click', function(e) {
 				e.preventDefault();
@@ -554,6 +543,7 @@
 		addHandleListener: function() {
 			var host = $("select[name='host']");
 			var code = $('<code>display_ca_sidebar();</code>');
+			var merge_pos = $('span.merge-pos');
 			host.parent().append(code);
 			$("select[name='handle']").change(function(){
 				var handle = $(this);
@@ -564,7 +554,12 @@
 				} else {
 					host.show();
 					code.hide();
-				}	
+				}
+				if(handle.val() == 3) {
+					merge_pos.hide();
+				} else {
+					merge_pos.show();
+				}
 			}).change(); //fire change event on page load
 		},
 		/**
