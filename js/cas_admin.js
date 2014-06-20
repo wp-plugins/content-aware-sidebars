@@ -75,7 +75,10 @@
 		 */
 		this.setCurrent = function(obj) {
 			var retval = true;
-			if(this.getCurrent()) {
+
+			if(obj.length == 0) {
+				retval =  false;
+			} else if(this.getCurrent()) { 
 				retval = this.resetCurrent();
 			}
 			if(retval) {
@@ -262,7 +265,12 @@
 
 		init: function() {
 
-			this.groups.setCurrent($('.cas-group-single',this.groups.getGroupContainer()).first());
+			var new_current_group = $('.cas-group-single',this.groups.getGroupContainer()).first();
+			if(new_current_group.length == 0) {
+				$('.js-cas-condition-add').attr('disabled',true);
+			} else {
+				this.groups.setCurrent(new_current_group);
+			}
 
 			this.addPaginationListener();	
 			this.addTabListener();
