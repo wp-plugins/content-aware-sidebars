@@ -3,8 +3,8 @@ Contributors: intoxstudio
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=KPZHE6A72LEN4&lc=US&item_name=WordPress%20Plugin%3a%20Content%20Aware%20Sidebars&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted
 Tags: sidebar, widget, widget area, content aware, context aware, conditional, seo, dynamic, bbpress, buddypress, qtranslate, polylang, transposh, wpml, woocommerce
 Requires at least: 3.3
-Tested up to: 3.9
-Stable tag: 2.2.1
+Tested up to: 4.0
+Stable tag: 2.4
 License: GPLv3
 
 Create and display sidebars according to the content being viewed.
@@ -15,17 +15,6 @@ Manage an infinite number of sidebars.
 Boost on-site SEO with better Calls to Action by controlling what content your sidebars should be displayed with.
 The sidebar manager makes it incredibly easy for anyone to create flexible, dynamic sidebars without the need of code.
 Developed with speed and performance in mind and will add no extra database tables or table columns.
-
-> **New in version 2**
->
-> Manage widgets for your created sidebars in the Theme Customizer.
->
-> Condition groups let you display a sidebar together with both associated and distinct content.
->
-> Improved GUI makes it even easier to select content and edit sidebars.
->
-> Improved API for developers who want to extend and manipulate content support.
->
 
 = Features =
 
@@ -54,12 +43,23 @@ Developed with speed and performance in mind and will add no extra database tabl
 * Schedule sidebars for later publishing
 * Template Tag to display content aware sidebars anywhere in your theme
 
+> **New in version 2**
+>
+> Manage widgets for your created sidebars in the Theme Customizer.
+>
+> Condition groups let you display a sidebar together with both associated and distinct content.
+>
+> Improved GUI makes it even easier to select content and edit sidebars.
+>
+> Improved API for developers who want to extend and manipulate content support.
+>
+
 = Builtin Plugin Support =
 
 * bbPress (v2.0.2+)
 * BuddyPress (v1.6.2+)
 * qTranslate (v2.5.29+)
-* Polylang (v0.9.6+)
+* Polylang (v1.2+)
 * Transposh Translation Filter (v0.9.5+)
 * [WPML Multilingual Blog/CMS (v2.4.3+) Tested and certified](http://wpml.org/plugin/content-aware-sidebars/)
 
@@ -70,10 +70,11 @@ Developed with speed and performance in mind and will add no extra database tabl
 * German (de_DE): Enno Wulff
 * Hungarian (hu_HU): Kis Lukács
 * Italian (it_IT): [Luciano Del Fico](http://www.myweb2.it/)
-* Latvian (lv_LV): [Haralds Gribusts](http://www.fireclubllatvia.lv/)
-* Lithuanian (lt_LT): [Vincent G](http://host1free.com/)
-* Slovak (sk_SK): [Branco](http://webhostinggeeks.com/)
+* Latvian (lv_LV): Haralds Gribusts
+* Lithuanian (lt_LT): Vincent G
+* Slovak (sk_SK): Branco
 * Spanish (es_ES): [Analia Jensen](http://www.linkedin.com/in/analiajensen)
+* Ukranian (uk_UA): [Michael Yunat](http://getvoip.com)
 
 Do you want to see your name here?
 
@@ -83,6 +84,7 @@ Download the latest [template .po file](http://plugins.svn.wordpress.org/content
 = More information =
 
 [Documentation](http://www.intox.dk/en/plugin/content-aware-sidebars-en/)
+[Follow development on Github](https://github.com/intoxstudio/content-aware-sidebars)
 
 == Installation ==
 
@@ -93,7 +95,7 @@ Download the latest [template .po file](http://plugins.svn.wordpress.org/content
 
 == Frequently Asked Questions ==
 
-[Click here to go to the official FAQ page](http://www.intox.dk/en/plugin/content-aware-sidebars-en/faq/).
+[Click here to go to the official FAQ page for Content Aware Sidebars](http://www.intox.dk/en/plugin/content-aware-sidebars-en/faq/).
 
 == Screenshots ==
 
@@ -131,6 +133,29 @@ Download the latest [template .po file](http://plugins.svn.wordpress.org/content
 * Hello World
 
 == Changelog ==
+
+= 2.4 =
+
+* Added: compatibility with wp4.0
+* Added: better ux design for condition groups
+* Added: better ux design for sidebars in widgets screen, including an edit link
+* Added: dashicon for admin menu (wp3.8+)
+* Fixed: using some newer wordpress actions and filters for admin columns
+* Fixed: sidebars could be fetched and prepared in administration
+
+= 2.3 =
+
+* Added: ukranian translation
+* Added: error if trying to access php files directly
+* Added: bbpress, bp_member, polylang, qtranslate, transposh and wpml modules are more robust
+* Added: content rule boxes can be hidden in screen options in sidebar editor
+* Added: help tab in sidebar editor
+* Added: widgets count column in sidebar overview
+* Added: menu order moved to options meta box in sidebar editor
+* Fixed: merge position option hidden on forced replace handle
+* Fixed: polylang compatibility now 1.2+
+* Fixed: width of columns in sidebar overview
+* Removed: exposure column in sidebar overview
 
 = 2.2.1 =
 
