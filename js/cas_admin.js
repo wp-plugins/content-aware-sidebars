@@ -75,18 +75,16 @@
 		 */
 		this.setCurrent = function(obj) {
 			var retval = true;
-			
+
 			if(obj.length == 0) {
 				retval =  false;
-			} else if(this.getCurrent()) {
+			} else if(this.getCurrent()) { 
 				retval = this.resetCurrent();
 			}
-
 			if(retval) {
 				this._currentGroup = obj;
 				this._setActive(true);
 			}
-
 			return retval;
 		}
 
@@ -133,6 +131,8 @@
 								$(this).remove();
 							}
 						});
+						//Show all again
+						$('li').fadeIn('slow');
 						this._setActive(false);
 						this._currentGroup = null;					
 					} else {
@@ -195,7 +195,7 @@
 		 * @param  {Boolean}  active
 		 */
 		this._setActive = function(active) {
-			$('.js-cas-condition-add').attr('disabled',!active);
+			$('.js-cas-condition-add, .accordion-section-content input:checkbox').attr('disabled',!active);
 			this.getCurrent().toggleClass(this._activeClass,active);
 			var checkboxes = $("input:checkbox",this.getCurrent());
 			checkboxes.attr('disabled',!active);
@@ -267,12 +267,19 @@
 
 		init: function() {
 
-			var new_current_group = $('.cas-group-single',this.groups.getGroupContainer()).first()
+			var new_current_group = $('.cas-group-single',this.groups.getGroupContainer()).first();
 			if(new_current_group.length == 0) {
 				$('.js-cas-condition-add').attr('disabled',true);
 			} else {
 				this.groups.setCurrent(new_current_group);
 			}
+
+			$('.cas-groups-body').on('change', 'input:checkbox', function(e) {
+				$this = $(this);
+				if(!$this.is('checked')) {
+					$this.closest('li').hide();
+				}
+			});
 
 			this.addPaginationListener();	
 			this.addTabListener();
@@ -350,7 +357,7 @@
 					var data = [];
 
 					if(condition_elem.length == 0) {
-						condition_elem = $('<div class="cas-condition cas-condition-'+button.attr('data-cas-condition')+'"><strong>'+button.closest('.accordion-section').find('.accordion-section-title').text()+'</strong><ul></ul></div>');
+						condition_elem = $('<div class="cas-condition cas-condition-'+button.attr('data-cas-condition')+'"><h4>'+button.closest('.accordion-section').find('.accordion-section-title').text()+'</h4><ul></ul></div>');
 						cas_admin.groups.getCurrent().find('.cas-content').append(condition_elem);
 					}
 					
@@ -358,7 +365,7 @@
 					old_checkboxes.each( function() {
 						var elem = $(this);
 						if(condition_elem.find("input[value='"+elem.val()+"']").length == 0) {
-							var temp = elem.closest('li').clone().addClass('cas-new');
+							var temp = elem.closest('li').clone().addClass('cas-new').append("&nbsp;"); //add whitespace to make it look nice
 							//jQuery 1.7 fix
 							data.push(temp[0]);
 						}
@@ -434,7 +441,6 @@
 						});
 
 						if(data.new_post_id) {
-							console.log("in");
 							cas_admin.groups.getCurrent().append('<input type="hidden" class="cas_group_id" name="cas_group_id" value="'+data.new_post_id+'" />');
 						}
 						button.attr('disabled',false);
@@ -497,7 +503,7 @@
 			var class_active = 'tabs-panel-active',
 			class_inactive = 'tabs-panel-inactive';
 
-			$("#cas-accordion .accordion-section").first().addClass('open');
+			$("#cas-accordion .accordion-section:not(.hide-if-js)").first().addClass('open');
 
 			$('.nav-tab-link').on('click', function(e) {
 				e.preventDefault();
@@ -554,6 +560,7 @@
 		addHandleListener: function() {
 			var host = $("select[name='host']");
 			var code = $('<code>display_ca_sidebar();</code>');
+			var merge_pos = $('span.merge-pos');
 			host.parent().append(code);
 			$("select[name='handle']").change(function(){
 				var handle = $(this);
@@ -564,7 +571,12 @@
 				} else {
 					host.show();
 					code.hide();
-				}	
+				}
+				if(handle.val() == 3) {
+					merge_pos.hide();
+				} else {
+					merge_pos.show();
+				}
 			}).change(); //fire change event on page load
 		},
 		/**

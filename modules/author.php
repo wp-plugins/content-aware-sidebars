@@ -4,6 +4,12 @@
  * @author Joachim Jensen <jv@intox.dk>
  */
 
+if (!defined('ContentAwareSidebars::DB_VERSION')) {
+	header('Status: 403 Forbidden');
+	header('HTTP/1.1 403 Forbidden');
+	exit;
+}
+
 /**
  *
  * Author Module
@@ -41,6 +47,7 @@ class CASModule_author extends CASModule {
 	/**
 	 * Get data from context
 	 * @author Joachim Jensen <jv@intox.dk>
+	 * @global WP_Post $post
 	 * @since  2.0
 	 * @return array
 	 */
@@ -77,6 +84,7 @@ class CASModule_author extends CASModule {
 
 	/**
 	 * Get authors with AJAX search
+	 * @global wpdb $wpdb
 	 * @return void
 	 */
 	public function ajax_content_search() {
@@ -97,19 +105,19 @@ class CASModule_author extends CASModule {
 			WHERE display_name 
 			LIKE '%s' 
 			ORDER BY display_name ASC 
-			LIMIT 0,10
+			LIMIT 0,20
 		", 
-        '%'.$_REQUEST['q'].'%'));
+		'%'.$_REQUEST['q'].'%'));
 
 		foreach($authors as $user) {
 			$suggestions[] = array(
-						'label' => $user->display_name,
-						'value' => $user->ID,
-						'id'	=> $user->ID,
+						'label'  => $user->display_name,
+						'value'  => $user->ID,
+						'id'     => $user->ID,
 						'module' => $this->id,
-						'name' => $this->id,
-						'id2' => $this->id,
-						'elem' => $this->id.'-'.$user->ID
+						'name'   => 'cas_condition['.$this->id.']',
+						'id2'    => $this->id,
+						'elem'   => $this->id.'-'.$user->ID
 					);
 		}
 
