@@ -4,6 +4,12 @@
  * @author Joachim Jensen <jv@intox.dk>
  */
 
+if (!defined('ContentAwareSidebars::DB_VERSION')) {
+	header('Status: 403 Forbidden');
+	header('HTTP/1.1 403 Forbidden');
+	exit;
+}
+
 /**
  *
  * Page Template Module
@@ -28,7 +34,7 @@ class CASModule_page_template extends CASModule {
 	 * Determine if content is relevant
 	 * @return boolean 
 	 */
-	public function in_context() {		
+	public function in_context() {
 		if(is_singular() && !('page' == get_option( 'show_on_front') && get_option('page_on_front') == get_the_ID())) {
 			$template = get_post_meta(get_the_ID(),'_wp_page_template',true);
 			return ($template && $template != 'default');
@@ -51,6 +57,7 @@ class CASModule_page_template extends CASModule {
 
 	/**
 	 * Get page templates
+	 * @param  array $args
 	 * @return array 
 	 */
 	protected function _get_content($args = array()) {

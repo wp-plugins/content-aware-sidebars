@@ -4,6 +4,12 @@
  * @author Joachim Jensen <jv@intox.dk>
  */
 
+if (!defined('ContentAwareSidebars::DB_VERSION')) {
+	header('Status: 403 Forbidden');
+	header('HTTP/1.1 403 Forbidden');
+	exit;
+}
+
 /**
  *
  * Taxonomy Module
@@ -37,17 +43,27 @@ class CASModule_taxonomy extends CASModule {
 
 		add_action('created_term', array(&$this,'term_ancestry_check'),10,3);
 
-		if(is_admin()) {
-			add_action('wp_ajax_cas-autocomplete-'.$this->id, array(&$this,'ajax_content_search'));
+	}
+
+	/**
+	 * Display module in Screen Settings
+	 * @author  Joachim Jensen <jv@intox.dk>
+	 * @version 2.3
+	 * @param   array    $columns
+	 * @return  array
+	 */
+	public function metabox_preferences($columns) {
+		foreach ($this->_get_taxonomies() as $tax) {
+			$columns['box-'.$this->id.'-'.$tax->name] = $tax->label;
 		}
-		
+		return $columns;
 	}
 	
 	/**
 	 * Determine if content is relevant
 	 * @return boolean 
 	 */
-	public function in_context() {		
+	public function in_context() {
 		if(is_singular()) {
 			// Check if content has any taxonomies supported
 			$taxonomies = get_object_taxonomies(get_post_type(),'object');
@@ -103,6 +119,7 @@ class CASModule_taxonomy extends CASModule {
 			foreach($terms as $taxonomy => $term_arr) {  
 				$termrules[] = "(taxonomy.taxonomy = '".$taxonomy."' AND terms.term_id IN('".implode("','",$term_arr)."'))";
 				$taxrules[] = $taxonomy;
+				$taxrules[] = ContentAwareSidebars::PREFIX."sub_".$taxonomy;
 			}
 
 			return "(terms.slug IS NULL OR ".implode(" OR ",$termrules).") AND (taxonomies.meta_value IS NULL OR taxonomies.meta_value IN('".implode("','",$taxrules)."'))";
@@ -111,7 +128,7 @@ class CASModule_taxonomy extends CASModule {
 		}
 		$term = get_queried_object();
 
-		return "(terms.slug IS NULL OR (taxonomy.taxonomy = '".$term->taxonomy."' AND terms.slug = '".$term->slug."')) AND (taxonomies.meta_value IS NULL OR taxonomies.meta_value = '".$term->taxonomy."')";
+		return "(terms.slug IS NULL OR (taxonomy.taxonomy = '".$term->taxonomy."' AND terms.slug = '".$term->slug."')) AND (taxonomies.meta_value IS NULL OR taxonomies.meta_value IN ('".$term->taxonomy."','".ContentAwareSidebars::PREFIX."sub_".$term->taxonomy."'))";
 	}
 	
 	/**
@@ -123,7 +140,8 @@ class CASModule_taxonomy extends CASModule {
 	}
 
 	/**
-	 * Get registered taxonomies
+	 * Get content for sidebar editor
+	 * @param  array $args
 	 * @return array 
 	 */
 	protected function _get_content($args = array()) {
@@ -133,7 +151,8 @@ class CASModule_taxonomy extends CASModule {
 			'number'   => 20,
 			'orderby'  => 'name',
 			'order'    => 'ASC',
-			'offset'   => 0
+			'offset'   => 0,
+			'search'   => ''
 		));
 		extract($args);
 		$total_items = wp_count_terms($taxonomy,array('hide_empty'=>false));
@@ -146,7 +165,8 @@ class CASModule_taxonomy extends CASModule {
 				'include'    => $include,
 				'offset'     => ($offset*$number),
 				'orderby'    => $orderby,
-				'order'      => $order
+				'order'      => $order,
+				'search'     => $args['search']
 			));	
 		}
 	
@@ -162,6 +182,11 @@ class CASModule_taxonomy extends CASModule {
 		return $terms;
 	}
 
+	/**
+	 * Get registered public taxonomies
+	 * @author  Joachim Jensen <jv@intox.dk>
+	 * @return  array
+	 */
 	protected function _get_taxonomies() {
 		// List public taxonomies
 		if (empty($this->taxonomy_objects)) {
@@ -172,6 +197,12 @@ class CASModule_taxonomy extends CASModule {
 		return $this->taxonomy_objects;
 	}
 
+	/**
+	 * Print condition data for a group
+	 * @author  Joachim Jensen <jv@intox.dk>
+	 * @param   int    $post_id
+	 * @return  void
+	 */
 	public function print_group_data($post_id) {
 		$ids = array_flip((array)get_post_custom_values(ContentAwareSidebars::PREFIX . $this->id, $post_id));
 
@@ -189,13 +220,13 @@ class CASModule_taxonomy extends CASModule {
 			//$posts = wp_get_object_terms( $post_id, $taxonomy->name);
 			if($posts || isset($ids[$taxonomy->name]) || isset($ids[ContentAwareSidebars::PREFIX.'sub_' . $taxonomy->name])) {
 				echo '<div class="cas-condition cas-condition-'.$this->id.'-'.$taxonomy->name.'">';
-				echo '<strong>'.$taxonomy->label.'</strong>';
+				echo '<h4>'.$taxonomy->label.'</h4>';
 				echo '<ul>';
 				if(isset($ids[ContentAwareSidebars::PREFIX.'sub_' . $taxonomy->name])) {
-					echo '<li class=""><label><input type="checkbox" name="cas_condition[taxonomies][]" value="'.ContentAwareSidebars::PREFIX.'sub_' . $taxonomy->name . '" checked="checked" /> ' . __('Automatically select new children of a selected ancestor', ContentAwareSidebars::DOMAIN) . '</label></li>' . "\n";
+					echo '<li class=""><label><input type="checkbox" name="cas_condition['.$this->id.'][]" value="'.ContentAwareSidebars::PREFIX.'sub_' . $taxonomy->name . '" checked="checked" /> ' . __('Automatically select new children of a selected ancestor', ContentAwareSidebars::DOMAIN) . '</label></li>' . "\n";
 				}
 				if(isset($ids[$taxonomy->name])) {
-					echo '<li class=""><label><input type="checkbox" name="cas_condition[taxonomies][]" value="'.$taxonomy->name.'" checked="checked" /> '.$taxonomy->labels->all_items.'</label></li>' . "\n";
+					echo '<li class=""><label><input type="checkbox" name="cas_condition['.$this->id.'][]" value="'.$taxonomy->name.'" checked="checked" /> '.$taxonomy->labels->all_items.'</label></li>' . "\n";
 				}
 				if($posts) {
 					echo $this->term_checklist($taxonomy, $posts);
@@ -215,9 +246,14 @@ class CASModule_taxonomy extends CASModule {
 	public function meta_box_content() {
 		global $post;
 
+		$hidden_columns  = get_hidden_columns( ContentAwareSidebars::TYPE_SIDEBAR );
+
 		foreach ($this->_get_taxonomies() as $taxonomy) {
 
-			echo '<li class="control-section accordion-section">';		
+			$id = 'box-'.$this->id.'-'.$taxonomy->name;
+			$hidden = in_array($id, $hidden_columns) ? ' hide-if-js' : '';
+
+			echo '<li id="'.$id.'" class="manage-column column-'.$id.' control-section accordion-section'.$hidden.'">';
 			echo '<h3 class="accordion-section-title" title="'.$taxonomy->label.'" tabindex="0">'.$taxonomy->label.'</h3>'."\n";
 			echo '<div class="accordion-section-content cas-rule-content" data-cas-module="'.$this->id.'" id="cas-' . $this->id . '-' . $taxonomy->name . '">';
 
@@ -226,11 +262,11 @@ class CASModule_taxonomy extends CASModule {
 
 			if($taxonomy->hierarchical) {
 				echo '<ul><li>' . "\n";
-				echo '<label><input type="checkbox" name="cas_condition[taxonomies][]" value="'.ContentAwareSidebars::PREFIX.'sub_' . $taxonomy->name . '" /> ' . __('Automatically select new children of a selected ancestor', ContentAwareSidebars::DOMAIN) . '</label>' . "\n";
+				echo '<label><input type="checkbox" name="cas_condition['.$this->id.'][]" value="'.ContentAwareSidebars::PREFIX.'sub_' . $taxonomy->name . '" /> ' . __('Automatically select new children of a selected ancestor', ContentAwareSidebars::DOMAIN) . '</label>' . "\n";
 				echo '</li></ul>' . "\n";
 			}
 			echo '<ul><li>' . "\n";
-			echo '<label><input class="cas-chk-all" type="checkbox" name="cas_condition[taxonomies][]" value="' . $taxonomy->name . '" /> ' . sprintf(__('Display with %s', ContentAwareSidebars::DOMAIN), $taxonomy->labels->all_items) . '</label>' . "\n";
+			echo '<label><input class="cas-chk-all" type="checkbox" name="cas_condition['.$this->id.'][]" value="' . $taxonomy->name . '" /> ' . sprintf(__('Display with %s', ContentAwareSidebars::DOMAIN), $taxonomy->labels->all_items) . '</label>' . "\n";
 			echo '</li></ul>' . "\n";
 	
 			if (!$terms) {
@@ -261,7 +297,7 @@ class CASModule_taxonomy extends CASModule {
 						'title' => __('Search'),
 						'status' => false,
 						'content' => '',
-						'content_before' => '<p><input class="cas-autocomplete-' . $this->id . ' cas-autocomplete quick-search" id="cas-autocomplete-' . $this->id . '-' . $taxonomy->name . '" type="search" name="cas-autocomplete" value="" placeholder="'.__('Search').'" autocomplete="off" /><span class="spinner"></span></p>'
+						'content_before' => '<p><input data-cas-item_object="'.$taxonomy->name.'" class="cas-autocomplete-' . $this->id . ' cas-autocomplete quick-search" id="cas-autocomplete-' . $this->id . '-' . $taxonomy->name . '" type="search" name="cas-autocomplete" value="" placeholder="'.__('Search').'" autocomplete="off" /><span class="spinner"></span></p>'
 					);
 				}
 
@@ -293,7 +329,7 @@ class CASModule_taxonomy extends CASModule {
 		$walker = new CAS_Walker_Checklist('category',array('parent' => 'parent', 'id' => 'term_id'));
 
 		$args = array(
-			'taxonomy'	=> $taxonomy,
+			'taxonomy'       => $taxonomy,
 			'selected_terms' => $selected_terms
 		);
 
@@ -319,61 +355,45 @@ class CASModule_taxonomy extends CASModule {
 
 	}
 
-	public function ajax_get_content() {
+	/**
+	 * Get content in HTML
+	 * @author  Joachim Jensen <jv@intox.dk>
+	 * @version 2.5
+	 * @param   array    $args
+	 * @return  string
+	 */
+	public function ajax_get_content($args) {
 
-		//validation
-		$paged = (isset($_POST['paged']) ? $_POST['paged'] : 1)-1;
-		$search = isset($_POST['search']) ? $_POST['search'] : false;
-		$taxonomy = get_taxonomy($_POST['item_object']);
+		$args = wp_parse_args($args, array(
+			'item_object'    => 'post',
+			'paged'          => 1,
+			'search'         => ''
+		));
 
-		$posts = $this->_get_content(array('taxonomy' => $_POST['item_object'], 'orderby' => 'name', 'order' => 'ASC', 'offset' => $paged));
-		$response = $this->term_checklist($taxonomy, $posts, array(), true);
-		//$response = $_POST['paged'];
-		echo json_encode($response);
-		die();
+		$taxonomy = get_taxonomy($args['item_object']);
+		
+		if(!$taxonomy) {
+			return false;
+		}
+
+		$posts = $this->_get_content(array(
+			'taxonomy' => $args['item_object'],
+			'orderby'  => 'name',
+			'order'    => 'ASC',
+			'offset'    => $args['paged']-1,
+			'search'   => $args['search']
+		));
+
+		return $this->term_checklist($taxonomy, $posts, array(), empty($args['search']));
+
 	}
 
 	/**
-	 * Get terms with AJAX search
-	 * @return void 
+	 * Save data on POST
+	 * @author  Joachim Jensen <jv@intox.dk>
+	 * @param   int    $post_id
+	 * @return  void
 	 */
-	public function ajax_content_search() {
-		
-		if(!isset($_POST['sidebar_id'])) {
-			die(-1);
-		}
-		
-		// Verify request
-		check_ajax_referer(ContentAwareSidebars::SIDEBAR_PREFIX.$_POST['sidebar_id'],'nonce');
-	
-		$suggestions = array();
-		if ( preg_match('/cas-autocomplete-'.$this->id.'-([a-zA-Z_-]*\b)/', $_REQUEST['type'], $matches) ) {
-			if(($taxonomy = get_taxonomy( $matches[1] ))) {
-				$terms = get_terms($taxonomy->name, array(
-					'number'     => 10,
-					'hide_empty' => false,
-					'search'     => $_REQUEST['q']
-				));
-				$name = 'cas_condition[tax_input]['.$matches[1].']';
-				$value = ($taxonomy->hierarchical ? 'term_id' : 'slug');
-				foreach($terms as $term) {
-					$suggestions[] = array(
-						'label'  => $term->name,
-						'value'  => $term->$value,
-						'id'     => $term->$value,
-						'module' => $this->id,
-						'name'   => $name,
-						'id2'    => $this->id.'-'.$term->taxonomy,
-						'elem'   => $term->taxonomy.'-'.$term->term_id
-					);
-				}
-			}
-		}
-
-		echo json_encode($suggestions);
-		die();
-	}
-
 	public function save_data($post_id) {
 		parent::save_data($post_id);
 

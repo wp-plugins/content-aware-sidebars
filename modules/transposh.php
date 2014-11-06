@@ -4,6 +4,12 @@
  * @author Joachim Jensen <jv@intox.dk>
  */
 
+if (!defined('ContentAwareSidebars::DB_VERSION')) {
+	header('Status: 403 Forbidden');
+	header('HTTP/1.1 403 Forbidden');
+	exit;
+}
+
 /**
  *
  * Transposh Module
@@ -36,24 +42,39 @@ class CASModule_transposh extends CASModule {
 	 * @return array
 	 */
 	public function get_context_data() {
-		return array(
-			$this->id,
-			transposh_get_current_language()
-		);
+		$data = array($this->id);
+		if(function_exists('transposh_get_current_language')) {
+			$data[] = transposh_get_current_language();
+		}
+		return $data;
 	}
 
 	/**
-	 * Get languages
+	 * Get content for sidebar editor
 	 * @global object $my_transposh_plugin
+	 * @param  array $args
 	 * @return array 
 	 */
 	protected function _get_content($args = array()) {
 		global $my_transposh_plugin;
 		$langs = array();
 
-		foreach(explode(',',$my_transposh_plugin->options->viewable_languages) as $lng) {
-			$langs[$lng] = transposh_consts::get_language_orig_name($lng);
+		/**
+		 * isset($my_transposh_plugin->options->viewable_languages)
+		 * returns false because transposh dev has not implemented __isset
+		 * using get_option instead for robustness
+		 */
+
+		if(defined('TRANSPOSH_OPTIONS') && method_exists('transposh_consts', 'get_language_orig_name')) {
+			$options = get_option(TRANSPOSH_OPTIONS);
+
+			if(isset($options['viewable_languages'])) {
+				foreach(explode(',',$options['viewable_languages']) as $lng) {
+					$langs[$lng] = transposh_consts::get_language_orig_name($lng);
+				}
+			}
 		}
+
 		if(isset($args['include'])) {
 			$langs = array_intersect_key($langs,array_flip($args['include']));
 		}
