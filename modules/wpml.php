@@ -4,6 +4,12 @@
  * @author Joachim Jensen <jv@intox.dk>
  */
 
+if (!defined('ContentAwareSidebars::DB_VERSION')) {
+	header('Status: 403 Forbidden');
+	header('HTTP/1.1 403 Forbidden');
+	exit;
+}
+
 /**
  *
  * WPML Module
@@ -36,27 +42,31 @@ class CASModule_wpml extends CASModule {
 	 * @return array
 	 */
 	public function get_context_data() {
-		return array(
-			$this->id,
-			ICL_LANGUAGE_CODE
-		);
+		$data = array($this->id);
+		if(defined('ICL_LANGUAGE_CODE')) {
+			$data[] = ICL_LANGUAGE_CODE;
+		}
+		return $data;
 	}
 
 	/**
 	 * Get languages
+	 * @param  array $args
 	 * @return array 
 	 */
 	protected function _get_content($args = array()) {
 		$langs = array();
 
-		foreach(icl_get_languages('skip_missing=N') as $lng) {
-			$langs[$lng['language_code']] = $lng['native_name'];	
-		}			
+		if(function_exists('icl_get_languages')) {
+			foreach(icl_get_languages('skip_missing=N') as $lng) {
+				$langs[$lng['language_code']] = $lng['native_name'];
+			}
+		}
 
 		if(isset($args['include'])) {
 			$langs = array_intersect_key($langs,array_flip($args['include']));
 		}
 		return $langs;
 	}
-	
+
 }

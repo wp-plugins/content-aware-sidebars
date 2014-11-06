@@ -4,6 +4,12 @@
  * @author Joachim Jensen <jv@intox.dk>
  */
 
+if (!defined('ContentAwareSidebars::DB_VERSION')) {
+	header('Status: 403 Forbidden');
+	header('HTTP/1.1 403 Forbidden');
+	exit;
+}
+
 /**
  *
  * bbPress Module
@@ -35,7 +41,7 @@ class CASModule_bbpress extends CASModule_author {
 	 * @return boolean 
 	 */
 	public function in_context() {
-		return bbp_is_single_user();
+		return function_exists('bbp_is_single_user') ? bbp_is_single_user() : false;
 	}
 
 	/**
@@ -45,10 +51,11 @@ class CASModule_bbpress extends CASModule_author {
 	 * @return array
 	 */
 	public function get_context_data() {
-		return array(
-			$this->id,
-			bbp_get_displayed_user_id()			
-		);
+		$data = array($this->id);
+		if(function_exists('bbp_get_displayed_user_id')) {
+			$data[] = bbp_get_displayed_user_id();
+		}
+		return $data;
 	}
 	
 	/**
@@ -59,7 +66,15 @@ class CASModule_bbpress extends CASModule_author {
 	 */
 	public function add_forum_dependency($where) {
 		if(is_singular(array('topic','reply'))) {
-			$where = "(post_types.meta_value IS NULL OR post_types.meta_value IN('".get_post_type()."','".get_the_ID()."','".bbp_get_forum_id()."','forum'))";
+			$data = array(
+				get_post_type(),
+				get_the_ID(),
+				'forum'
+			);
+			if(function_exists('bbp_get_forum_id')) {
+				$data[] = bbp_get_forum_id();
+			}
+			$where = "(post_types.meta_value IS NULL OR post_types.meta_value IN('".implode("','", $data)."'))";
 		}
 		return $where;
 	}

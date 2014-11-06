@@ -3,8 +3,8 @@ Contributors: intoxstudio
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=KPZHE6A72LEN4&lc=US&item_name=WordPress%20Plugin%3a%20Content%20Aware%20Sidebars&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted
 Tags: sidebar, widget, widget area, content aware, context aware, conditional, seo, dynamic, bbpress, buddypress, qtranslate, polylang, transposh, wpml, woocommerce
 Requires at least: 3.3
-Tested up to: 3.9
-Stable tag: 2.2.1
+Tested up to: 4.0
+Stable tag: 2.5
 License: GPLv3
 
 Create and display sidebars according to the content being viewed.
@@ -15,17 +15,6 @@ Manage an infinite number of sidebars.
 Boost on-site SEO with better Calls to Action by controlling what content your sidebars should be displayed with.
 The sidebar manager makes it incredibly easy for anyone to create flexible, dynamic sidebars without the need of code.
 Developed with speed and performance in mind and will add no extra database tables or table columns.
-
-> **New in version 2**
->
-> Manage widgets for your created sidebars in the Theme Customizer.
->
-> Condition groups let you display a sidebar together with both associated and distinct content.
->
-> Improved GUI makes it even easier to select content and edit sidebars.
->
-> Improved API for developers who want to extend and manipulate content support.
->
 
 = Features =
 
@@ -53,13 +42,14 @@ Developed with speed and performance in mind and will add no extra database tabl
 * Private sidebars only for members
 * Schedule sidebars for later publishing
 * Template Tag to display content aware sidebars anywhere in your theme
+* **NEW:** Shortcode to display sidebars anywhere in your content
 
 = Builtin Plugin Support =
 
 * bbPress (v2.0.2+)
 * BuddyPress (v1.6.2+)
 * qTranslate (v2.5.29+)
-* Polylang (v0.9.6+)
+* Polylang (v1.2+)
 * Transposh Translation Filter (v0.9.5+)
 * [WPML Multilingual Blog/CMS (v2.4.3+) Tested and certified](http://wpml.org/plugin/content-aware-sidebars/)
 
@@ -67,33 +57,42 @@ Developed with speed and performance in mind and will add no extra database tabl
 
 * Chinese (zh_CN): [Joe Tze](http://tkjune.com)
 * Danish (da_DK): [Joachim Jensen](http://www.intox.dk/)
+* Dutch (nl_NL): [Dennis Beckers](https://www.transifex.com/accounts/profile/denisbeckers/)
 * German (de_DE): Enno Wulff
 * Hungarian (hu_HU): Kis Lukács
 * Italian (it_IT): [Luciano Del Fico](http://www.myweb2.it/)
-* Latvian (lv_LV): [Haralds Gribusts](http://www.fireclubllatvia.lv/)
-* Lithuanian (lt_LT): [Vincent G](http://host1free.com/)
-* Slovak (sk_SK): [Branco](http://webhostinggeeks.com/)
-* Spanish (es_ES): [Analia Jensen](http://www.linkedin.com/in/analiajensen)
+* Latvian (lv_LV): Haralds Gribusts
+* Lithuanian (lt_LT): Vincent G
+* Polish (pl_PL): [Marta Jasiuk](http://linkedin.com/in/martajasiuk)
+* Portuguese (Brazilian): (pt_BR) [Marcelo Ghelman](https://www.transifex.com/accounts/profile/marcelo.ghelman/)
+* Russian (ru_RU): [Ilya Trofimov](https://www.transifex.com/accounts/profile/iltrof/)
+* Serbian (sr_RS): [Ogi Djuraskovic](http://firstsiteguide.com/)
+* Slovak (sk_SK): Branco
+* Spanish (es_ES)
+* Ukranian (uk_UA): [Michael Yunat](http://getvoip.com)
 
-Do you want to see your name here?
+Do you want to contribute and see your name here?
 
-If you have translated the plugin into your language or updated an existing translation, please send the .po and .mo files to jv[at]intox.dk.
-Download the latest [template .po file](http://plugins.svn.wordpress.org/content-aware-sidebars/trunk/lang/content-aware-sidebars.po) or the [.po file in your language](http://plugins.svn.wordpress.org/content-aware-sidebars/trunk/lang/).
+[Click to go to Transifex.com to translate Content Aware Sidebars into your language](https://www.transifex.com/projects/p/content-aware-sidebars/). Alternatively you can send the .po and .mo files to translate [at] intox.dk.
 
-= More information =
+= For more information =
 
-[Documentation](http://www.intox.dk/en/plugin/content-aware-sidebars-en/)
+* [Documentation](http://www.intox.dk/en/plugin/content-aware-sidebars-en/)
+* [Follow development on Github](https://github.com/intoxstudio/content-aware-sidebars)
+* [Intox Studio on Facebook](https://www.facebook.com/intoxstudio)
+* [Intox Studio on Twitter](https://twitter.com/intoxstudio)
 
 == Installation ==
 
 1. Upload the full plugin directory to your `/wp-content/plugins/` directory or install the plugin through `Plugins` in the administration 
 1. Activate the plugin through `Plugins` in the administration
-1. Have fun creating your first sidebar
-1. Optional: Insert `<?php display_ca_sidebar( $args ); ?>` in a template if you have a special spot for the new, manual handled, sidebars.
+1. Have fun creating your first sidebar under the menu *Sidebars > Add New*
+1. Optional: Insert Template Tag `<?php display_ca_sidebar( $args ); ?>` in your theme for manually handled sidebars
+1. Optional: Insert Shortcode `[ca-sidebar id=]` in some content for manually handled sidebars
 
 == Frequently Asked Questions ==
 
-[Click here to go to the official FAQ page](http://www.intox.dk/en/plugin/content-aware-sidebars-en/faq/).
+[Click here to go to the official FAQ page for Content Aware Sidebars](http://www.intox.dk/en/plugin/content-aware-sidebars-en/faq/).
 
 == Screenshots ==
 
@@ -131,6 +130,56 @@ Download the latest [template .po file](http://plugins.svn.wordpress.org/content
 * Hello World
 
 == Changelog ==
+
+= 2.5 =
+
+* Added: ca-sidebar shortcode
+* Added: serbian and dutch translations
+* Added: teaser meta box
+* Added: shortcode is displayed when selecting manual handle in sidebar editor
+* Added: description can be added to modules
+* Added: generic module callback for ajax allowing search and pagination to use same request
+* Added: or-separator between condition groups in editor
+* Fixed: headers already sent error on ajax request
+
+= 2.4.3 =
+
+* Fixed: german translation properly included
+
+= 2.4.2 =
+
+* Added: polish, brazilian portuguese and russian translations
+* Fixed: "auto-select new children of selected ancestors" caused new top level post types to be selected
+* Fixed: "auto-select new children of selected ancestors" for taxonomies could prevent sidebar from being displayed
+
+= 2.4.1 =
+
+* Fixed: authors found via search in sidebar editor could not be saved
+* Fixed: displaying max 20 authors in search results instead of 10
+* Fixed: improved ux design for sidebars in widgets screen
+
+= 2.4 =
+
+* Added: compatibility with wp4.0
+* Added: better ux design for condition groups
+* Added: better ux design for sidebars in widgets screen, including an edit link
+* Added: dashicon for admin menu (wp3.8+)
+* Fixed: using some newer wordpress actions and filters for admin columns
+* Fixed: sidebars could be fetched and prepared in administration
+
+= 2.3 =
+
+* Added: ukranian translation
+* Added: error if trying to access php files directly
+* Added: bbpress, bp_member, polylang, qtranslate, transposh and wpml modules are more robust
+* Added: content rule boxes can be hidden in screen options in sidebar editor
+* Added: help tab in sidebar editor
+* Added: widgets count column in sidebar overview
+* Added: menu order moved to options meta box in sidebar editor
+* Fixed: merge position option hidden on forced replace handle
+* Fixed: polylang compatibility now 1.2+
+* Fixed: width of columns in sidebar overview
+* Removed: exposure column in sidebar overview
 
 = 2.2.1 =
 

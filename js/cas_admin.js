@@ -1,4 +1,4 @@
-/**
+/*!
  * @package Content Aware Sidebars
  * @author Joachim Jensen <jv@intox.dk>
  */
@@ -56,7 +56,7 @@
 		this.remove = function(obj) {
 			var that = this;
 			obj
-			.css('background','red')
+			.css('background','#FFEBE8')
 			.fadeOut('slow', function() { 
 				obj.remove();
 				if(!that.hasGroups()) {
@@ -75,18 +75,16 @@
 		 */
 		this.setCurrent = function(obj) {
 			var retval = true;
-			
+
 			if(obj.length == 0) {
 				retval =  false;
-			} else if(this.getCurrent()) {
+			} else if(this.getCurrent()) { 
 				retval = this.resetCurrent();
 			}
-
 			if(retval) {
 				this._currentGroup = obj;
 				this._setActive(true);
 			}
-
 			return retval;
 		}
 
@@ -133,6 +131,8 @@
 								$(this).remove();
 							}
 						});
+						//Show all again
+						$('li').fadeIn('slow');
 						this._setActive(false);
 						this._currentGroup = null;					
 					} else {
@@ -195,7 +195,8 @@
 		 * @param  {Boolean}  active
 		 */
 		this._setActive = function(active) {
-			$('.js-cas-condition-add').attr('disabled',!active);
+			$('.js-cas-condition-add, .accordion-section-content input:checkbox').attr('disabled',!active);
+			$('.accordion-container').toggleClass('accordion-disabled',!active);
 			this.getCurrent().toggleClass(this._activeClass,active);
 			var checkboxes = $("input:checkbox",this.getCurrent());
 			checkboxes.attr('disabled',!active);
@@ -267,12 +268,25 @@
 
 		init: function() {
 
-			var new_current_group = $('.cas-group-single',this.groups.getGroupContainer()).first()
+			var new_current_group = $('.cas-group-single',this.groups.getGroupContainer()).first();
 			if(new_current_group.length == 0) {
 				$('.js-cas-condition-add').attr('disabled',true);
 			} else {
 				this.groups.setCurrent(new_current_group);
 			}
+
+			$('.cas-groups-body').on('change', 'input:checkbox', function(e) {
+				var $this = $(this);
+				console.log("change");
+				if(!$this.is('checked')) {
+					var $li = $this.closest('li');
+					if($li.hasClass('cas-new')) {
+						$li.remove();
+					} else {
+						$li.hide();
+					}
+				}
+			});
 
 			this.addPaginationListener();	
 			this.addTabListener();
@@ -316,16 +330,16 @@
 
 				$.ajax({
 					url: ajaxurl,
-					data:link.attr('href').split('?')[1]+'&action=cas-module-'+action.attr('data-cas-module'),
+					data:link.attr('href').split('?')[1]+'&nonce='+cas_admin.nonce+'&sidebar_id='+cas_admin.sidebarID+'&action=cas-module-'+action.attr('data-cas-module'),
 					dataType: 'JSON',
 					type: 'POST',
 					success:function(data){
-						link.closest('.cas-contentlist').html(data);						
+						link.closest('.cas-contentlist').html(data);
 					},
 					error: function(xhr, desc, e) {
 						console.log(xhr.responseText);
 					}
-				});			
+				});
 
 			});
 		},
@@ -345,12 +359,12 @@
 
 					var button = $(this);
 
-					var old_checkboxes = $("input:checkbox:checked", button.closest('.cas-rule-content'));
+					var old_checkboxes = $("input:checkbox:checked, .cas-text-input", button.closest('.cas-rule-content'));
 					var condition_elem = $('.cas-condition-'+button.attr('data-cas-condition'), cas_admin.groups.getCurrent());
 					var data = [];
 
 					if(condition_elem.length == 0) {
-						condition_elem = $('<div class="cas-condition cas-condition-'+button.attr('data-cas-condition')+'"><strong>'+button.closest('.accordion-section').find('.accordion-section-title').text()+'</strong><ul></ul></div>');
+						condition_elem = $('<div class="cas-condition cas-condition-'+button.attr('data-cas-condition')+'"><h4>'+button.closest('.accordion-section').find('.accordion-section-title').text()+'</h4><ul></ul></div>');
 						cas_admin.groups.getCurrent().find('.cas-content').append(condition_elem);
 					}
 					
@@ -358,9 +372,16 @@
 					old_checkboxes.each( function() {
 						var elem = $(this);
 						if(condition_elem.find("input[value='"+elem.val()+"']").length == 0) {
-							var temp = elem.closest('li').clone().addClass('cas-new');
+							if(elem.attr('type') != 'checkbox') {
+								if(!elem.val()) return true;
+								var temp = $('<li class="cas-new"><label><input value="'+elem.val()+'" name="'+elem.attr('name')+'" type="checkbox" checked="checked" />'+elem.val()+'</label></li>');
+							} else {
+								var temp = elem.closest('li').clone().addClass('cas-new');
+							}
+							temp.append("&nbsp;"); //add whitespace to make it look nice
 							//jQuery 1.7 fix
 							data.push(temp[0]);
+							//temp.find('input').show();
 						}
 					});
 					old_checkboxes.attr('checked',false);
@@ -382,13 +403,13 @@
 
 				e.preventDefault();
 
-				var group = $('<li>', {class: 'cas-group-single cas-group-single-new', html: '<span class="cas-group-control cas-group-control-active">'+
+				var group = $('<li>', {class: 'cas-group-single cas-group-single-new', html: '<div class="cas-group-body"><span class="cas-group-control cas-group-control-active">'+
 							'<input type="button" class="button js-cas-group-save" value="'+CASAdmin.save+'" /> | <a class="js-cas-group-cancel" href="#">'+CASAdmin.cancel+'</a>'+
 							'</span>'+
 							'<span class="cas-group-control">'+
 							'<a class="js-cas-group-edit" href="#">'+CASAdmin.edit+'</a> | <a class="submitdelete trash js-cas-group-remove" href="#">'+CASAdmin.remove+'</a>'+
 							'</span>'+
-							'<div class="cas-content"></div>'});
+							'<div class="cas-content"></div></div><div class="cas-group-sep">'+CASAdmin.or+'</div>'});
 
 				cas_admin.groups.add(group);
 			});
@@ -434,7 +455,6 @@
 						});
 
 						if(data.new_post_id) {
-							console.log("in");
 							cas_admin.groups.getCurrent().append('<input type="hidden" class="cas_group_id" name="cas_group_id" value="'+data.new_post_id+'" />');
 						}
 						button.attr('disabled',false);
@@ -497,7 +517,7 @@
 			var class_active = 'tabs-panel-active',
 			class_inactive = 'tabs-panel-inactive';
 
-			$("#cas-accordion .accordion-section").first().addClass('open');
+			$("#cas-accordion .accordion-section:not(.hide-if-js)").first().addClass('open');
 
 			$('.nav-tab-link').on('click', function(e) {
 				e.preventDefault();
@@ -553,7 +573,9 @@
 		 */
 		addHandleListener: function() {
 			var host = $("select[name='host']");
-			var code = $('<code>display_ca_sidebar();</code>');
+			var code = $('<p>Shortcode:</p><code>[ca-sidebar id='+this.sidebarID+']</code>'+
+				'<p>Template Tag:</p><code>display_ca_sidebar();</code>');
+			var merge_pos = $('span.merge-pos');
 			host.parent().append(code);
 			$("select[name='handle']").change(function(){
 				var handle = $(this);
@@ -564,7 +586,12 @@
 				} else {
 					host.show();
 					code.hide();
-				}	
+				}
+				if(handle.val() == 3) {
+					merge_pos.hide();
+				} else {
+					merge_pos.show();
+				}
 			}).change(); //fire change event on page load
 		},
 		/**
@@ -610,29 +637,26 @@
 
 			spinner.show();
 
+			var action = input.closest('.cas-rule-content');
+
 			$.ajax({
 				url: ajaxurl,
 				data:{
-					'action': input.attr('class').split(' ')[0],
-					'response-format': 'JSON',
+					'action': 'cas-module-'+action.attr('data-cas-module'),
 					'nonce': cas_admin.nonce,
 					'sidebar_id': cas_admin.sidebarID,
-					'type': input.attr('id'),
-					'q': q
+					'item_object': input.attr('data-cas-item_object'),
+					'search': q
 				},
 				dataType: 'JSON',
 				type: 'POST',
 				success:function(response){
-					var elements = "";
-					if(response.length > 0) {
-						$.each(response, function(i,item) {
-							elements += '<li><label class="selectit"><input value="'+item.value+'" type="checkbox" name="'+item.name+'[]"/> '+item.label+'</label></li>';	
-						});
+					if(response) {
+						data = response;
 					} else {
-						elements = '<li><p>'+CASAdmin.noResults+'</p></li>';
+						data = '<li><p>'+CASAdmin.noResults+'</p></li>';
 					}
-					
-					$('.categorychecklist', panel).html(elements);
+					panel.find('.cas-contentlist').html(data);
 					spinner.hide();
 				},
 				error: function(xhr, desc, e) {

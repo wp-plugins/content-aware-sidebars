@@ -4,6 +4,12 @@
  * @author Joachim Jensen <jv@intox.dk>
  */
 
+if (!defined('ContentAwareSidebars::DB_VERSION')) {
+	header('Status: 403 Forbidden');
+	header('HTTP/1.1 403 Forbidden');
+	exit;
+}
+
 /**
  *
  * Static Pages Module
@@ -26,13 +32,14 @@ class CASModule_static extends CASModule {
 	
 	/**
 	 * Get static content
+	 * @param  array $args
 	 * @return array 
 	 */
 	protected function _get_content($args = array()) {
 		$static = array(
-			'front-page'	=> __('Front Page', ContentAwareSidebars::DOMAIN),
-			'search'		=> __('Search Results', ContentAwareSidebars::DOMAIN),
-			'404'			=> __('404 Page', ContentAwareSidebars::DOMAIN)
+			'front-page' => __('Front Page', ContentAwareSidebars::DOMAIN),
+			'search'     => __('Search Results', ContentAwareSidebars::DOMAIN),
+			'404'        => __('404 Page', ContentAwareSidebars::DOMAIN)
 		);
 		if(isset($args['include'])) {
 			$static = array_intersect_key($static, array_flip($args['include']));
@@ -64,7 +71,7 @@ class CASModule_static extends CASModule {
 		}
 		return array(
 			$val
-		);			
+		);
 	}
-	
+
 }
