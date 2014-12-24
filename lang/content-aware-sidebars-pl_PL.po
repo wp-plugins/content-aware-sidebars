@@ -1,21 +1,19 @@
 # Copyright (C) 2012 Content Aware Sidebars
 # This file is distributed under the same license as the Content Aware Sidebars package.
 # Translators:
-# Johnny Wong <wcybrick@gmail.com>, 2014
-# tkjune <tkjune@gmail.com>, 2014
 msgid ""
 msgstr ""
 "Project-Id-Version: Content Aware Sidebars\n"
 "Report-Msgid-Bugs-To: http://wordpress.org/tag/content-aware-sidebars\n"
 "POT-Creation-Date: 2014-11-05 01:08-0800\n"
-"PO-Revision-Date: 2014-11-19 10:46+0000\n"
-"Last-Translator: Johnny Wong <wcybrick@gmail.com>\n"
-"Language-Team: Chinese (http://www.transifex.com/projects/p/content-aware-sidebars/language/zh/)\n"
+"PO-Revision-Date: 2014-11-05 10:24+0000\n"
+"Last-Translator: Joachim <jv@intox.dk>\n"
+"Language-Team: Polish (Poland) (http://www.transifex.com/projects/p/content-aware-sidebars/language/pl_PL/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: zh\n"
-"Plural-Forms: nplurals=1; plural=0;\n"
+"Language: pl_PL\n"
+"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 "X-Generator: Poedit 1.6.5\n"
 "X-Poedit-Basepath: .\n"
 "X-Poedit-KeywordsList: __;_e;__ngettext:1,2;_n:1,2;__ngettext_noop:1,2;_n_noop:1,2;_c,_nc:4c,1,2;_x:1,2c;_nx:4c,1,2;_nx_noop:4c,1,2;_ex:1,2c;esc_attr__;esc_attr_e;esc_attr_x:1,2c;esc_html__;esc_html_e;esc_html_x:1,2c\n"
@@ -26,171 +24,171 @@ msgstr ""
 
 #: ../content-aware-sidebars.php:117
 msgid "Manage and show sidebars according to the content being viewed."
-msgstr "根据页面内容管理和显示边栏"
+msgstr "Zarządzaj i pokaż paski boczne zależnie od zawartości."
 
 #: ../content-aware-sidebars.php:118
 msgid "Content Aware Sidebars"
-msgstr "自由定制边栏"
+msgstr "Paski boczne"
 
 #: ../content-aware-sidebars.php:200 ../content-aware-sidebars.php:950
 msgid "FAQ"
-msgstr "常见问题"
+msgstr "FAQ"
 
 #: ../content-aware-sidebars.php:300
 msgid "Exposure"
-msgstr "显示于"
+msgstr "Ekspozycja"
 
 #: ../content-aware-sidebars.php:306
 msgid "Singular"
-msgstr "文章页"
+msgstr "Pojedynczy"
 
 #: ../content-aware-sidebars.php:307
 msgid "Singular & Archive"
-msgstr "文章页和列表页"
+msgstr "Pojedynczy & Archiwum"
 
 #: ../content-aware-sidebars.php:308
 msgid "Archive"
-msgstr "列表页"
+msgstr "Archiwum"
 
 #: ../content-aware-sidebars.php:312 ../content-aware-sidebars.php:504
 msgctxt "option"
 msgid "Handle"
-msgstr "处理方式"
+msgstr "Opcje"
 
 #: ../content-aware-sidebars.php:314
 msgid "Replace host sidebar, merge with it or add sidebar manually."
-msgstr "替换主边栏, 合并或者手动添加边栏"
+msgstr "Zastąp Główny pasek boczny, scal go lub dodaj pasek boczny ręcznie."
 
 #: ../content-aware-sidebars.php:318
 msgid "Replace"
-msgstr "替换"
+msgstr "Zastąp"
 
 #: ../content-aware-sidebars.php:319
 msgid "Merge"
-msgstr "合并"
+msgstr "Scal"
 
 #: ../content-aware-sidebars.php:320
 msgid "Manual"
-msgstr "手动"
+msgstr "Instrukcja"
 
 #: ../content-aware-sidebars.php:321
 msgid "Forced replace"
-msgstr "强制替换"
+msgstr "Wymuszona zamiana"
 
 #: ../content-aware-sidebars.php:325
 msgid "Host Sidebar"
-msgstr "主边栏"
+msgstr "Główny Pasek boczny"
 
 #: ../content-aware-sidebars.php:333 ../content-aware-sidebars.php:505
 msgid "Merge position"
-msgstr "合并位置"
+msgstr "Pozycja scalenia"
 
 #: ../content-aware-sidebars.php:335
 msgid "Place sidebar on top or bottom of host when merging."
-msgstr "合并时将边栏放置在主边栏的顶部或底部"
+msgstr "Umieść pasek boczny na górze lub dole głównego paska podczas scalania."
 
 #: ../content-aware-sidebars.php:339
 msgid "Top"
-msgstr "顶部"
+msgstr "Góra"
 
 #: ../content-aware-sidebars.php:340
 msgid "Bottom"
-msgstr "底部"
+msgstr "Dół"
 
 #: ../content-aware-sidebars.php:365
 msgid "Sidebars"
-msgstr "边栏"
+msgstr "Paski boczne"
 
 #: ../content-aware-sidebars.php:366
 msgid "Sidebar"
-msgstr "边栏"
+msgstr "Pasek boczny"
 
 #: ../content-aware-sidebars.php:367
 msgctxt "sidebar"
 msgid "Add New"
-msgstr "新建"
+msgstr "Dodaj nowy"
 
 #: ../content-aware-sidebars.php:368
 msgid "Add New Sidebar"
-msgstr "添加边栏"
+msgstr "Dodaj nowy Pasek boczny"
 
 #: ../content-aware-sidebars.php:369
 msgid "Edit Sidebar"
-msgstr "编辑边栏"
+msgstr "Edytuj Pasek boczny"
 
 #: ../content-aware-sidebars.php:370
 msgid "New Sidebar"
-msgstr "新建边栏"
+msgstr "Nowy pasek boczny"
 
 #: ../content-aware-sidebars.php:371
 msgid "All Sidebars"
-msgstr "全部边栏"
+msgstr "Wszystkie Paski boczne"
 
 #: ../content-aware-sidebars.php:372
 msgid "View Sidebar"
-msgstr "查看边栏"
+msgstr "Zobacz pasek boczny"
 
 #: ../content-aware-sidebars.php:373
 msgid "Search Sidebars"
-msgstr "搜索边栏"
+msgstr "Szukaj Pasków bocznych"
 
 #: ../content-aware-sidebars.php:374
 msgid "No sidebars found"
-msgstr "未找到边栏"
+msgstr "Nie znaleziono pasków bocznych"
 
 #: ../content-aware-sidebars.php:375
 msgid "No sidebars found in Trash"
-msgstr "回收站中未找到边栏"
+msgstr "Nie znaleziono pasków w koszu"
 
 #: ../content-aware-sidebars.php:390 ../content-aware-sidebars.php:944
 #: ../content-aware-sidebars.php:1017
 msgid "Condition Groups"
-msgstr "显示条件组"
+msgstr "Stan Grup"
 
 #: ../content-aware-sidebars.php:391
 msgid "Condition Group"
-msgstr "显示条件组"
+msgstr "Stan Grupy"
 
 #: ../content-aware-sidebars.php:392
 msgctxt "group"
 msgid "Add New"
-msgstr "新建"
+msgstr "Dodaj nową"
 
 #: ../content-aware-sidebars.php:393 ../content-aware-sidebars.php:1017
 #: ../content-aware-sidebars.php:1051
 msgid "Add New Group"
-msgstr "新建组"
+msgstr "Dodaj nową Grupę"
 
 #: ../content-aware-sidebars.php:394 ../content-aware-sidebars.php:1032
 #: ../content-aware-sidebars.php:1401
 msgctxt "group"
 msgid "Edit"
-msgstr "编辑"
+msgstr "Edytuj"
 
 #: ../content-aware-sidebars.php:418
 msgid "Manage widgets"
-msgstr "管理小工具"
+msgstr "Zarządzaj widgetami"
 
 #: ../content-aware-sidebars.php:421 ../content-aware-sidebars.php:424
 msgid "Sidebar updated."
-msgstr "边栏已更新."
+msgstr "Pasek boczny zaktualizowany."
 
 #: ../content-aware-sidebars.php:426
 msgid "Sidebar published."
-msgstr "已发布边栏"
+msgstr "Pasek boczny opublikowany."
 
 #: ../content-aware-sidebars.php:427
 msgid "Sidebar saved."
-msgstr "边栏已保存."
+msgstr "Pasek boczny zapisany."
 
 #: ../content-aware-sidebars.php:428
 msgid "Sidebar submitted."
-msgstr "已提交边栏"
+msgstr "Pasek boczny wysłany."
 
 #: ../content-aware-sidebars.php:429
 #, php-format
 msgid "Sidebar scheduled for: <strong>%1$s</strong>."
-msgstr "已为 <strong>%1$s</strong> 设置了边栏计划"
+msgstr "Plan paska bocznego na: <strong>%1$s</strong>."
 
 #. translators: Publish box date format, see http://php.net/date
 #: ../content-aware-sidebars.php:431
@@ -199,37 +197,37 @@ msgstr "M j, Y @ G:i"
 
 #: ../content-aware-sidebars.php:432
 msgid "Sidebar draft updated."
-msgstr "边栏草稿已更新."
+msgstr "Szkic paska bocznego zaktualizowany."
 
 #: ../content-aware-sidebars.php:480 ../content-aware-sidebars.php:567
 msgid "Please update Host Sidebar"
-msgstr "请更新主边栏"
+msgstr "Zaktualizuj Główny pasek boczny"
 
 #: ../content-aware-sidebars.php:506
 msgid "Widgets"
-msgstr "小工具"
+msgstr ""
 
 #: ../content-aware-sidebars.php:642
 msgid "Manage Widgets"
-msgstr "管理小工具"
+msgstr "Zarządzaj Widgetami"
 
 #: ../content-aware-sidebars.php:897
 msgid "Get a free Content Aware Sidebars Premium Bundle"
-msgstr "获取免费自由定制边栏加強版"
+msgstr ""
 
 #: ../content-aware-sidebars.php:913
 msgid "Content"
-msgstr "内容"
+msgstr "Zawartość"
 
 #: ../content-aware-sidebars.php:921
 msgid "Options"
-msgstr "选项"
+msgstr "Opcje"
 
 #: ../content-aware-sidebars.php:945
 msgid ""
 "Each created condition group describe some specific content (conditions) "
 "that the current sidebar should be displayed with."
-msgstr "每个条件组表示当前边栏会显示的特定的内容(条件)"
+msgstr "Każdy stan grupy opisuje pewną specyficzną zawartość (stan), który obecny pasek boczny powinien wyświetlić."
 
 #: ../content-aware-sidebars.php:946
 msgid ""
@@ -238,245 +236,245 @@ msgid ""
 " a group should be associated, as they are treated as such, and that the "
 "groups do not interfere with each other. Thus it is possible to have both "
 "extremely focused and at the same time distinct conditions."
-msgstr "加入条件组的内容使用逻辑关联，条件组自身使用逻辑分离。意思是加入组的内容必须相关，而各个组之间并不影响。"
+msgstr "Zawartość dodana do stanu grup używa logicznej koniunkcji, podczas gdy stan grup używa logicznej alternatywy. To znaczy, że zawartość do grupy powinna być powiązana, a grupy nie oddziałują między sobą. "
 
 #: ../content-aware-sidebars.php:949
 msgid "More Information"
-msgstr "更多信息"
+msgstr "Więcej informacji"
 
 #: ../content-aware-sidebars.php:951
 msgid "Get Support"
-msgstr "技术支持"
+msgstr "Uzyskaj pomoc"
 
 #: ../content-aware-sidebars.php:982
 msgid ""
 "Translate Content Aware Sidebars into your language and become a BETA tester"
 " of the upcoming Premium Bundle*!"
-msgstr "译内自由定制边栏到你的语言，即可成为加強版的beta测试員* ！"
+msgstr ""
 
 #: ../content-aware-sidebars.php:983
 msgid "Translate Now"
-msgstr "即時翻译"
+msgstr ""
 
 #: ../content-aware-sidebars.php:984
 msgid "Get Premium Bundle"
-msgstr "获取自由定制边栏加強版"
+msgstr ""
 
 #: ../content-aware-sidebars.php:985
 msgid ""
 "Single-site use. BETA implies it is not recommended for production sites."
-msgstr "单一网站使用。 BETA意味着它不建议商业。"
+msgstr ""
 
 #: ../content-aware-sidebars.php:988
 msgid "Partial Feature List"
-msgstr "部分功能列表"
+msgstr ""
 
 #: ../content-aware-sidebars.php:990
 msgid "Select and create sidebars in the Post Editing Screens"
-msgstr "选择并建立后期编辑屏幕的侧边栏"
+msgstr ""
 
 #: ../content-aware-sidebars.php:991
 msgid "Display sidebars with URLs using wildcards"
-msgstr "使用通配符的URL显示侧边栏"
+msgstr ""
 
 #: ../content-aware-sidebars.php:992
 msgid "Display sidebars with User Roles"
-msgstr "边栏顯示用戶角色"
+msgstr ""
 
 #: ../content-aware-sidebars.php:993
 msgid "Display sidebars with BuddyPress User Groups"
-msgstr "以BuddyPress的用户组显示侧边栏"
+msgstr ""
 
 #: ../content-aware-sidebars.php:994
 msgid "Sidebars column in Post Type and Taxonomy Overview Screens"
-msgstr "在帖子的类型和分类概述加侧边栏列"
+msgstr ""
 
 #: ../content-aware-sidebars.php:1018
 msgid ""
 "Click to edit a group or create a new one. Select content on the left to add"
 " it. In each group, you can combine different types of associated content."
-msgstr "点击修改或新建组。选择左侧内容添加到组中。在每组中，你可以组合不同的有关内容。"
+msgstr "Kliknij by edytować Grupę lub stworzyć nową. Wybierz zawartość po lewej do dodania. Dla każdej z grup możesz połączyć różne typy zawartości."
 
 #: ../content-aware-sidebars.php:1019
 msgid "Display sidebar with"
-msgstr "边栏显示在"
+msgstr "Wyświetl pasek boczny z"
 
 #: ../content-aware-sidebars.php:1024
 msgid ""
 "No content. Please add at least one condition group to make the sidebar "
 "content aware."
-msgstr "没有内容。请至少选择一项内容组以定制边栏"
+msgstr "Brak zawartości. Dodaj chociaż jedną grupę, aby pasek działał."
 
 #: ../content-aware-sidebars.php:1029 ../content-aware-sidebars.php:1398
 msgid "Save"
-msgstr "保存"
+msgstr "Zapisz"
 
 #: ../content-aware-sidebars.php:1029 ../content-aware-sidebars.php:1399
 msgid "Cancel"
-msgstr "取消"
+msgstr "Anuluj"
 
 #: ../content-aware-sidebars.php:1032 ../content-aware-sidebars.php:1402
 msgid "Remove"
-msgstr "删除"
+msgstr "Usuń"
 
 #: ../content-aware-sidebars.php:1041 ../content-aware-sidebars.php:1400
 msgid "Or"
-msgstr "或"
+msgstr ""
 
 #: ../content-aware-sidebars.php:1129 ../content-aware-sidebars.php:1172
 #: ../content-aware-sidebars.php:1177
 msgid "Unauthorized request"
-msgstr "未授权请求"
+msgstr "Nieuprawnione wnioski"
 
 #: ../content-aware-sidebars.php:1135
 msgid "Condition group cannot be empty"
-msgstr "未能创建条件组"
+msgstr "Stan grupy nie może być pusty"
 
 #: ../content-aware-sidebars.php:1149
 msgid "Condition group saved"
-msgstr "已保存条件组"
+msgstr "Stan grupy zapisany"
 
 #: ../content-aware-sidebars.php:1182
 msgid "Condition group could not be removed"
-msgstr "未能删除条件组"
+msgstr "Stan grupy nie może zostać usunięty"
 
 #: ../content-aware-sidebars.php:1187
 msgid "Condition group removed"
-msgstr "已删除条件组"
+msgstr "Stan grupy usunięty"
 
 #: ../content-aware-sidebars.php:1246 ../content-aware-sidebars.php:1247
 msgid "Order"
-msgstr "訂單"
+msgstr ""
 
 #: ../content-aware-sidebars.php:1263
 msgid ""
 "If you love this plugin, please consider donating to support future "
 "development."
-msgstr "如果你喜欢这个插件, 请考虑捐赠."
+msgstr "Jeśli podoba Ci się ta wtyczka, rozważ wsparcie finansowe przyszłych wersji."
 
 #: ../content-aware-sidebars.php:1272
 msgid "Or you could:"
-msgstr "或者你可以："
+msgstr "Lub możesz:"
 
 #: ../content-aware-sidebars.php:1274
 msgid "Rate the plugin on WordPress.org"
-msgstr "在WordPress.org为此插件评分"
+msgstr "Oceń tę wtyczkę na WordPress.org"
 
 #: ../content-aware-sidebars.php:1275
 msgid "Link to the plugin page"
-msgstr "链接到插件页面"
+msgstr "Link do strony wtyczny"
 
 #: ../content-aware-sidebars.php:1276
 msgid "Translate the plugin into your language"
-msgstr "翻译此插件"
+msgstr "Przetłumacz wtyczkę na swój język"
 
 #: ../content-aware-sidebars.php:1403
 msgid "Remove this group and its contents permanently?"
-msgstr "永久删除此组和它的内容？"
+msgstr "Usunąć tę grupę i jej zawartość?"
 
 #: ../content-aware-sidebars.php:1404
 msgid "No results found."
-msgstr "未找到结果"
+msgstr "Nic nie znaleziono."
 
 #: ../content-aware-sidebars.php:1405
 msgid ""
 "The current group has unsaved changes. Do you want to continue and discard "
 "these changes?"
-msgstr "当前修改未保存，放弃修改吗？"
+msgstr "Obecna grupa ma niezapisane zmiany. Chcesz kontynuować i je odrzucić?"
 
 #: ../content-aware-sidebars.php:1419
 msgid "Edit"
-msgstr "编辑"
+msgstr "Edytuj"
 
 #: ../modules/author.php:28
 msgid "Authors"
-msgstr "作者"
+msgstr "Autorzy"
 
 #: ../modules/bbpress.php:29
 msgid "bbPress User Profiles"
-msgstr "bbPress用户资料"
+msgstr "Profile Użytkowników Formu"
 
 #: ../modules/bp_member.php:27
 msgid "BuddyPress Members"
-msgstr "BuddyPress用户"
+msgstr "Członkowie BuddyPress"
 
 #: ../modules/bp_member.php:130 ../modules/casmodule.php:132
 #: ../modules/post_type.php:267 ../modules/taxonomy.php:295
 msgid "View All"
-msgstr "查看全部"
+msgstr "Zobacz wszystkie"
 
 #: ../modules/bp_member.php:139 ../modules/casmodule.php:151
 #: ../modules/post_type.php:286 ../modules/taxonomy.php:314
 msgid "Add to Group"
-msgstr "添加到组"
+msgstr "Dodaj do Grupy"
 
 #: ../modules/casmodule.php:126
 #, php-format
 msgid "Display with All %s"
-msgstr "在所有%s显示"
+msgstr "Wyświetl z wszystkimi %s"
 
 #: ../modules/casmodule.php:139 ../modules/casmodule.php:142
 #: ../modules/post_type.php:273 ../modules/post_type.php:276
 #: ../modules/taxonomy.php:301 ../modules/taxonomy.php:304
 msgid "Search"
-msgstr "搜索"
+msgstr "Szukaj"
 
 #: ../modules/casmodule.php:223
 #, php-format
 msgid "All %s"
-msgstr "全部%s"
+msgstr "Wszystkie %s"
 
 #: ../modules/page_template.php:28
 msgid "Page Templates"
-msgstr "页面模板"
+msgstr "Szablony strony"
 
 #: ../modules/polylang.php:27 ../modules/qtranslate.php:27
 #: ../modules/transposh.php:27 ../modules/wpml.php:27
 msgid "Languages"
-msgstr "语言"
+msgstr "Języki"
 
 #: ../modules/post_type.php:34
 msgid "Post Types"
-msgstr "文章类型"
+msgstr "Typy wpisów"
 
 #: ../modules/post_type.php:166 ../modules/post_type.php:236
 #: ../modules/taxonomy.php:230 ../modules/taxonomy.php:269
 msgid "Automatically select new children of a selected ancestor"
-msgstr "自动为选中的父级选择新子级"
+msgstr "Automatycznie wybierz nowe potomstwo wybranego Rodzica"
 
 #: ../modules/post_type.php:242 ../modules/taxonomy.php:273
 #, php-format
 msgid "Display with %s"
-msgstr "在%s显示"
+msgstr "Wyświetl %s"
 
 #: ../modules/post_type.php:247 ../modules/taxonomy.php:277
 msgid "No items."
-msgstr "没有项目."
+msgstr "Brak pozycji."
 
 #: ../modules/post_type.php:262
 msgid "Most Recent"
-msgstr "最新"
+msgstr "Najnowsze"
 
 #: ../modules/static.php:29
 msgid "Static Pages"
-msgstr "静态页面"
+msgstr "Strona statyczna"
 
 #: ../modules/static.php:40
 msgid "Front Page"
-msgstr "首页"
+msgstr "Strona główna"
 
 #: ../modules/static.php:41
 msgid "Search Results"
-msgstr "搜索结果"
+msgstr "Wyniki wyszukiwania"
 
 #: ../modules/static.php:42
 msgid "404 Page"
-msgstr "404页面"
+msgstr "Strona błędu 404"
 
 #: ../modules/taxonomy.php:40
 msgid "Taxonomies"
-msgstr "分类"
+msgstr "Taksonomie"
 
 #: ../modules/taxonomy.php:290
 msgid "Most Used"
-msgstr "最常用"
+msgstr "Najczęściej używane"
