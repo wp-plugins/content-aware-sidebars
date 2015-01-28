@@ -1,20 +1,20 @@
 # Copyright (C) 2012 Content Aware Sidebars
 # This file is distributed under the same license as the Content Aware Sidebars package.
 # Translators:
-# Ilya Trofimov <trofilya@gmail.com>, 2014
+# Gattiken Produkzioak <gattiken@gattiken.com>, 2015
 msgid ""
 msgstr ""
 "Project-Id-Version: Content Aware Sidebars\n"
 "Report-Msgid-Bugs-To: http://wordpress.org/tag/content-aware-sidebars\n"
 "POT-Creation-Date: 2014-11-05 01:08-0800\n"
-"PO-Revision-Date: 2014-12-24 13:00+0000\n"
-"Last-Translator: Ilya Trofimov <trofilya@gmail.com>\n"
-"Language-Team: Russian (Russia) (http://www.transifex.com/projects/p/content-aware-sidebars/language/ru_RU/)\n"
+"PO-Revision-Date: 2015-01-22 16:41+0000\n"
+"Last-Translator: Gattiken Produkzioak <gattiken@gattiken.com>\n"
+"Language-Team: Basque (http://www.transifex.com/projects/p/content-aware-sidebars/language/eu/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: ru_RU\n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"Language: eu\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Poedit 1.6.5\n"
 "X-Poedit-Basepath: .\n"
 "X-Poedit-KeywordsList: __;_e;__ngettext:1,2;_n:1,2;__ngettext_noop:1,2;_n_noop:1,2;_c,_nc:4c,1,2;_x:1,2c;_nx:4c,1,2;_nx_noop:4c,1,2;_ex:1,2c;esc_attr__;esc_attr_e;esc_attr_x:1,2c;esc_html__;esc_html_e;esc_html_x:1,2c\n"
@@ -25,210 +25,210 @@ msgstr ""
 
 #: ../content-aware-sidebars.php:117
 msgid "Manage and show sidebars according to the content being viewed."
-msgstr "Управляйте и показывайте боковые панели, соответствующие просматриваемому содержимому."
+msgstr "Kudeatu eta erakutsi albo-barrak erakutsi nahi den edukiaren arabera."
 
 #: ../content-aware-sidebars.php:118
 msgid "Content Aware Sidebars"
-msgstr "Учитывающие содержимое боковые панели"
+msgstr "Content Aware Sidebars"
 
 #: ../content-aware-sidebars.php:200 ../content-aware-sidebars.php:950
 msgid "FAQ"
-msgstr "FAQ"
+msgstr "Ohiko Galderak"
 
 #: ../content-aware-sidebars.php:300
 msgid "Exposure"
-msgstr "Показ"
+msgstr "Esposaketa"
 
 #: ../content-aware-sidebars.php:306
 msgid "Singular"
-msgstr "Единичный"
+msgstr "Singularra"
 
 #: ../content-aware-sidebars.php:307
 msgid "Singular & Archive"
-msgstr "Единичный & Архив"
+msgstr "Singularra & Artxiboa"
 
 #: ../content-aware-sidebars.php:308
 msgid "Archive"
-msgstr "Архив"
+msgstr "Artxiboa"
 
 #: ../content-aware-sidebars.php:312 ../content-aware-sidebars.php:504
 msgctxt "option"
 msgid "Handle"
-msgstr "Управление"
+msgstr "Maneiatu"
 
 #: ../content-aware-sidebars.php:314
 msgid "Replace host sidebar, merge with it or add sidebar manually."
-msgstr "Заменить прежнюю базовую панель, слиться с ней или добавить боковую панель вручную."
+msgstr "Ordezkatu berezko albo-barra, batu berarekin edo gehitu albo-barra bat eskuz."
 
 #: ../content-aware-sidebars.php:318
 msgid "Replace"
-msgstr "Заменить"
+msgstr "Ordezkatu"
 
 #: ../content-aware-sidebars.php:319
 msgid "Merge"
-msgstr "Слить"
+msgstr "Batu"
 
 #: ../content-aware-sidebars.php:320
 msgid "Manual"
-msgstr "Вручную"
+msgstr "Eskuz"
 
 #: ../content-aware-sidebars.php:321
 msgid "Forced replace"
-msgstr "Принудительная замена"
+msgstr "Behartu ordezkapena"
 
 #: ../content-aware-sidebars.php:325
 msgid "Host Sidebar"
-msgstr "Базовая боковая панель"
+msgstr "Berezko Albo-Barra"
 
 #: ../content-aware-sidebars.php:333 ../content-aware-sidebars.php:505
 msgid "Merge position"
-msgstr "Позиция слияния"
+msgstr "Batu kokapena"
 
 #: ../content-aware-sidebars.php:335
 msgid "Place sidebar on top or bottom of host when merging."
-msgstr "Поместить боковую панель сверху или снизу базовой панели при слиянии."
+msgstr "Albo-Barra berezkoaren gainean edo azpian kokatu elkartzea gauzatzean."
 
 #: ../content-aware-sidebars.php:339
 msgid "Top"
-msgstr "Сверху"
+msgstr "Gainean"
 
 #: ../content-aware-sidebars.php:340
 msgid "Bottom"
-msgstr "Снизу"
+msgstr "Azpian"
 
 #: ../content-aware-sidebars.php:365
 msgid "Sidebars"
-msgstr "Боковые панели"
+msgstr "Albo-Barrak"
 
 #: ../content-aware-sidebars.php:366
 msgid "Sidebar"
-msgstr "Боковая панель"
+msgstr "Albo-barra"
 
 #: ../content-aware-sidebars.php:367
 msgctxt "sidebar"
 msgid "Add New"
-msgstr "Добавить новую"
+msgstr "Gehitu berria"
 
 #: ../content-aware-sidebars.php:368
 msgid "Add New Sidebar"
-msgstr "Добавить новую боковую панель"
+msgstr "Gehitu Albo-Barra Berria"
 
 #: ../content-aware-sidebars.php:369
 msgid "Edit Sidebar"
-msgstr "Редактировать боковую панель"
+msgstr "Editatu Albo-Barra"
 
 #: ../content-aware-sidebars.php:370
 msgid "New Sidebar"
-msgstr "Новая боковая панель"
+msgstr "Albo-Barra Berria"
 
 #: ../content-aware-sidebars.php:371
 msgid "All Sidebars"
-msgstr "Все боковые панели"
+msgstr "Albo-Barra Guztiak"
 
 #: ../content-aware-sidebars.php:372
 msgid "View Sidebar"
-msgstr "Просмотреть боковую панель"
+msgstr "Ikusi Albo-Barra"
 
 #: ../content-aware-sidebars.php:373
 msgid "Search Sidebars"
-msgstr "Искать боковые панели"
+msgstr "Bilatu Albo-Barrak"
 
 #: ../content-aware-sidebars.php:374
 msgid "No sidebars found"
-msgstr "Боковые панели не найдены"
+msgstr "Ez da Albo-Barrarik topatu"
 
 #: ../content-aware-sidebars.php:375
 msgid "No sidebars found in Trash"
-msgstr "В корзине боковые панели не найдены"
+msgstr "Ez da Albo-Barrarik topatu zakarrontzian"
 
 #: ../content-aware-sidebars.php:390 ../content-aware-sidebars.php:944
 #: ../content-aware-sidebars.php:1017
 msgid "Condition Groups"
-msgstr "Группы состояния"
+msgstr "Baldintzazko Taldeak"
 
 #: ../content-aware-sidebars.php:391
 msgid "Condition Group"
-msgstr "Группа состояния"
+msgstr "Baldintzazko Taldea"
 
 #: ../content-aware-sidebars.php:392
 msgctxt "group"
 msgid "Add New"
-msgstr "Добавить новую"
+msgstr "Gehitu Berria"
 
 #: ../content-aware-sidebars.php:393 ../content-aware-sidebars.php:1017
 #: ../content-aware-sidebars.php:1051
 msgid "Add New Group"
-msgstr "Добавить новую группу"
+msgstr "Gehitu Talde Berria"
 
 #: ../content-aware-sidebars.php:394 ../content-aware-sidebars.php:1032
 #: ../content-aware-sidebars.php:1401
 msgctxt "group"
 msgid "Edit"
-msgstr "Редактировать"
+msgstr "Editatu"
 
 #: ../content-aware-sidebars.php:418
 msgid "Manage widgets"
-msgstr "Управление виджетами"
+msgstr "Kudeatu Widgetak"
 
 #: ../content-aware-sidebars.php:421 ../content-aware-sidebars.php:424
 msgid "Sidebar updated."
-msgstr "Боковая панель обновлена."
+msgstr "Albo-Barra eguneratu da."
 
 #: ../content-aware-sidebars.php:426
 msgid "Sidebar published."
-msgstr "Боковая панель опубликована."
+msgstr "Albo-Barra argitaratu da."
 
 #: ../content-aware-sidebars.php:427
 msgid "Sidebar saved."
-msgstr "Боковая панель сохранена."
+msgstr "Albo-Barra gorde da."
 
 #: ../content-aware-sidebars.php:428
 msgid "Sidebar submitted."
-msgstr "Боковая панель отправлена."
+msgstr "Albo-Barra aurkeztu da."
 
 #: ../content-aware-sidebars.php:429
 #, php-format
 msgid "Sidebar scheduled for: <strong>%1$s</strong>."
-msgstr "Боковая панель запланирована на: <strong>%1$s</strong>."
+msgstr "<strong>%1$s</strong> erako programatutako Albo-Barra."
 
 #. translators: Publish box date format, see http://php.net/date
 #: ../content-aware-sidebars.php:431
 msgid "M j, Y @ G:i"
-msgstr "j M, Y @ H:i"
+msgstr "M j, Y @ G:i"
 
 #: ../content-aware-sidebars.php:432
 msgid "Sidebar draft updated."
-msgstr "Набросок боковой панели обновлён."
+msgstr "Zirriborroa eguneratu da."
 
 #: ../content-aware-sidebars.php:480 ../content-aware-sidebars.php:567
 msgid "Please update Host Sidebar"
-msgstr "Пожалуйста, обновите базовую боковую панель"
+msgstr "Faborez, eguneratu Berezko Albo-Barra"
 
 #: ../content-aware-sidebars.php:506
 msgid "Widgets"
-msgstr "Виждеты"
+msgstr "Widgetak"
 
 #: ../content-aware-sidebars.php:642
 msgid "Manage Widgets"
-msgstr "Управление виджетами"
+msgstr "Kudeatu Widgetak"
 
 #: ../content-aware-sidebars.php:897
 msgid "Get a free Content Aware Sidebars Premium Bundle"
-msgstr "Получить Премиум-пакет учитывающих содержимое боковых панелей"
+msgstr "Eskuratu doako Content Aware Sidebar Premium Bundle -a."
 
 #: ../content-aware-sidebars.php:913
 msgid "Content"
-msgstr "Содержимое"
+msgstr "Edukia"
 
 #: ../content-aware-sidebars.php:921
 msgid "Options"
-msgstr "Настройки"
+msgstr "Ezarpenak"
 
 #: ../content-aware-sidebars.php:945
 msgid ""
 "Each created condition group describe some specific content (conditions) "
 "that the current sidebar should be displayed with."
-msgstr "Каждая созданная группа состояния описывает некоторое отдельное содержимое (состояние), с которым текущая боковая панель должна быть отображена."
+msgstr "Sortzen den baldintzazko talde bakoitzak, hainbat eduki (baldintza) zehatz deskribatzen ditu, uneko albo-barrak erakutsiko dituenak."
 
 #: ../content-aware-sidebars.php:946
 msgid ""
@@ -237,245 +237,245 @@ msgid ""
 " a group should be associated, as they are treated as such, and that the "
 "groups do not interfere with each other. Thus it is possible to have both "
 "extremely focused and at the same time distinct conditions."
-msgstr "Содержимое, добавленное в группу состояния, использует логическую конъюнкцию, когда сами группы состояний используют логическую дизъюнкцию. Это значит, что содержимое, добавляемое в группы, должно быть связано, а группы не должны мешать друг другу. Это делает возможным очень точные, но в то же время различные состояния."
+msgstr "Baldintzazko talde batera gehitutako edukiak modu lojikoan elkartzen ditu, baina baldintzazko taldeek eurek ez-elkartze lojikoa dute. Honek esan nahi du, talde batera gehitutako edukiak asoziatu egin daitezkeela, modu horretan tratatzen diren bitartean, eta taldeek ez diotela elkarri interferitzen. honek baldintza desberdinek aldi berean funtzionatzeko aukera ematen du."
 
 #: ../content-aware-sidebars.php:949
 msgid "More Information"
-msgstr "Больше информации"
+msgstr "Informazio Gehiago"
 
 #: ../content-aware-sidebars.php:951
 msgid "Get Support"
-msgstr "Поддержка"
+msgstr "Eskuratu Laguntza"
 
 #: ../content-aware-sidebars.php:982
 msgid ""
 "Translate Content Aware Sidebars into your language and become a BETA tester"
 " of the upcoming Premium Bundle*!"
-msgstr "Переведите продукт на Ваш язык и станьте бета-тестером вскоре выходящего Премиум-пакета*!"
+msgstr "Itzuli Content Aware Sidebars zure hizkuntzara eta bihurtu zaitez BETA probalari bat, datorren Premiun Bundle-rako!"
 
 #: ../content-aware-sidebars.php:983
 msgid "Translate Now"
-msgstr "Перевести сейчас"
+msgstr "Itzuli orain"
 
 #: ../content-aware-sidebars.php:984
 msgid "Get Premium Bundle"
-msgstr "Получить Премиум-пакет"
+msgstr "Eskuratu Premiun Bundle"
 
 #: ../content-aware-sidebars.php:985
 msgid ""
 "Single-site use. BETA implies it is not recommended for production sites."
-msgstr "Для использования на одиночных сайтах. Бета предполагает, что продукт не рекомендуется для производственных сайтов."
+msgstr "Gune bakarreko erabilera. BETA izanik, ez da gomendatzen produkzio guneetarako."
 
 #: ../content-aware-sidebars.php:988
 msgid "Partial Feature List"
-msgstr "Частичный список возможностей"
+msgstr "Ezaugarrien Zerrenda Partziala"
 
 #: ../content-aware-sidebars.php:990
 msgid "Select and create sidebars in the Post Editing Screens"
-msgstr "Выбор и создание боковых панелей на экранах редактирования постов"
+msgstr "Aukeratu eta sortu albo-barrak Bidalketak Editatzeko Pantailan"
 
 #: ../content-aware-sidebars.php:991
 msgid "Display sidebars with URLs using wildcards"
-msgstr "Отображение боковых панелей со ссылками с использованием символов подстановки"
+msgstr "Erakutsi albo-barrak URL-ekin komodinak erabiliz"
 
 #: ../content-aware-sidebars.php:992
 msgid "Display sidebars with User Roles"
-msgstr "Отображение боковых панелей с пользовательскими ролями"
+msgstr "Erakutsi Albo-Barra Erabiltzaile Baimenekin"
 
 #: ../content-aware-sidebars.php:993
 msgid "Display sidebars with BuddyPress User Groups"
-msgstr "Отображение боковых панелей с группами пользователей BuddyPress"
+msgstr "Erakutsi albo-barrakl BuddyPress Erabiltzaile Taldeekin"
 
 #: ../content-aware-sidebars.php:994
 msgid "Sidebars column in Post Type and Taxonomy Overview Screens"
-msgstr "Столбец боковых панелей на экранах типов постов и систематического обзора"
+msgstr "Albo-Barren zutabea Post Type and Taxonomy aukeren pantailan"
 
 #: ../content-aware-sidebars.php:1018
 msgid ""
 "Click to edit a group or create a new one. Select content on the left to add"
 " it. In each group, you can combine different types of associated content."
-msgstr "Нажмите для редактирования группы или создания новой. Выберите содержимое слева, чтобы добавить его. В каждой группе вы можете комбинировать различные типы связанного содержимого."
+msgstr "Egin klik talde bat editatzeko edo sortzeko. Aukeratu edukia ezkerretik. Talde bakoitzean, elkartutako eduki mota desberdinak uztartu ditzakezu."
 
 #: ../content-aware-sidebars.php:1019
 msgid "Display sidebar with"
-msgstr "Показать боковую панель с"
+msgstr "Erakutsi Albo-Barra honekin:"
 
 #: ../content-aware-sidebars.php:1024
 msgid ""
 "No content. Please add at least one condition group to make the sidebar "
 "content aware."
-msgstr "Без содержимого. Пожалуйста, добавьте хотя бы одну группу состояния, чтобы сделать содержимое видимым."
+msgstr "Ez dago edukirik. Faborez, gehitu gutxienez baldintzazko talde bat albo-barra erabilgarri bihurtzeko."
 
 #: ../content-aware-sidebars.php:1029 ../content-aware-sidebars.php:1398
 msgid "Save"
-msgstr "Сохранить"
+msgstr "Gorde"
 
 #: ../content-aware-sidebars.php:1029 ../content-aware-sidebars.php:1399
 msgid "Cancel"
-msgstr "Отмена"
+msgstr "Ezeztatu"
 
 #: ../content-aware-sidebars.php:1032 ../content-aware-sidebars.php:1402
 msgid "Remove"
-msgstr "Удалить"
+msgstr "Ezabatu"
 
 #: ../content-aware-sidebars.php:1041 ../content-aware-sidebars.php:1400
 msgid "Or"
-msgstr "Или"
+msgstr "Edo"
 
 #: ../content-aware-sidebars.php:1129 ../content-aware-sidebars.php:1172
 #: ../content-aware-sidebars.php:1177
 msgid "Unauthorized request"
-msgstr "Неразрешённый запрос"
+msgstr "Baimenik gabeko eskaera"
 
 #: ../content-aware-sidebars.php:1135
 msgid "Condition group cannot be empty"
-msgstr "Группа состояния не может быть пустой"
+msgstr "Baldintzazko Taldea ezin da hutsik egon"
 
 #: ../content-aware-sidebars.php:1149
 msgid "Condition group saved"
-msgstr "Группа состояния сохранена"
+msgstr "Baldintzazko taldea gorde da"
 
 #: ../content-aware-sidebars.php:1182
 msgid "Condition group could not be removed"
-msgstr "Не удалось удалить группу состояния"
+msgstr "Baldintzazko taldea ezin da ezabatu"
 
 #: ../content-aware-sidebars.php:1187
 msgid "Condition group removed"
-msgstr "Группа состояния удалена"
+msgstr "Baldintzazko taldea ezabatu da"
 
 #: ../content-aware-sidebars.php:1246 ../content-aware-sidebars.php:1247
 msgid "Order"
-msgstr "Порядок"
+msgstr "Ordena"
 
 #: ../content-aware-sidebars.php:1263
 msgid ""
 "If you love this plugin, please consider donating to support future "
 "development."
-msgstr "Если Вам понравился этот плагин, Вы можете пожертвовать, чтобы поддержать будущую разработку."
+msgstr "Plugin hau maite baduzu, mesedez aztertu etorkizunean berau garatzeko diru apur bat ematea."
 
 #: ../content-aware-sidebars.php:1272
 msgid "Or you could:"
-msgstr "Также Вы можете:"
+msgstr "Edo bestela:"
 
 #: ../content-aware-sidebars.php:1274
 msgid "Rate the plugin on WordPress.org"
-msgstr "Оценить плагин на WordPress.org"
+msgstr "Eman puntuak plugin honi WordPress.org-n"
 
 #: ../content-aware-sidebars.php:1275
 msgid "Link to the plugin page"
-msgstr "Ссылка на страницу плагина"
+msgstr "Egin lotura pluginaren orrialdearekin"
 
 #: ../content-aware-sidebars.php:1276
 msgid "Translate the plugin into your language"
-msgstr "Перевести плагин на свой язык"
+msgstr "Itzuli plugin hau zure hizkuntzara"
 
 #: ../content-aware-sidebars.php:1403
 msgid "Remove this group and its contents permanently?"
-msgstr "Удалить эту группу и её содержимое навсегда?"
+msgstr "Ezabatu talde hau eta bere edukia betirako?"
 
 #: ../content-aware-sidebars.php:1404
 msgid "No results found."
-msgstr "Результаты не найдены."
+msgstr "Ez da emaitzarik topatu."
 
 #: ../content-aware-sidebars.php:1405
 msgid ""
 "The current group has unsaved changes. Do you want to continue and discard "
 "these changes?"
-msgstr "Текущая группа содержит несохранённые изменения. Хотите продолжить и отменить все эти изменения?"
+msgstr "Talde honek gorde gabeko aldaketak ditu. Aurrera segi nahi duzu eta aldaketak baztertu?"
 
 #: ../content-aware-sidebars.php:1419
 msgid "Edit"
-msgstr "Редактировать"
+msgstr "Editatu"
 
 #: ../modules/author.php:28
 msgid "Authors"
-msgstr "Авторы"
+msgstr "Egileak"
 
 #: ../modules/bbpress.php:29
 msgid "bbPress User Profiles"
-msgstr "Пользовательские профили bbPress"
+msgstr "bbPress Erabiltzaile Profilak"
 
 #: ../modules/bp_member.php:27
 msgid "BuddyPress Members"
-msgstr "Члены BuddyPress"
+msgstr "BuddyPress Kideak"
 
 #: ../modules/bp_member.php:130 ../modules/casmodule.php:132
 #: ../modules/post_type.php:267 ../modules/taxonomy.php:295
 msgid "View All"
-msgstr "Просмотреть всё"
+msgstr "Ikusi Guztiak"
 
 #: ../modules/bp_member.php:139 ../modules/casmodule.php:151
 #: ../modules/post_type.php:286 ../modules/taxonomy.php:314
 msgid "Add to Group"
-msgstr "Добавить в группу"
+msgstr "Gehitu Taldera"
 
 #: ../modules/casmodule.php:126
 #, php-format
 msgid "Display with All %s"
-msgstr "Показать со всеми %s"
+msgstr "Erakutsi %s guztiekin"
 
 #: ../modules/casmodule.php:139 ../modules/casmodule.php:142
 #: ../modules/post_type.php:273 ../modules/post_type.php:276
 #: ../modules/taxonomy.php:301 ../modules/taxonomy.php:304
 msgid "Search"
-msgstr "Поиск"
+msgstr "Bilatu"
 
 #: ../modules/casmodule.php:223
 #, php-format
 msgid "All %s"
-msgstr "Все %s"
+msgstr "%s Guztiak"
 
 #: ../modules/page_template.php:28
 msgid "Page Templates"
-msgstr "Шаблоны страниц"
+msgstr "Orrialde Plantillak"
 
 #: ../modules/polylang.php:27 ../modules/qtranslate.php:27
 #: ../modules/transposh.php:27 ../modules/wpml.php:27
 msgid "Languages"
-msgstr "Языки"
+msgstr "Hizkuntzak"
 
 #: ../modules/post_type.php:34
 msgid "Post Types"
-msgstr "Типы постов"
+msgstr "Bidalketa Motak"
 
 #: ../modules/post_type.php:166 ../modules/post_type.php:236
 #: ../modules/taxonomy.php:230 ../modules/taxonomy.php:269
 msgid "Automatically select new children of a selected ancestor"
-msgstr "Автоматически выбирать новые дочерние элементы выбранного элемента"
+msgstr "Aukeratu automatikoki aukeratutako aurretiazko albo-barra baten kume berri bat "
 
 #: ../modules/post_type.php:242 ../modules/taxonomy.php:273
 #, php-format
 msgid "Display with %s"
-msgstr "Показать с %s"
+msgstr "Erakutsi  %s ekin"
 
 #: ../modules/post_type.php:247 ../modules/taxonomy.php:277
 msgid "No items."
-msgstr "Без элементов"
+msgstr "Ez dago elementurik."
 
 #: ../modules/post_type.php:262
 msgid "Most Recent"
-msgstr "Наиболее новые"
+msgstr "Berrienak"
 
 #: ../modules/static.php:29
 msgid "Static Pages"
-msgstr "Статичные страницы"
+msgstr "Orrialde Estatikoak"
 
 #: ../modules/static.php:40
 msgid "Front Page"
-msgstr "Главная страница"
+msgstr "Azala"
 
 #: ../modules/static.php:41
 msgid "Search Results"
-msgstr "Результаты поиска"
+msgstr "Bilaketaren Emaitzak"
 
 #: ../modules/static.php:42
 msgid "404 Page"
-msgstr "Страница 404"
+msgstr "404 orrialdea"
 
 #: ../modules/taxonomy.php:40
 msgid "Taxonomies"
-msgstr "Таксономии"
+msgstr "Taxonomiak"
 
 #: ../modules/taxonomy.php:290
 msgid "Most Used"
-msgstr "Наиболее используемые"
+msgstr "Erabilienak"

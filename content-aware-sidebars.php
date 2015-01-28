@@ -7,7 +7,7 @@
 Plugin Name: Content Aware Sidebars
 Plugin URI: http://www.intox.dk/en/plugin/content-aware-sidebars-en/
 Description: Manage and show sidebars according to the content being viewed.
-Version: 2.5.3
+Version: 2.6
 Author: Joachim Jensen, Intox Studio
 Author URI: http://www.intox.dk/
 Text Domain: content-aware-sidebars
@@ -47,7 +47,7 @@ final class ContentAwareSidebars {
 	/**
 	 * Plugin version
 	 */
-	const PLUGIN_VERSION       = '2.5.3';
+	const PLUGIN_VERSION       = '2.6';
 
 	/**
 	 * Prefix for data (keys) stored in database
@@ -252,6 +252,7 @@ final class ContentAwareSidebars {
 			'author'        => true,
 			'page_template' => true,
 			'taxonomy'      => true,
+			'date'          => true,
 			'bbpress'       => function_exists('bbp_get_version'),	// bbPress
 			'bp_member'     => defined('BP_VERSION'),				// BuddyPress
 			'polylang'      => defined('POLYLANG_VERSION'),			// Polylang
@@ -777,8 +778,8 @@ final class ContentAwareSidebars {
 		$context_data['WHERE'][] = "posts.post_type = '".self::TYPE_CONDITION_GROUP."'";
 		$context_data['WHERE'][] = "posts.post_status ".(current_user_can('read_private_posts') ? "IN('publish','private')" : "= 'publish'")."";
 
-		//Syntax changed in MySQL 5.6
-		$wpdb->query('SET'.(version_compare($wpdb->db_version(), '5.6', '>=') ? '' : ' OPTION').' SQL_BIG_SELECTS = 1');
+		//Syntax changed in MySQL 5.5 and MariaDB 10.0 (reports as version 5.5)
+		$wpdb->query('SET'.(version_compare($wpdb->db_version(), '5.5', '>=') ? '' : ' OPTION').' SQL_BIG_SELECTS = 1');
 
 		$sidebars_in_context = $wpdb->get_results("
 			SELECT
