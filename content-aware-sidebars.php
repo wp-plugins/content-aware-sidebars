@@ -5,9 +5,9 @@
  */
 /*
 Plugin Name: Content Aware Sidebars
-Plugin URI: http://www.intox.dk/
+Plugin URI: http://www.intox.dk/en/plugin/content-aware-sidebars-en/
 Description: Manage and show sidebars according to the content being viewed.
-Version: 2.2.1
+Version: 2.6
 Author: Joachim Jensen, Intox Studio
 Author URI: http://www.intox.dk/
 Text Domain: content-aware-sidebars
@@ -31,6 +31,12 @@ License: GPLv3
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+if (!defined('ABSPATH')) {
+	header('Status: 403 Forbidden');
+	header('HTTP/1.1 403 Forbidden');
+	exit;
+}
+
 final class ContentAwareSidebars {
 	
 	/**
@@ -41,7 +47,7 @@ final class ContentAwareSidebars {
 	/**
 	 * Plugin version
 	 */
-	const PLUGIN_VERSION       = '2.2.1';
+	const PLUGIN_VERSION       = '2.6';
 
 	/**
 	 * Prefix for data (keys) stored in database
@@ -113,6 +119,8 @@ final class ContentAwareSidebars {
 		
 		$this->_load_dependencies();
 
+		spl_autoload_register(array($this,"autoload_modules"));
+
 		// WordPress Hooks. Somewhat ordered by execution
 		
 		//For administration
@@ -126,17 +134,18 @@ final class ContentAwareSidebars {
 			add_action('add_meta_boxes_'.self::TYPE_SIDEBAR, array(&$this,'create_meta_boxes'));
 			add_action('in_admin_header', array(&$this,'clear_admin_menu'),99);
 			add_action('transition_post_status', array(&$this,'cascade_sidebar_status'),10,3);
+			add_action('manage_'.self::TYPE_SIDEBAR.'_posts_custom_column', array(&$this,'admin_column_rows'),10,2);
+
+			add_action('wp_ajax_cas_add_rule', array(&$this,'add_sidebar_rule_ajax'));
+			add_action('wp_ajax_cas_remove_group', array(&$this,'remove_sidebar_group_ajax'));			
 
 			add_filter('request', array(&$this,'admin_column_orderby'));
 			add_filter('default_hidden_meta_boxes', array(&$this,'change_default_hidden'),10,2);
-			add_filter('manage_edit-'.self::TYPE_SIDEBAR.'_columns', array(&$this,'admin_column_headers'),99);
+			add_filter('manage_'.self::TYPE_SIDEBAR.'_posts_columns', array(&$this,'admin_column_headers'),99);
 			add_filter('manage_edit-'.self::TYPE_SIDEBAR.'_sortable_columns',array(&$this,'admin_column_sortable_headers'));
-			add_filter('manage_posts_custom_column', array(&$this,'admin_column_rows'),10,3);
 			add_filter('post_row_actions', array(&$this,'sidebar_row_actions'),10,2);
 			add_filter('post_updated_messages', array(&$this,'sidebar_updated_messages'));
-
-			add_action('wp_ajax_cas_add_rule', array(&$this,'add_sidebar_rule_ajax'));
-			add_action('wp_ajax_cas_remove_group', array(&$this,'remove_sidebar_group_ajax'));
+			add_filter( 'plugin_action_links_'.plugin_basename(__FILE__), array(&$this,'plugin_action_links'), 10, 4 );
 
 		//For frontend
 		} else {
@@ -144,8 +153,11 @@ final class ContentAwareSidebars {
 			
 
 		}
+
+		add_shortcode( 'ca-sidebar', array($this,'sidebar_shortcode'));
 		add_action('sidebars_widgets', array(&$this,'replace_sidebar'));
 		add_action('wp_head',array(&$this,'sidebar_notify_theme_customizer'));
+
 		//For both
 		add_action('init', array(&$this,'deploy_modules'));
 		add_action('init', array(&$this,'init_sidebar_type'),99);
@@ -155,10 +167,50 @@ final class ContentAwareSidebars {
 	}
 
 	/**
+	 * Display sidebar with shortcode
+	 * @author  Joachim Jensen <jv@intox.dk>
+	 * @version 2.5
+	 * @param   array     $atts
+	 * @param   string    $content
+	 * @return  string
+	 */
+	public function sidebar_shortcode( $atts, $content = null ) {
+		$a = shortcode_atts( array(
+			'id' => 0,
+		), $atts );
+		
+		$id = 'ca-sidebar-'.esc_attr($a['id']);
+		ob_start();
+		dynamic_sidebar($id);
+		return ob_get_clean();
+	}
+
+
+	/**
+	 * Add actions to plugin in Plugins screen
+	 * @author  Joachim Jensen <jv@intox.dk>
+	 * @version 2.4
+	 * @param   array     $actions
+	 * @param   string    $plugin_file
+	 * @param   [type]    $plugin_data
+	 * @param   [type]    $context
+	 * @return  array
+	 */
+	public function plugin_action_links($actions, $plugin_file, $plugin_data, $context) {
+
+		$new_actions = array(
+			'<a href="http://www.intox.dk/en/plugin/content-aware-sidebars-en/faq/" target="_blank">'.__('FAQ',self::DOMAIN).'</a>'
+		);
+
+		return array_merge($new_actions,$actions);
+	}
+
+	/**
 	 * Runs is_active_sidebar for sidebars
 	 * Widget management in Theme Customizer
 	 * expects this
 	 * @author Joachim Jensen <jv@intox.dk>
+	 * @global type $wp_customize
 	 * @since  2.2
 	 * @return void
 	 */
@@ -200,7 +252,7 @@ final class ContentAwareSidebars {
 			'author'        => true,
 			'page_template' => true,
 			'taxonomy'      => true,
-			'url'           => false,
+			'date'          => true,
 			'bbpress'       => function_exists('bbp_get_version'),	// bbPress
 			'bp_member'     => defined('BP_VERSION'),				// BuddyPress
 			'polylang'      => defined('POLYLANG_VERSION'),			// Polylang
@@ -214,7 +266,7 @@ final class ContentAwareSidebars {
 		// Forge modules
 		foreach($modules as $name => $enabled) {
 			if($enabled) {
-				if(is_bool($enabled) && include('modules/'.$name .'.php')) {
+				if(is_bool($enabled)) {
 					$class = 'CASModule_'.$name;
 					$obj = new $class;
 				} else if(class_exists((string)$enabled)) {
@@ -305,6 +357,7 @@ final class ContentAwareSidebars {
 			'read_post'          => self::CAPABILITY,
 			'delete_post'        => self::CAPABILITY,
 			'edit_posts'         => self::CAPABILITY,
+			'delete_posts'       => self::CAPABILITY,
 			'edit_others_posts'  => self::CAPABILITY,
 			'publish_posts'      => self::CAPABILITY,
 			'read_private_posts' => self::CAPABILITY
@@ -332,7 +385,7 @@ final class ContentAwareSidebars {
 			'rewrite'       => false,
 			'menu_position' => 25.099, //less probable to be overwritten
 			'supports'      => array('title','page-attributes'),
-			'menu_icon'     => plugins_url('/img/icon-16.png', __FILE__ )
+			'menu_icon'     => version_compare(get_bloginfo('version'), '3.8' ,'>=') ? 'dashicons-welcome-widgets-menus' : plugins_url('/img/icon-16.png', __FILE__ )
 		));
 		
 		// Register the condition group type
@@ -362,25 +415,24 @@ final class ContentAwareSidebars {
 	/**
 	 * Create update messages
 	 * @global object $post
-	 * @param  array $messages 
+	 * @param  array  $messages 
 	 * @return array           
 	 */
 	public function sidebar_updated_messages( $messages ) {
+		$manage_widgets = sprintf(' <a href="%1$s">%2$s</a>','widgets.php',__('Manage widgets',self::DOMAIN));
 		$messages[self::TYPE_SIDEBAR] = array(
 			0 => '',
-			1 => __('Sidebar updated.',self::DOMAIN).sprintf(' <a href="%1$s">%2$s</a>','widgets.php',__('Manage widgets',self::DOMAIN)),
+			1 => __('Sidebar updated.',self::DOMAIN).$manage_widgets,
 			2 => '',
 			3 => '',
 			4 => __('Sidebar updated.',self::DOMAIN),
 			5 => '',
-			6 => __('Sidebar published.',self::DOMAIN).sprintf(' <a href="%1$s">%2$s</a>','widgets.php',__('Manage widgets',self::DOMAIN)),
+			6 => __('Sidebar published.',self::DOMAIN).$manage_widgets,
 			7 => __('Sidebar saved.',self::DOMAIN),
-			8 => __('Sidebar submitted.',self::DOMAIN).sprintf(' <a href="%1$s">%2$s</a>','widgets.php',__('Manage widgets',self::DOMAIN)),
-			9 => sprintf(__('Sidebar scheduled for: <strong>%1$s</strong>.',self::DOMAIN).' <a href="%2$s">%3$s</a>',
+			8 => __('Sidebar submitted.',self::DOMAIN).$manage_widgets,
+			9 => sprintf(__('Sidebar scheduled for: <strong>%1$s</strong>.',self::DOMAIN),
 				// translators: Publish box date format, see http://php.net/date
-				date_i18n(__('M j, Y @ G:i'),strtotime(get_the_ID())),
-				'widgets.php',
-				__('Manage widgets',self::DOMAIN)),
+				date_i18n(__('M j, Y @ G:i'),strtotime(get_the_ID()))).$manage_widgets,
 			10 => __('Sidebar draft updated.',self::DOMAIN),
 		);
 		return $messages;
@@ -442,7 +494,7 @@ final class ContentAwareSidebars {
 			));
 		}
 	}
-	
+
 	/**
 	 * Add admin column headers
 	 * @param  array $columns 
@@ -453,9 +505,9 @@ final class ContentAwareSidebars {
 		return array(
 			'cb'        => $columns['cb'],
 			'title'     => $columns['title'],
-			'exposure'  => __('Exposure', self::DOMAIN),
 			'handle'    => _x('Handle','option', self::DOMAIN),
 			'merge-pos' => __('Merge position', self::DOMAIN),
+			'widgets'   => __('Widgets'),
 			'date'      => $columns['date']
 		);
 	}
@@ -468,7 +520,6 @@ final class ContentAwareSidebars {
 	public function admin_column_sortable_headers($columns) {
 		return array_merge(
 			array(
-				'exposure'  => 'exposure',
 				'handle'    => 'handle',
 				'merge-pos' => 'merge-pos'
 			), $columns
@@ -498,28 +549,31 @@ final class ContentAwareSidebars {
 	 */
 	public function admin_column_rows($column_name, $post_id) {
 
-		if (get_post_type($post_id) != self::TYPE_SIDEBAR)
+		if($column_name == 'widgets') {
+			$sidebars_widgets = wp_get_sidebars_widgets();
+			echo (isset($sidebars_widgets[self::SIDEBAR_PREFIX . $post_id]) ? count($sidebars_widgets[self::SIDEBAR_PREFIX . $post_id]) : 0);
 			return;
+		} 
 
 		// Load metadata
 		if (!$this->metadata)
 			$this->_init_metadata();
 
 		$current = get_post_meta($post_id, self::PREFIX . $column_name, true);
-		$current_from_list = "";
+		$retval = "";
 
 		if(isset($this->metadata[$column_name]['list'][$current])) {
 
-			$current_from_list = $this->metadata[$column_name]['list'][$current];
+			$retval = $this->metadata[$column_name]['list'][$current];
 			
 			if ($column_name == 'handle' && $current != 2) {
 				$host = get_post_meta($post_id, self::PREFIX . 'host', true);
-				$current_from_list .= ": " . (isset($this->metadata['host']['list'][$host]) ? $this->metadata['host']['list'][$host] : '<span style="color:red;">' . __('Please update Host Sidebar', self::DOMAIN) . '</span>');
+				$retval .= ": " . (isset($this->metadata['host']['list'][$host]) ? $this->metadata['host']['list'][$host] : '<span style="color:red;">' . __('Please update Host Sidebar', self::DOMAIN) . '</span>');
 			}
 
 		}
 		
-		echo $current_from_list;
+		echo $retval;
 	}
 	
 	/**
@@ -701,9 +755,9 @@ final class ContentAwareSidebars {
 	 * @return array|boolean 
 	 */
 	public function get_sidebars() {
-		global $wpdb;
+		global $wpdb, $post;
 		
-		if(post_password_required())
+		if(!$post || is_admin() || post_password_required())
 			return false;
 		
 		// Return cache if present
@@ -724,8 +778,8 @@ final class ContentAwareSidebars {
 		$context_data['WHERE'][] = "posts.post_type = '".self::TYPE_CONDITION_GROUP."'";
 		$context_data['WHERE'][] = "posts.post_status ".(current_user_can('read_private_posts') ? "IN('publish','private')" : "= 'publish'")."";
 
-		//Syntax changed in MySQL 5.6
-		$wpdb->query('SET'.(version_compare($wpdb->db_version(), '5.6', '>=') ? '' : ' OPTION').' SQL_BIG_SELECTS = 1');
+		//Syntax changed in MySQL 5.5 and MariaDB 10.0 (reports as version 5.5)
+		$wpdb->query('SET'.(version_compare($wpdb->db_version(), '5.5', '>=') ? '' : ' OPTION').' SQL_BIG_SELECTS = 1');
 
 		$sidebars_in_context = $wpdb->get_results("
 			SELECT
@@ -804,12 +858,12 @@ final class ContentAwareSidebars {
 
 		// Names of whitelisted meta boxes
 		$whitelist = array(
+			'cas-news'      => 'cas-news',
 			'cas-support'   => 'cas-support',
 			'cas-groups'    => 'cas-groups',
 			'cas-rules'     => 'cas-rules',
 			'cas-options'   => 'cas-options',
 			'submitdiv'     => 'submitdiv',
-			'pageparentdiv' => 'pageparentdiv',
 			'slugdiv'       => 'slugdiv'
 		);
 
@@ -841,14 +895,22 @@ final class ContentAwareSidebars {
 			unset($this->metadata['host']['list'][self::SIDEBAR_PREFIX.get_the_ID()]);
 
 		$boxes = array(
-			//About
+			//News
 			array(
-				'id'       => 'cas-support',
-				'title'    => __('Support the Author of Content Aware Sidebars', self::DOMAIN),
-				'callback' => 'meta_box_author_words',
+				'id'       => 'cas-news',
+				'title'    => __('Get a free Content Aware Sidebars Premium Bundle', self::DOMAIN),
+				'callback' => 'meta_box_news',
 				'context'  => 'normal',
 				'priority' => 'high'
 			),
+			//About
+			// array(
+			// 	'id'       => 'cas-support',
+			// 	'title'    => __('Support the Author of Content Aware Sidebars', self::DOMAIN),
+			// 	'callback' => 'meta_box_author_words',
+			// 	'context'  => 'normal',
+			// 	'priority' => 'high'
+			// ),
 			//Content
 			array(
 				'id'       => 'cas-rules',
@@ -879,6 +941,20 @@ final class ContentAwareSidebars {
 			);
 		}
 
+		$screen = get_current_screen();
+
+		$screen->add_help_tab( array( 
+			'id'      => self::PREFIX.'help',
+			'title'   => __('Condition Groups',self::DOMAIN),
+			'content' => '<p>'.__('Each created condition group describe some specific content (conditions) that the current sidebar should be displayed with.',self::DOMAIN).'</p>'.
+				'<p>'.__('Content added to a condition group uses logical conjunction, while condition groups themselves use logical disjunction. '.
+				'This means that content added to a group should be associated, as they are treated as such, and that the groups do not interfere with each other. Thus it is possible to have both extremely focused and at the same time distinct conditions.',self::DOMAIN).'</p>',
+		) );
+		$screen->set_help_sidebar( '<h4>'.__('More Information').'</h4>'.
+			'<p><a href="http://www.intox.dk/en/plugin/content-aware-sidebars-en/faq/" target="_blank">'.__('FAQ',self::DOMAIN).'</a></p>'.
+			'<p><a href="http://wordpress.org/support/plugin/content-aware-sidebars" target="_blank">'.__('Get Support',self::DOMAIN).'</a></p>'
+		);
+
 	}
 	
 	/**
@@ -901,6 +977,39 @@ final class ContentAwareSidebars {
 	}
 
 	/**
+	 * Meta box for news
+	 * @author  Joachim Jensen <jv@intox.dk>
+	 * @version 2.5
+	 * @return  void
+	 */
+	public function meta_box_news() {
+		// Use nonce for verification. Unique per sidebar
+		wp_nonce_field(self::SIDEBAR_PREFIX.get_the_ID(), '_ca-sidebar-nonce');
+		echo '<input type="hidden" id="current_sidebar" value="'.get_the_ID().'" />';
+?>
+		<div style="overflow:hidden;">
+			<div style="float:left;width:40%;overflow:hidden">
+				<p><?php _e('Translate Content Aware Sidebars into your language and become a BETA tester of the upcoming Premium Bundle*!',self::DOMAIN); ?></p>
+				<a target="_blank" href="https://www.transifex.com/projects/p/content-aware-sidebars/" class="button button-primary" style="width:100%;text-align:center;margin-bottom:10px;"><?php _e('Translate Now',self::DOMAIN); ?></a>
+				<a href="mailto:translate@intox.dk?subject=Premium Bundle BETA tester" class="button button-primary" style="width:100%;text-align:center;margin-bottom:10px;"><?php _e('Get Premium Bundle',self::DOMAIN); ?></a>
+				<p><small>(*) <?php _e('Single-site use. BETA implies it is not recommended for production sites.',self::DOMAIN); ?></small></p>
+			</div>
+			<div style="float:left;width:60%;box-sizing:border-box;-moz-box-sizing:border-box;padding-left:25px;">
+				<p><strong><?php _e('Partial Feature List',self::DOMAIN); ?></strong></p>
+				<ul class="cas-feature-list">
+					<li><?php _e('Select and create sidebars in the Post Editing Screens',self::DOMAIN); ?></li>
+					<li><?php _e('Display sidebars with URLs using wildcards',self::DOMAIN); ?></li>
+					<li><?php _e('Display sidebars with User Roles',self::DOMAIN); ?></li>
+					<li><?php _e('Display sidebars with BuddyPress User Groups',self::DOMAIN); ?></li>
+					<li><?php _e('Sidebars column in Post Type and Taxonomy Overview Screens',self::DOMAIN); ?></li>
+				</ul>
+			</div>
+
+		</div>
+<?php
+	}
+
+	/**
 	 * Meta box for content rules
 	 * @return void 
 	 */
@@ -909,7 +1018,7 @@ final class ContentAwareSidebars {
 		$groups = $this->_get_sidebar_groups(null,false);
 
 		echo '<div id="cas-container">'."\n";
-		echo '<div id="cas-accordion" class="accordion-container postbox">'."\n";
+		echo '<div id="cas-accordion" class="accordion-container postbox'.(empty($groups) ? ' accordion-disabled' : '').'">'."\n";
 		echo '<ul class="outer-border">';
 		do_action('cas-module-admin-box');
 		echo '</ul>';
@@ -917,7 +1026,7 @@ final class ContentAwareSidebars {
 		echo '<div id="cas-groups" class="postbox'.(empty($groups) ? '' : ' cas-has-groups').'">'."\n";
 		echo '<div class="cas-groups-header"><h3>'.__('Condition Groups',self::DOMAIN).'</h3><input type="button" class="button button-primary js-cas-group-new" value="'.__('Add New Group',self::DOMAIN).'" /></div>';
 		echo '<div class="cas-groups-body"><p>'.__('Click to edit a group or create a new one. Select content on the left to add it. In each group, you can combine different types of associated content.',self::DOMAIN).'</p>';
-		echo '<h4>'.__('Display sidebar with',self::DOMAIN).':</h4>';
+		echo '<strong>'.__('Display sidebar with',self::DOMAIN).':</strong>';
 
 		$i = 0;
 
@@ -925,7 +1034,7 @@ final class ContentAwareSidebars {
 		echo '<li class="cas-no-groups">'.__('No content. Please add at least one condition group to make the sidebar content aware.',self::DOMAIN).'</li>';
 		foreach($groups as $group) {
 
-			echo '<li class="cas-group-single'.($i == 0 ? ' cas-group-active' : '').'">
+			echo '<li class="cas-group-single'.($i == 0 ? ' cas-group-active' : '').'"><div class="cas-group-body">
 			<span class="cas-group-control cas-group-control-active">
 			<input type="button" class="button js-cas-group-save" value="'.__('Save',self::DOMAIN).'" /> | <a class="js-cas-group-cancel" href="#">'.__('Cancel',self::DOMAIN).'</a>
 			</span>
@@ -936,6 +1045,10 @@ final class ContentAwareSidebars {
 			do_action('cas-module-print-data',$group->ID);
 			echo '</div>
 			<input type="hidden" class="cas_group_id" name="cas_group_id" value="'.$group->ID.'" />';
+
+			echo '</div>';
+
+			echo '<div class="cas-group-sep">'.__('Or',self::DOMAIN).'</div>';
 
 			echo '</li>';	
 			$i++;
@@ -1018,22 +1131,18 @@ final class ContentAwareSidebars {
 	 */
 	public function add_sidebar_rule_ajax() {
 
-		try {
-			if(!isset($_POST['current_id'])) {
-				_e('Unauthorized request',self::DOMAIN);
-				throw new Exception("Forbidden",403);
-			}	
+		$response = array();
 
-			if(!check_ajax_referer(self::SIDEBAR_PREFIX.$_POST['current_id'],'token',false)) {
-				_e('Unauthorized request',self::DOMAIN);
+		try {
+			if(!isset($_POST['current_id']) || 
+				!check_ajax_referer(self::SIDEBAR_PREFIX.$_POST['current_id'],'token',false)) {
+				$response = __('Unauthorized request',self::DOMAIN);
 				throw new Exception("Forbidden",403);
 			}
 
-			$response = array();
-
 			//Make sure some rules are sent
 			if(!isset($_POST['cas_condition'])) {
-				_e('Condition group cannot be empty',self::DOMAIN);
+				$response = __('Condition group cannot be empty',self::DOMAIN);
 				throw new Exception("Internal Server Error",500);
 			}
 
@@ -1053,8 +1162,9 @@ final class ContentAwareSidebars {
 			
 		} catch(Exception $e) {
 			header("HTTP/1.1 ".$e->getCode()." ".$e->getMessage());
+			echo $response;
 		}
-		die();	
+		die();
 	}
 
 	/**
@@ -1065,19 +1175,21 @@ final class ContentAwareSidebars {
 	 */
 	public function remove_sidebar_group_ajax() {
 
+		$response = "";
+
 		try {
 			if(!isset($_POST['current_id'],$_POST['cas_group_id'])) {
-				_e('Unauthorized request',self::DOMAIN);
+				$response = __('Unauthorized request',self::DOMAIN);
 				throw new Exception("Forbidden",403);
 			}	
 
 			if(!check_ajax_referer(self::SIDEBAR_PREFIX.$_POST['current_id'],'token',false)) {
-				_e('Unauthorized request',self::DOMAIN);
+				$response = __('Unauthorized request',self::DOMAIN);
 				throw new Exception("Forbidden",403);
 			}
 
 			if(wp_delete_post(intval($_POST['cas_group_id']), true) === false) {
-				_e('Condition group could not be removed',self::DOMAIN);
+				$response = __('Condition group could not be removed',self::DOMAIN);
 				throw new Exception("Internal Server Error",500);
 			}
 
@@ -1087,6 +1199,7 @@ final class ContentAwareSidebars {
 			
 		} catch(Exception $e) {
 			header("HTTP/1.1 ".$e->getCode()." ".$e->getMessage());
+			echo $response;
 		}
 		die();
 	}
@@ -1126,7 +1239,9 @@ final class ContentAwareSidebars {
 
 		foreach ($columns as $key => $value) {
 
-			echo '<span>' . $this->metadata[is_numeric($key) ? $value : $key]['name'] . ':';
+			$id = is_numeric($key) ? $value : $key;
+
+			echo '<span class="'.$id.'"><strong>' . $this->metadata[$id]['name'] . '</strong>';
 			echo '<p>';
 			$values = explode(',', $value);
 			foreach ($values as $val) {
@@ -1134,6 +1249,13 @@ final class ContentAwareSidebars {
 			}
 			echo '</p></span>';
 		}
+
+		global $post; 
+
+		echo '<span>';
+		echo '<strong>'.__('Order').'</strong>';
+		echo '<p><label for="menu_order" class="screen-reader-text">'.__('Order').'</label>';
+		echo '<input type="number" value="'.$post->menu_order.'" id="menu_order" size="4" name="menu_order"></p></span>';
 	}
 		
 	/**
@@ -1271,6 +1393,7 @@ final class ContentAwareSidebars {
 		if($current_screen->post_type == self::TYPE_SIDEBAR) {
 			
 			wp_register_script('cas_admin_script', plugins_url('/js/cas_admin.js', __FILE__), array('jquery'), self::PLUGIN_VERSION, true);
+			
 			wp_register_style('cas_admin_style', plugins_url('/css/style.css', __FILE__), array(), self::PLUGIN_VERSION);
 
 			//Sidebar editor
@@ -1284,6 +1407,7 @@ final class ContentAwareSidebars {
 				wp_localize_script( 'cas_admin_script', 'CASAdmin', array(
 					'save'          => __('Save',self::DOMAIN),
 					'cancel'        => __('Cancel',self::DOMAIN),
+					'or'            => __('Or',self::DOMAIN),
 					'edit'          => _x('Edit','group',self::DOMAIN),
 					'remove'        => __('Remove',self::DOMAIN),
 					'confirmRemove' => __('Remove this group and its contents permanently?',self::DOMAIN),
@@ -1295,6 +1419,16 @@ final class ContentAwareSidebars {
 			} else if ($hook == 'edit.php') {
 				wp_enqueue_style('cas_admin_style');
 			}			
+		} else if($current_screen->base == 'widgets') {
+			wp_register_style('cas_admin_style', plugins_url('/css/style.css', __FILE__), array(), self::PLUGIN_VERSION);
+			wp_enqueue_style('cas_admin_style');
+
+			wp_register_script('cas_admin_widgets', plugins_url('/js/widgets.js', __FILE__), array('jquery'), self::PLUGIN_VERSION, true);
+			wp_enqueue_script('cas_admin_widgets');
+			wp_localize_script( 'cas_admin_widgets', 'CASAdmin', array(
+				'edit' => __('Edit Sidebar', self::DOMAIN)
+			));
+
 		}
 
 	}
@@ -1307,7 +1441,22 @@ final class ContentAwareSidebars {
 		$path = plugin_dir_path( __FILE__ );
 		require($path.'/walker.php');
 		require($path.'/update_db.php');
-		require($path.'/modules/abstract.php');
+	}
+
+	/**
+	 * Autoload module class files
+	 * @author  Joachim Jensen <jv@intox.dk>
+	 * @version 2.5
+	 * @param   string    $class
+	 * @return  boolean
+	 */
+	public function autoload_modules($class) {
+		$path = plugin_dir_path( __FILE__ );
+		if($class == 'CASModule') {
+			require_once($path . "modules/" . strtolower($class) . ".php");
+		} else if(strpos($class, "CASModule") !== false) {
+			require_once($path . "modules/" . str_replace("CASModule_", "", $class) . ".php");
+		}
 	}
 
 }
