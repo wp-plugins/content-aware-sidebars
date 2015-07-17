@@ -4,6 +4,12 @@
  * @author Joachim Jensen <jv@intox.dk>
  */
 
+if (!defined('ContentAwareSidebars::DB_VERSION')) {
+	header('Status: 403 Forbidden');
+	header('HTTP/1.1 403 Forbidden');
+	exit;
+}
+
 /**
  *
  * BuddyPress Member Page Module
@@ -23,23 +29,30 @@ class CASModule_bp_member extends CASModule {
 		add_filter('cas-is-content-static', array(&$this,'static_is_content'));
 		
 	}
-	
+
 	/**
-	 * Get member pages
-	 * @global object $bp
-	 * @return array 
+	 * Get content for sidebar editor
+	 * @author  Joachim Jensen <jv@intox.dk>
+	 * @global  object    $bp
+	 * @param   array     $args
+	 * @return  array
 	 */
 	protected function _get_content($args = array()) {
 		global $bp;
-		
-		$components = $bp->loaded_components;
-		unset($components['members'],$components['xprofile']);
-		$components['profile'] = 'profile';
-		
+
 		$content = array();
-		foreach((array)$components as $name) {
-			$content[$name] = ucfirst($name);
+
+		if(isset($bp->loaded_components)) {
+			$components = $bp->loaded_components;
+			unset($components['members'],$components['xprofile']);
+			$components['profile'] = 'profile';
+			
+			
+			foreach((array)$components as $name) {
+				$content[$name] = ucfirst($name);
+			}
 		}
+
 		if(isset($args['include'])) {
 			$content = array_intersect_key($content,array_flip($args['include']));
 		}
@@ -54,33 +67,46 @@ class CASModule_bp_member extends CASModule {
 	 */
 	public function in_context() {
 		global $bp;
-		return $bp->displayed_user->domain != null;
+		return isset($bp->displayed_user->domain) ? $bp->displayed_user->domain : false;
 	}
 
 	/**
 	 * Get data from context
 	 * @author Joachim Jensen <jv@intox.dk>
+	 * @global object $bp
 	 * @since  2.0
 	 * @return array
 	 */
 	public function get_context_data() {
 		global $bp;
-		return array(
-			$bp->current_component,
-			$bp->current_component."-".$bp->current_action
-		);
+		$data = array();
+		if(isset($bp->current_component)) {
+			$data[] = $bp->current_component;
+			if(isset($bp->current_action)) {
+				$data[] = $bp->current_component."-".$bp->current_action;
+			}
+		}
+		return $data;
 	}
 	
 	/**
 	 * Meta box content
-	 * @global object $post
-	 * @global object $bp
+	 * @global WP_Post $post
+	 * @global object  $bp
 	 * @return void 
 	 */
 	public function meta_box_content() {
 		global $post, $bp;
-		
-		echo '<li class="control-section accordion-section">';		
+
+		if(!$bp->bp_options_nav) {
+			return;
+		}
+
+		$hidden_columns  = get_hidden_columns( ContentAwareSidebars::TYPE_SIDEBAR );
+		$id = 'box-'.$this->id;
+		$hidden = in_array($id, $hidden_columns) ? ' hide-if-js' : '';
+
+		echo '<li id="'.$id.'" class="manage-column column-'.$id.' control-section accordion-section'.$hidden.'">';
 		echo '<h3 class="accordion-section-title" title="'.$this->name.'" tabindex="0">'.$this->name.'</h3>'."\n";
 		echo '<div class="accordion-section-content cas-rule-content" data-cas-module="'.$this->id.'" id="cas-'.$this->id.'">';
 
@@ -101,8 +127,8 @@ class CASModule_bp_member extends CASModule {
 		}
 
 		$tabs['all'] = array(
-			'title' => __('View All'),
-			'status' => true,
+			'title'   => __('View All'),
+			'status'  => true,
 			'content' => $tab_content
 		);
 
