@@ -7,7 +7,7 @@
 Plugin Name: Content Aware Sidebars
 Plugin URI: http://www.intox.dk/en/plugin/content-aware-sidebars-en/
 Description: Manage and show sidebars according to the content being viewed.
-Version: 2.6.2
+Version: 2.6.3
 Author: Joachim Jensen, Intox Studio
 Author URI: http://www.intox.dk/
 Text Domain: content-aware-sidebars
@@ -47,7 +47,7 @@ final class ContentAwareSidebars {
 	/**
 	 * Plugin version
 	 */
-	const PLUGIN_VERSION       = '2.6.2';
+	const PLUGIN_VERSION       = '2.6.3';
 
 	/**
 	 * Prefix for data (keys) stored in database
@@ -769,9 +769,9 @@ final class ContentAwareSidebars {
 	 * @return array|boolean 
 	 */
 	public function get_sidebars() {
-		global $wpdb, $wp_query;
-		
-		if($wp_query->query == null || is_admin() || post_password_required())
+		global $wpdb, $wp_query, $post;
+
+		if(($wp_query->query == null && $post == null) || is_admin() || post_password_required())
 			return false;
 		
 		// Return cache if present
